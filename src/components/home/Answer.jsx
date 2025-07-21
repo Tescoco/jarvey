@@ -1,0 +1,973 @@
+import React, { useState } from 'react'
+import Dropdown from '../../components/Dropdown';
+import TableFilter from '../../components/TableFilter'
+import Checkbox from '../../components/Checkbox'
+import { Link, NavLink, useLocation } from 'react-router-dom';
+import Modal from '../../components/Modal'
+import Input from '../../components/Input';
+import { city, country, messageFieldCollapse, search } from '../../utilities/Classes';
+
+import addIcon1 from '../../assets/img/tickets/add/1.png'
+import addIcon2 from '../../assets/img/tickets/add/2.png'
+import addIcon3 from '../../assets/img/tickets/add/3.png'
+import addIcon4 from '../../assets/img/tickets/add/4.png'
+import addIcon5 from '../../assets/img/tickets/add/5.png'
+import order_logo from '../../assets/img/tickets/order_logo.png'
+import { handleChange } from '../../store/MessageSidebarCollapse';
+import { useDispatch } from 'react-redux';
+
+export default function Answer() {
+
+    const dispatch = useDispatch();
+    const [quantity, setQuantity] = useState(3);
+
+    const handleDecrease = () => {
+        if (quantity > 1) setQuantity(quantity - 1);
+    };
+
+    const handleIncrease = () => {
+        setQuantity(quantity + 1);
+    };
+
+    const [activeTab2, setActiveTab2] = useState("Customer Details")
+    const [addCustomer, setAddCustomer] = useState(false)
+    const [chat, setChat] = useState(false)
+    // for modal start
+    const [modal, setModal] = useState(false)
+    const [address, setAddress] = useState(false)
+    const [Order, setOrder] = useState(false)
+    const [OrderSearch, setSearchOrder] = useState(false)
+    const [refund, setRefund] = useState(false)
+    // for modal end
+
+    const tickets = [
+        {
+            id: '1',
+            name: "Re: ticket number:YHTGER89B4...",
+            des: 'Ja Op do 9 jan. 2025 om 14:43 schreef Jarvey Al < tiger.s.ai.2024@gmail.com',
+            sender: 'Julien C 9',
+            time: '10d ago',
+        },
+        {
+            id: '2',
+            name: "Re: ticket number:YHTGER89B4...",
+            des: 'Ja Op do 9 jan. 2025 om 14:43 schreef Jarvey Al < tiger.s.ai.2024@gmail.com',
+            sender: 'Julien C 9',
+            time: '10d ago',
+        },
+        {
+            id: '3',
+            name: "Re: ticket number:YHTGER89B4...",
+            des: 'Ja Op do 9 jan. 2025 om 14:43 schreef Jarvey Al < tiger.s.ai.2024@gmail.com',
+            sender: 'Julien C 9',
+            time: '10d ago',
+        },
+        {
+            id: '4',
+            name: "Re: ticket number:YHTGER89B4...",
+            des: 'Ja Op do 9 jan. 2025 om 14:43 schreef Jarvey Al < tiger.s.ai.2024@gmail.com',
+            sender: 'Julien C 9',
+            time: '10d ago',
+        },
+        {
+            id: '5',
+            name: "Re: ticket number:YHTGER89B4...",
+            des: 'Ja Op do 9 jan. 2025 om 14:43 schreef Jarvey Al < tiger.s.ai.2024@gmail.com',
+            sender: 'Julien C 9',
+            time: '10d ago',
+        },
+        {
+            id: '6',
+            name: "Re: ticket number:YHTGER89B4...",
+            des: 'Ja Op do 9 jan. 2025 om 14:43 schreef Jarvey Al < tiger.s.ai.2024@gmail.com',
+            sender: 'Julien C 9',
+            time: '10d ago',
+        },
+        {
+            id: '7',
+            name: "Re: ticket number:YHTGER89B4...",
+            des: 'Ja Op do 9 jan. 2025 om 14:43 schreef Jarvey Al < tiger.s.ai.2024@gmail.com',
+            sender: 'Julien C 9',
+            time: '10d ago',
+        },
+        {
+            id: '8',
+            name: "Re: ticket number:YHTGER89B4...",
+            des: 'Ja Op do 9 jan. 2025 om 14:43 schreef Jarvey Al < tiger.s.ai.2024@gmail.com',
+            sender: 'Julien C 9',
+            time: '10d ago',
+        },
+        {
+            id: '9',
+            name: "Re: ticket number:YHTGER89B4...",
+            des: 'Ja Op do 9 jan. 2025 om 14:43 schreef Jarvey Al < tiger.s.ai.2024@gmail.com',
+            sender: 'Julien C 9',
+            time: '10d ago',
+        },
+        {
+            id: '10',
+            name: "Re: ticket number:YHTGER89B4...",
+            des: 'Ja Op do 9 jan. 2025 om 14:43 schreef Jarvey Al < tiger.s.ai.2024@gmail.com',
+            sender: 'Julien C 9',
+            time: '10d ago',
+        },
+        {
+            id: '11',
+            name: "Re: ticket number:YHTGER89B4...",
+            des: 'Ja Op do 9 jan. 2025 om 14:43 schreef Jarvey Al < tiger.s.ai.2024@gmail.com',
+            sender: 'Julien C 9',
+            time: '10d ago',
+        },
+        {
+            id: '12',
+            name: "Re: ticket number:YHTGER89B4...",
+            des: 'Ja Op do 9 jan. 2025 om 14:43 schreef Jarvey Al < tiger.s.ai.2024@gmail.com',
+            sender: 'Julien C 9',
+            time: '10d ago',
+        },
+    ]
+
+    const [selected, setSelected] = useState([]);
+    const handleSelectAll = () => {
+        if (selected.length === tickets.length) {
+            setSelected([]);
+        } else {
+            setSelected(tickets.map(item => item.id));
+        }
+    };
+    const handleSelect = (id) => {
+        setSelected((prev) =>
+            prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+        );
+    };
+
+
+    const customer = [
+        {
+            icon: (<svg width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5.83333 9.83333H8.83333M5.83333 7.16667H10.1667M3.83333 14H12.1667C12.903 14 13.5 13.403 13.5 12.6667V4.33333C13.5 3.59695 12.903 3 12.1667 3H3.83333C3.09695 3 2.5 3.59695 2.5 4.33333V12.6667C2.5 13.403 3.09695 14 3.83333 14Z" stroke="#111111" strokeOpacity="0.5" strokeWidth="1.25" strokeLinecap="round" />
+            </svg>
+            ),
+            text: 'This customer has no note.',
+        },
+        {
+            icon: (<svg width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M14.0011 6.66675C12.3296 7.92257 10.2518 8.66675 8.00016 8.66675C5.74851 8.66675 3.67067 7.92257 1.99919 6.66675M3.16683 3.66675H12.8335C13.5699 3.66675 14.1668 4.2637 14.1668 5.00008V12.0001C14.1668 12.7365 13.5699 13.3334 12.8335 13.3334H3.16683C2.43045 13.3334 1.8335 12.7365 1.8335 12.0001V5.00008C1.8335 4.2637 2.43045 3.66675 3.16683 3.66675Z" stroke="#111111" strokeOpacity="0.5" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            ),
+            text: 'examples@gmail.com',
+        },
+        {
+            icon: (<svg width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5.16971 6.64524C5.66448 7.6245 6.3209 8.54302 7.13898 9.3611C7.95706 10.1792 8.87558 10.8356 9.85485 11.3304L10.8651 10.3201C11.0809 10.1043 11.4159 10.0626 11.678 10.219L13.4315 11.2651C13.8046 11.4876 13.8685 12.0018 13.5614 12.309L11.7475 14.1229C11.4109 14.4595 10.9187 14.5961 10.4668 14.4468C9.58201 14.1544 8.72192 13.7664 7.9027 13.2825C6.96126 12.7265 6.07382 12.044 5.26493 11.2352C4.45604 10.4263 3.77358 9.53882 3.21756 8.59738C2.73373 7.77817 2.34563 6.91807 2.05327 6.03327C1.90394 5.58134 2.04062 5.08918 2.37717 4.75263L4.19107 2.93873C4.49825 2.63155 5.01245 2.69551 5.235 3.06858L6.28106 4.82205C6.43746 5.08423 6.3958 5.41914 6.17994 5.63501L5.16971 6.64524Z" stroke="#111111" strokeOpacity="0.5" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            ),
+            number: 'Add Phone Numnber',
+        },
+    ]
+    const shopify = [
+        {
+            name: 'Total spent:',
+            value: '€ 1.035,00',
+        },
+        {
+            name: 'Orders:',
+            value: '1',
+        },
+        {
+            name: 'Created at:',
+            value: '01/05/2025',
+        },
+    ]
+    const order = [
+        {
+            name: 'Created: ',
+            value: ' 01/05/2025',
+        },
+        {
+            name: 'Total spent:',
+            value: '€ 1.035,00',
+        },
+        {
+            name: 'Orders:',
+            value: '1',
+        },
+        {
+            name: 'Created at:',
+            value: '01/05/2025',
+        },
+    ]
+    const snipping = [
+        {
+            li: 'Name: Julien C',
+        },
+        {
+            li: 'Address1: Heuvelring 40',
+
+        },
+        {
+            li: 'Address2: -',
+
+        },
+        {
+            li: 'City: Tilburg',
+
+        },
+        {
+            li: 'Country: Netherlands',
+
+        },
+        {
+            li: 'Province: -',
+
+        },
+        {
+
+            li: 'Province code: -',
+        },
+        {
+            li: 'Zip: 5038 CL',
+
+        },
+    ]
+    const wil = [
+        {
+            icon: (<svg width="10" height="11" viewBox="0 0 10 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6.24987 8.83342L3.5058 6.08935C3.18036 5.76391 3.18036 5.23627 3.5058 4.91083L6.24987 2.16675" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            ),
+        },
+        {
+            icon: (<svg width="5" height="9" viewBox="0 0 5 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0.750126 1.16658L3.4942 3.91065C3.81964 4.23609 3.81964 4.76373 3.4942 5.08917L0.750126 7.83325" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            ),
+        },
+        {
+            icon: (<svg width="10" height="11" viewBox="0 0 10 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <g clipPath="url(#clip0_10009_31134)">
+                    <path d="M0.833496 2.6875L2.0835 1.4375M9.16683 2.6875L7.91683 1.4375M5.00016 3.83333V5.5L6.04183 6.54167M8.85433 5.5C8.85433 7.6286 7.12876 9.35417 5.00016 9.35417C2.87157 9.35417 1.146 7.6286 1.146 5.5C1.146 3.3714 2.87157 1.64583 5.00016 1.64583C7.12876 1.64583 8.85433 3.3714 8.85433 5.5Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+                </g>
+                <defs>
+                    <clipPath id="clip0_10009_31134">
+                        <rect width="10" height="10" fill="white" transform="translate(0 0.5)" />
+                    </clipPath>
+                </defs>
+            </svg>
+            ),
+        },
+        {
+            icon: (<svg width="10" height="11" viewBox="0 0 10 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5.00016 2.47909C5.23028 2.47909 5.41683 2.29254 5.41683 2.06242C5.41683 1.8323 5.23028 1.64575 5.00016 1.64575C4.77004 1.64575 4.5835 1.8323 4.5835 2.06242C4.5835 2.29254 4.77004 2.47909 5.00016 2.47909Z" fill="black" />
+                <path d="M5.00016 5.91659C5.23028 5.91659 5.41683 5.73004 5.41683 5.49992C5.41683 5.2698 5.23028 5.08325 5.00016 5.08325C4.77004 5.08325 4.5835 5.2698 4.5835 5.49992C4.5835 5.73004 4.77004 5.91659 5.00016 5.91659Z" fill="black" />
+                <path d="M5.00016 9.35409C5.23028 9.35409 5.41683 9.16754 5.41683 8.93742C5.41683 8.7073 5.23028 8.52075 5.00016 8.52075C4.77004 8.52075 4.5835 8.7073 4.5835 8.93742C4.5835 9.16754 4.77004 9.35409 5.00016 9.35409Z" fill="black" />
+                <path d="M5.00016 2.47909C5.23028 2.47909 5.41683 2.29254 5.41683 2.06242C5.41683 1.8323 5.23028 1.64575 5.00016 1.64575C4.77004 1.64575 4.5835 1.8323 4.5835 2.06242C4.5835 2.29254 4.77004 2.47909 5.00016 2.47909Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M5.00016 5.91659C5.23028 5.91659 5.41683 5.73004 5.41683 5.49992C5.41683 5.2698 5.23028 5.08325 5.00016 5.08325C4.77004 5.08325 4.5835 5.2698 4.5835 5.49992C4.5835 5.73004 4.77004 5.91659 5.00016 5.91659Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M5.00016 9.35409C5.23028 9.35409 5.41683 9.16754 5.41683 8.93742C5.41683 8.7073 5.23028 8.52075 5.00016 8.52075C4.77004 8.52075 4.5835 8.7073 4.5835 8.93742C4.5835 9.16754 4.77004 9.35409 5.00016 9.35409Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            ),
+        },
+    ]
+    const mailIcon = (<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M14.0011 6.16675C12.3296 7.42257 10.2518 8.16675 8.00016 8.16675C5.74851 8.16675 3.67067 7.42257 1.99919 6.16675M3.16683 3.16675H12.8335C13.5699 3.16675 14.1668 3.7637 14.1668 4.50008V11.5001C14.1668 12.2365 13.5699 12.8334 12.8335 12.8334H3.16683C2.43045 12.8334 1.8335 12.2365 1.8335 11.5001V4.50008C1.8335 3.7637 2.43045 3.16675 3.16683 3.16675Z" stroke="#111111" strokeOpacity="0.5" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+    )
+    const mail = []
+    const SearchCustomer = [
+        {
+            name: 'Search customer 1'
+        },
+        {
+            name: 'Search customer 2'
+        },
+        {
+            name: 'Search customer 3'
+        },
+    ]
+    const JarveySupport = [
+        {
+            name: 'Jarvey Support 1'
+        },
+        {
+            name: 'Jarvey Support 2'
+        },
+        {
+            name: 'Jarvey Support 3'
+        },
+    ]
+    const textEditor = [
+        {
+            icon: (<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4.78369 10H11.0418C12.8828 10 14.3752 8.50762 14.3752 6.66667V6.45833C14.3752 4.61738 12.8828 3.125 11.0418 3.125H6.45036C5.52988 3.125 4.78369 3.87119 4.78369 4.79167V10ZM4.78369 10V15.2083C4.78369 16.1288 5.52988 16.875 6.45036 16.875H10.4168M10.8337 16.875H11.8754C13.7163 16.875 15.2087 15.3826 15.2087 13.5417V13.3333C15.2087 11.4924 13.7163 10 11.8754 10H10.8337" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.25" strokeLinecap="square" strokeLinejoin="round" />
+            </svg>
+            ),
+        },
+        {
+            icon: (<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8.12516 3.125L12.0835 3.125M16.0418 3.125L12.0835 3.125M12.0835 3.125L7.91683 16.875M7.91683 16.875H3.9585M7.91683 16.875H11.8836" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            ),
+        },
+        {
+            icon: (<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4.7915 17.2917H15.2082M4.7915 3.125V10C4.7915 12.8765 7.12335 15.2083 9.99984 15.2083C12.8763 15.2083 15.2082 12.8765 15.2082 10V3.125" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.25" strokeLinecap="round" />
+            </svg>
+            ),
+        },
+        {
+            icon: (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M5.62516 9.375C5.27998 9.375 5.00016 9.65482 5.00016 10C5.00016 10.3452 5.27998 10.625 5.62516 10.625V9.375ZM14.3752 10.625C14.7203 10.625 15.0002 10.3452 15.0002 10C15.0002 9.65482 14.7203 9.375 14.3752 9.375V10.625ZM13.1252 13.75C12.78 13.75 12.5002 14.0298 12.5002 14.375C12.5002 14.7202 12.78 15 13.1252 15V13.75ZM13.1252 5C12.78 5 12.5002 5.27982 12.5002 5.625C12.5002 5.97018 12.78 6.25 13.1252 6.25V5ZM6.87516 15C7.22034 15 7.50016 14.7202 7.50016 14.375C7.50016 14.0298 7.22034 13.75 6.87516 13.75V15ZM6.87516 6.25C7.22034 6.25 7.50016 5.97018 7.50016 5.625C7.50016 5.27982 7.22034 5 6.87516 5V6.25ZM5.62516 10.625H14.3752V9.375H5.62516V10.625ZM17.9168 7.29167V12.7083H19.1668V7.29167H17.9168ZM16.8752 13.75H13.1252V15H16.8752V13.75ZM13.1252 6.25H16.8752V5H13.1252V6.25ZM0.833496 7.29167V12.7083H2.0835V7.29167H0.833496ZM3.12516 15H6.87516V13.75H3.12516V15ZM6.87516 5H3.12516V6.25H6.87516V5ZM2.0835 7.29167C2.0835 6.71637 2.54987 6.25 3.12516 6.25V5C1.85951 5 0.833496 6.02601 0.833496 7.29167H2.0835ZM17.9168 12.7083C17.9168 13.2836 17.4505 13.75 16.8752 13.75V15C18.1408 15 19.1668 13.974 19.1668 12.7083H17.9168ZM0.833496 12.7083C0.833496 13.974 1.85951 15 3.12516 15V13.75C2.54987 13.75 2.0835 13.2836 2.0835 12.7083H0.833496ZM19.1668 7.29167C19.1668 6.02601 18.1408 5 16.8752 5V6.25C17.4505 6.25 17.9168 6.71637 17.9168 7.29167H19.1668Z" fill="currentColor" fillOpacity="0.5" />
+            </svg>),
+        },
+        {
+            icon: (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M5.48816 11.1785L5.9301 11.6205V11.6205L5.48816 11.1785ZM7.84518 11.1785L8.28712 10.7366L7.84518 11.1785ZM4.79167 3.75H15.2083V2.5H4.79167V3.75ZM16.25 4.79167V15.2083H17.5V4.79167H16.25ZM3.56694 13.9836L5.9301 11.6205L5.04621 10.7366L2.68306 13.0997L3.56694 13.9836ZM3.75 15.2083V13.5417H2.5V15.2083H3.75ZM3.75 13.5417V4.79167H2.5V13.5417H3.75ZM7.40324 11.6205L13.0997 17.3169L13.9836 16.4331L8.28712 10.7366L7.40324 11.6205ZM15.2083 16.25H13.5417V17.5H15.2083V16.25ZM13.5417 16.25H4.79167V17.5H13.5417V16.25ZM5.9301 11.6205C6.33689 11.2137 6.99644 11.2137 7.40324 11.6205L8.28712 10.7366C7.39217 9.84162 5.94116 9.84162 5.04621 10.7366L5.9301 11.6205ZM2.5 15.2083C2.5 16.474 3.52601 17.5 4.79167 17.5V16.25C4.21637 16.25 3.75 15.7836 3.75 15.2083H2.5ZM16.25 15.2083C16.25 15.7836 15.7836 16.25 15.2083 16.25V17.5C16.474 17.5 17.5 16.474 17.5 15.2083H16.25ZM15.2083 3.75C15.7836 3.75 16.25 4.21637 16.25 4.79167H17.5C17.5 3.52601 16.474 2.5 15.2083 2.5V3.75ZM4.79167 2.5C3.52601 2.5 2.5 3.52601 2.5 4.79167H3.75C3.75 4.21637 4.21637 3.75 4.79167 3.75V2.5ZM13.125 7.91667C13.125 8.49196 12.6586 8.95833 12.0833 8.95833V10.2083C13.349 10.2083 14.375 9.18232 14.375 7.91667H13.125ZM12.0833 8.95833C11.508 8.95833 11.0417 8.49196 11.0417 7.91667H9.79167C9.79167 9.18232 10.8177 10.2083 12.0833 10.2083V8.95833ZM11.0417 7.91667C11.0417 7.34137 11.508 6.875 12.0833 6.875V5.625C10.8177 5.625 9.79167 6.65101 9.79167 7.91667H11.0417ZM12.0833 6.875C12.6586 6.875 13.125 7.34137 13.125 7.91667H14.375C14.375 6.65101 13.349 5.625 12.0833 5.625V6.875Z" fill="currentColor" fillOpacity="0.5" />
+            </svg>),
+        },
+        {
+            icon: (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M5.20817 6.25008C5.78347 6.25008 6.24984 5.78371 6.24984 5.20841C6.24984 4.63312 5.78347 4.16675 5.20817 4.16675C4.63287 4.16675 4.1665 4.63312 4.1665 5.20841C4.1665 5.78371 4.63287 6.25008 5.20817 6.25008Z" fill="currentColor" />
+                <path d="M10.8332 10.784V14.2166C10.8332 14.7222 11.4023 15.0185 11.8166 14.7286L14.2684 13.0123C14.6238 12.7635 14.6238 12.2371 14.2684 11.9883L11.8166 10.272C11.4023 9.98206 10.8332 10.2784 10.8332 10.784Z" fill="currentColor" />
+                <path fillRule="evenodd" clipRule="evenodd" d="M1.6665 3.95841C1.6665 2.69276 2.69252 1.66675 3.95817 1.66675H11.0415C12.3072 1.66675 13.3332 2.69276 13.3332 3.95841V6.66675H16.0415C17.3072 6.66675 18.3332 7.69276 18.3332 8.95841V16.0417C18.3332 17.3074 17.3072 18.3334 16.0415 18.3334H8.95817C7.69252 18.3334 6.6665 17.3074 6.6665 16.0417V13.3334H3.95817C2.69252 13.3334 1.6665 12.3074 1.6665 11.0417V3.95841ZM12.0832 3.95841V6.66675H8.95817C7.77869 6.66675 6.80733 7.55781 6.68052 8.70348L6.26941 8.4294C5.49964 7.91622 4.4968 7.91622 3.72703 8.4294L2.9165 8.96975V3.95841C2.9165 3.38312 3.38287 2.91675 3.95817 2.91675H11.0415C11.6168 2.91675 12.0832 3.38312 12.0832 3.95841ZM5.57603 9.46946L6.6665 10.1964V12.0834H3.95817C3.38287 12.0834 2.9165 11.617 2.9165 11.0417V10.4721L4.42041 9.46946C4.7703 9.2362 5.22614 9.2362 5.57603 9.46946ZM7.9165 16.0417V8.95841C7.9165 8.38312 8.38287 7.91675 8.95817 7.91675H16.0415C16.6168 7.91675 17.0832 8.38312 17.0832 8.95841V16.0417C17.0832 16.617 16.6168 17.0834 16.0415 17.0834H8.95817C8.38287 17.0834 7.9165 16.617 7.9165 16.0417Z" fill="currentColor" />
+            </svg>),
+        },
+        {
+            icon: (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M8.74984 7.91675C8.74984 8.6071 8.28347 9.16675 7.70817 9.16675C7.13287 9.16675 6.6665 8.6071 6.6665 7.91675C6.6665 7.22639 7.13287 6.66675 7.70817 6.66675C8.28347 6.66675 8.74984 7.22639 8.74984 7.91675Z" fill="currentColor" />
+                <path d="M13.3332 7.91675C13.3332 8.6071 12.8668 9.16675 12.2915 9.16675C11.7162 9.16675 11.2498 8.6071 11.2498 7.91675C11.2498 7.22639 11.7162 6.66675 12.2915 6.66675C12.8668 6.66675 13.3332 7.22639 13.3332 7.91675Z" fill="currentColor" />
+                <path fillRule="evenodd" clipRule="evenodd" d="M15.0085 4.99141C12.2423 2.22519 7.75739 2.22519 4.99117 4.99141C2.22495 7.75761 2.22495 12.2425 4.99117 15.0088C7.75737 17.775 12.2423 17.775 15.0085 15.0087C17.7747 12.2425 17.7747 7.75763 15.0085 4.99141ZM4.10728 4.10753C7.36166 0.853155 12.638 0.853154 15.8924 4.10753C19.1468 7.3619 19.1468 12.6383 15.8924 15.8926C12.638 19.147 7.36164 19.147 4.10728 15.8926C0.852911 12.6383 0.85291 7.36189 4.10728 4.10753Z" fill="currentColor" />
+                <path fillRule="evenodd" clipRule="evenodd" d="M7.20113 11.9152C7.4452 11.6711 7.84093 11.6711 8.08501 11.9152C9.14267 12.9728 10.8575 12.9728 11.9152 11.9152C12.1592 11.6711 12.555 11.6711 12.7991 11.9152C13.0431 12.1592 13.0431 12.555 12.7991 12.799C11.2532 14.3449 8.74694 14.3449 7.20112 12.799C6.95705 12.555 6.95705 12.1592 7.20113 11.9152Z" fill="currentColor" />
+            </svg>),
+        },
+        {
+            icon: (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M12.7085 6.45841V5.00008C12.7085 3.50431 11.496 2.29175 10.0002 2.29175C8.50443 2.29175 7.29187 3.50431 7.29187 5.00008V6.45841M5.47364 17.7084H14.5268C15.5445 17.7084 16.3246 16.8042 16.1754 15.7975L15.0026 7.88083C14.8815 7.06361 14.1801 6.45841 13.3539 6.45841H6.64648C5.82034 6.45841 5.11888 7.06361 4.99781 7.88083L3.82497 15.7975C3.67582 16.8042 4.45591 17.7084 5.47364 17.7084Z" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.25" strokeLinecap="round" />
+            </svg>),
+        },
+        {
+            icon: (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M2.2915 9.30139V3.95841C2.2915 3.03794 3.0377 2.29175 3.95817 2.29175H9.30115C9.74317 2.29175 10.1671 2.46734 10.4797 2.7799L17.1547 9.4549C17.8055 10.1058 17.8055 11.1611 17.1547 11.8119L11.8117 17.1549C11.1608 17.8058 10.1055 17.8058 9.45466 17.1549L2.77966 10.4799C2.4671 10.1673 2.2915 9.74342 2.2915 9.30139Z" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.25" strokeLinejoin="round" />
+                <path d="M6.87484 6.25008C6.87484 6.59526 6.59502 6.87508 6.24984 6.87508C5.90466 6.87508 5.62484 6.59526 5.62484 6.25008C5.62484 5.9049 5.90466 5.62508 6.24984 5.62508C6.59502 5.62508 6.87484 5.9049 6.87484 6.25008Z" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.25" strokeLinejoin="round" />
+            </svg>),
+        },
+        {
+            icon: (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M4.7915 8.95841V12.7084C4.7915 15.4698 7.03008 17.7084 9.7915 17.7084H10.2082C12.9696 17.7084 15.2082 15.4698 15.2082 12.7084V5.83341C15.2082 3.87741 13.6225 2.29175 11.6665 2.29175C9.7105 2.29175 8.12484 3.87741 8.12484 5.83341V12.3959C8.12484 13.3739 8.91767 14.1667 9.89567 14.1667C10.8737 14.1667 11.6665 13.3739 11.6665 12.3959V6.45841" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.25" strokeLinecap="round" />
+            </svg>),
+        },
+    ]
+    const modalTable = [
+        {
+            product: 'Gift Card',
+            stock: '49',
+            price: "10,00",
+        },
+        {
+            product: 'Gift Card',
+            stock: '49',
+            price: "10,00",
+        },
+    ]
+    const customerType = [
+        {
+            icon: addIcon1,
+            text: 'Collaborator',
+        },
+        {
+            icon: addIcon2,
+            text: 'VIP',
+        },
+        {
+            icon: addIcon3,
+            text: 'Problematic',
+        },
+        {
+            icon: addIcon4,
+            text: 'High Returns',
+        },
+        {
+            icon: addIcon5,
+            text: 'Fraud',
+        },
+    ]
+    const orderTable = [
+        {
+            logo: order_logo,
+            name: 'The Videographer Snowboard',
+            stock: '45',
+            price: "50.00",
+            total: '150.00',
+        },
+        {
+            logo: order_logo,
+            name: 'The Videographer Snowboard',
+            stock: '45',
+            price: "50.00",
+            total: '150.00',
+        },
+    ]
+
+    const orderSearchTable = [
+        {
+            logo: order_logo,
+            name: 'The Videographer Snowboard',
+            stock: '45',
+        },
+        {
+            logo: order_logo,
+            name: 'The Videographer Snowboard',
+            stock: '45',
+        },
+        {
+            logo: order_logo,
+            name: 'The Videographer Snowboard',
+            stock: '45',
+        },
+        {
+            logo: order_logo,
+            name: 'The Videographer Snowboard',
+            stock: '45',
+        },
+        {
+            logo: order_logo,
+            name: 'The Videographer Snowboard',
+            stock: '45',
+        },
+        {
+            logo: order_logo,
+            name: 'The Videographer Snowboard',
+            stock: '45',
+        },
+        {
+            logo: order_logo,
+            name: 'The Videographer Snowboard',
+            stock: '45',
+        },
+    ]
+
+    const orderList = [
+        {
+            name: 'Add Discount',
+            value: "€ 0,00",
+        },
+        {
+            name: 'Subtotal',
+            value: "€150.00",
+        },
+        {
+            name: 'Add Shipping',
+            value: "€ 0,00",
+        },
+        {
+            name: 'Taxes',
+            value: "€ 0,00",
+        },
+        {
+            name: 'Total',
+            value: "€150.00",
+        },
+    ]
+    return (
+        <>
+            <div className='flex'>
+                <div className="h-full mid w-full md:w-[calc(100%-260px)] xl:w-[calc(100%-290px)] 2xl:w-[calc(100%-335px)]">
+                    <div className="p-3 md:p-4 border-b border-stroke">
+                        <div className="flex justify-between items-center mb-3">
+                            <h4 className='text-lg inline-flex items-center gap-3'>
+                                Wil niet meer
+                            </h4>
+                            <div className="flex items-center gap-1">
+                                {wil.map((item, index) => (
+                                    <button key={index} className='hover:bg-primary text-[#111111]/50 hover:text-white size-6 rounded-lg border border-stroke flex items-center justify-center'>
+                                        {item.icon}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="flex items-center justify-between flex-wrap md:flex-nowrap gap-2 md:gap-0">
+                            <button className='text-primary font-medium text-xs flex items-center gap-1'>Add tags</button>
+                            <button className='text-primary font-medium text-xs flex items-center gap-1'>
+                                Unassigned
+                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10" fill="none">
+                                    <path d="M8.33317 3.74988L5.5891 6.49396C5.26366 6.8194 4.73603 6.8194 4.41059 6.49396L1.6665 3.74988" stroke="#111111" strokeOpacity="0.5" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                            </button>
+                            <button className='font-medium text-xs flex items-center gap-1'>
+                                Contact Reason
+                                <span className='bg-primary size-5 rounded-[5px] flex items-center justify-center'>
+                                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M5 1.5625V5M5 5V8.4375M5 5H1.5625M5 5H8.4375" stroke="white" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                </span>
+                            </button>
+                            <button className='font-medium text-xs flex items-center gap-1'>
+                                Product
+                                <span className='bg-primary size-5 rounded-[5px] flex items-center justify-center'>
+                                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M5 1.5625V5M5 5V8.4375M5 5H1.5625M5 5H8.4375" stroke="white" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                </span>
+                            </button>
+                            <Link to="#" className='text-primary font-medium text-xs'>
+                                See More
+                            </Link>
+                        </div>
+                    </div>
+                    <div className="flex flex-col justify-between h-[calc(100%-96px)]">
+                        <div className="p-4">
+
+                            {chat ?
+                                <div>
+                                    <div className="flex items-start gap-2  max-w-[393px] ">
+                                        <div className="size-[30px] flex items-center justify-center rounded-full bg-[#FFF0EF]">
+                                            <span className='uppercase font-semibold text-xs font-inter !leading-[1.5] bg-[linear-gradient(114deg,#FF6B5F_49.41%,#FFC563_110.43%)] bg-clip-text text-transparent'>jc</span>
+                                        </div>
+                                        <div className="w-full bg-[#F7F7F7] p-3 rounded-xl">
+                                            <div className="flex items-center justify-between">
+                                                <h6 className='text-xs'>Julien C</h6>
+                                                <span className='text-xs'>01/09/2025</span>
+                                            </div>
+                                            <p className='text-xs mt-1 text-[#0A0D14]'>Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Velit officia consequat duis enim velit mollit. Exercitation veniam consequat sunt nostrud amet.</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start flex-row-reverse  ml-auto gap-2  ">
+                                        <div className="size-[30px] flex items-center justify-center rounded-full bg-[#FFF0EF] flex-none">
+                                            <span className='uppercase font-semibold text-xs font-inter !leading-[1.5] bg-[linear-gradient(114deg,#FF6B5F_49.41%,#FFC563_110.43%)] bg-clip-text text-transparent'>jc</span>
+                                        </div>
+                                        <div className="w-full p-3 bg-primary rounded-xl max-w-[393px] text-white">
+                                            <div className="flex items-center justify-between">
+                                                <h6 className='text-xs text-white'>Julien C</h6>
+                                                <span className='text-xs text-white/70'>01/09/2025</span>
+                                            </div>
+                                            <p className='text-xs mt-1 text-white'>Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Velit officia consequat duis enim velit mollit. Exercitation veniam consequat sunt nostrud amet.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                :
+                                <div className="flex gap-2 min-h-[450px]">
+                                    <div className="size-[30px] flex items-center justify-center rounded-full bg-[#FFF0EF] flex-none">
+                                        <span className='uppercase font-semibold text-xs font-inter !leading-[1.5] bg-[linear-gradient(114deg,#FF6B5F_49.41%,#FFC563_110.43%)] bg-clip-text text-transparent'>jc</span>
+                                    </div>
+                                    <div className="w-full">
+                                        <div className="flex items-center justify-between">
+                                            <h6 className='text-xs'>Julien C</h6>
+                                            <span className='text-xs'>01/09/2025</span>
+                                        </div>
+                                        <p className='text-xs mt-1'>Hoi Ik heb besloten dat ik de cadeaubon niet meer wil Kan je deze weghalen</p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div className="p-4 pt-3 bg-[#F8F6FF]">
+                            <div className="flex items-end justify-center flex-wrap md:flex-nowrap gap-4 mb-2">
+                                <Dropdown className='mb-0 ' btnClass="!min-w-[75px] !rounded-md !h-[34px]" placeholder="" leftIcon={mailIcon} items={mail} />
+                                <Dropdown className='mb-0 grow' btnClass="!min-w-[75px] !rounded-md !h-[34px] text-[#111111]/50" label="To" placeholder="Search Customer " items={SearchCustomer} />
+                                <Dropdown className='mb-0 grow' btnClass="!min-w-[75px] !rounded-md !h-[34px] text-[#111111]/50" label="From" placeholder="Jarvey Support " items={JarveySupport} />
+                            </div>
+                            <div className="flex items-center gap-2 py-2.5 border-y border-stroke">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M13.1663 9.24528C13.1663 15.8035 2.83301 15.8107 2.83301 9.24528C2.83301 4.31646 7.99967 1.5 7.99967 1.5C7.99967 1.5 13.1663 4.31646 13.1663 9.24528Z" stroke="#111111" strokeOpacity="0.5" strokeWidth="1.25" strokeLinejoin="round" />
+                                    <path d="M10.4997 11.6412C10.4997 15.0066 5.49967 15.0103 5.49967 11.6412C5.49967 9.11196 7.99967 7.66667 7.99967 7.66667C7.99967 7.66667 10.4997 9.11196 10.4997 11.6412Z" stroke="#111111" strokeOpacity="0.5" strokeWidth="1.25" strokeLinejoin="round" />
+                                </svg>
+                                <p className='max-w-[228px] text-xs !leading-[1.66] text-gray'>Search Predefined Responses by name, tag body</p>
+                            </div>
+                            <div className="pb-8 xl:pb-[90px]">
+                                <button onClick={() => setChat(true)} className='max-w-[228px] text-xs !leading-[1.66] text-gray my-3 hover:text-primary'>Click here to reply</button>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <p>Suggest Predefined Responses</p>
+                                <div className="flex items-center gap-2">
+                                    <button className='btn !text-gray !rounded !bg-white !h-9 text-xs md:!text-sm'>Generic: How can i help?</button>
+                                    <button className='btn !text-gray !rounded !bg-white !h-9 text-xs md:!text-sm'>Generic:Sign off</button>
+                                </div>
+
+                            </div>
+                            <div className="flex items-center justify-between flex-wrap gap-2 mt-3">
+                                <ul className="flex items-center gap-2">
+                                    {textEditor.map((item, index) => (
+                                        <li key={index}>
+                                            <button className='text-[#111111]/50 hover:text-primary'>{item.icon} </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                                <div className="flex items-center gap-2">
+                                    <button className="btn !border-primary !text-primary hover:!text-white !min-w-[unset] !px-4">Send $ Close</button>
+                                    <button className="btn !min-w-[63px] !px-0 !bg-primary !text-white">Send</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="h-full overflow-y-auto md:hidden xl:block right w-full md:w-[290px] 2xl:w-[335px] border-l border-stroke">
+                    <div className="">
+                        <div className="pt-3">
+                            <div className="border-b border-solid border-stroke flex items-center">
+                                {["Customer Details", "AI Feedback"].map((item, index) => (
+                                    <button onClick={() => setActiveTab2(item)} key={index} className={`first:ml-4 last:mr-4 grow font-inter font-medium text-xs 2xl:text-sm px-4 md:px-5 pb-3 border-b border-solid ${item === activeTab2 ? 'border-btn text-btn' : 'border-transparent text-heading'}`}>{item}</button>
+                                ))}
+                            </div>
+                            <TableFilter hideSortDrop textHidden BtnClass="!p-2" className='!px-4 mt-3 md:mt-4 !mb-0 !p-0 !flex-nowrap md:!justify-end relative z-[2]' searchClass='!mr-0' />
+                        </div>
+                        <div className="py-3 px-4 flex flex-col gap-3 border-b border-stroke">
+                            <div className="flex items-center gap-3 ">
+                                <div className="size-[30px] flex items-center justify-center rounded-full bg-[#FFF0EF]">
+                                    <span className='uppercase font-semibold text-xs font-inter !leading-[1.5] bg-[linear-gradient(114deg,#FF6B5F_49.41%,#FFC563_110.43%)] bg-clip-text text-transparent'>jc</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <h4>Julien C</h4>
+                                    <span className='text-xs text-white font-normal !leading-[1.5] px-[5px] py-px rounded-full font-inter bg-[linear-gradient(114deg,#FF6B5F_49.41%,#FFC563_110.43%)]'>ВЕТА</span>
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between ">
+                                <div className="flex items-center gap-1 text-xs">
+                                    Customer Fields
+                                    <button>
+                                        <svg width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M6.16667 3H4.63333C3.8866 3 3.51323 3 3.22801 3.14532C2.97713 3.27316 2.77316 3.47713 2.64532 3.72801C2.5 4.01323 2.5 4.3866 2.5 5.13333V11.8667C2.5 12.6134 2.5 12.9868 2.64532 13.272C2.77316 13.5229 2.97713 13.7268 3.22801 13.8547C3.51323 14 3.8866 14 4.63333 14H11.3667C12.1134 14 12.4868 14 12.772 13.8547C13.0229 13.7268 13.2268 13.5229 13.3547 13.272C13.5 12.9868 13.5 12.6134 13.5 11.8667V10.3333M9.16667 3H13.5M13.5 3V7.33333M13.5 3L7.33333 9.16667" stroke="#7856FF" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div className="relative">
+                                    <div className="flex items-center gap-1 text-xs">
+                                        Customer Type:
+                                        <button onClick={() => setAddCustomer(!addCustomer)}>
+                                            <span className='text-primary font-semibold'> +Add</span>
+                                        </button>
+                                    </div>
+                                    {addCustomer &&
+                                        <div className="absolute top-full right-0 p-4 rounded-xl bg-white shadow-[0px_4px_16px_0px_rgba(0,0,0,0.12)] min-w-[240px] ">
+                                            <Input type='search' inputClass='!h-9' leftIcon={search} name="search" />
+                                            <div className='flex flex-col gap-6'>
+                                                {customerType.map((item, index) => (
+                                                    <button onClick={() => setAddCustomer(!addCustomer)} key={index} className='flex items-center gap-2'>
+                                                        <div className="">
+                                                            <img src={item.icon} alt="" />
+                                                        </div>
+                                                        <span className='text-[#0A0D14] font-semibold !leading-[140%] '>{item.text} </span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <ul className="flex flex-col gap-3">
+                                {customer.map((item, index) => (
+                                    <li className='flex items-center gap-1' key={index}>
+                                        <div className="icon">{item.icon} </div>
+                                        {item.text &&
+                                            <p className='text-xs'>{item.text} </p>
+                                        }
+                                        {item.number &&
+                                            <a href='#' className='text-xs text-primary'>{item.number} </a>
+                                        }
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                        <div className="py-3 px-4 flex flex-col gap-3 border-b border-stroke">
+                            <h5 className='text-sm font-bold !leading-[140%] mb-2'>Shopify Julien C</h5>
+                            <ul className="flex flex-col gap-2">
+                                {shopify.map((item, index) => (
+                                    <li className='flex items-center gap-1' key={index}>
+                                        <p className='text-xs'>{item.name} <span className='text-base text-heading font-semibold'> {item.value}</span> </p>
+                                    </li>
+                                ))}
+                                <li className='flex items-center gap-1'>
+                                    <p className='text-xs'>Tags: <button className='text-base font-semibold text-primary'> Add tags..</button> </p>
+                                </li>
+                            </ul>
+                            <button onClick={() => setOrder(!Order)} className='btn bg-off'>Create order</button>
+                        </div>
+                        <div className="py-3 px-4 flex flex-col gap-3 border-b border-stroke">
+                            <h4 className='text-xl font-bold !leading-[140%] mb-2'>Order #1009</h4>
+                            <div className="flex items-center gap-1 rounded">
+                                {['UNFULFILLED', 'CANCELLED', 'PAID',].map((item, index) => (
+                                    <button key={index} className='bg-[#7856FF]/10 px-3 py-1 text-heading font-semibold !leading-[140%] text-xs rounded'>
+                                        {item}
+                                    </button>
+                                ))}
+                            </div>
+                            <ul className="flex flex-col gap-2">
+                                {order.map((item, index) => (
+                                    <li className='flex items-center gap-1' key={index}>
+                                        <p className='text-xs'>{item.name} <span className='text-base text-heading font-semibold'> {item.value}</span> </p>
+                                    </li>
+                                ))}
+                            </ul>
+                            <div className="flex items-center gap-2">
+                                <button onClick={() => setModal(!modal)} className='btn grow !px-0 !min-w-[unset] !border-primary !text-primary hover:!text-white'>Duplicate</button>
+                                <button onClick={() => setRefund(!refund)} className='btn grow !px-0 !min-w-[unset] !border-primary !text-primary hover:!text-white'>Refund</button>
+                            </div>
+                        </div>
+                        <div className="py-3 px-4 flex flex-col gap-3 border-b border-stroke">
+                            <h4 className='text-xl font-bold !leading-[140%] flex items-center gap-1'>Snipping Address
+                                <button onClick={() => setAddress(!address)}>
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M11.0415 5.20824L13.4047 2.84509C14.0555 2.19422 15.1108 2.19421 15.7617 2.84509L17.1547 4.23807C17.8055 4.88894 17.8055 5.94422 17.1547 6.59509L14.7915 8.95824M11.0415 5.20824L2.77966 13.4701C2.4671 13.7827 2.2915 14.2066 2.2915 14.6486V17.7082H5.35115C5.79318 17.7082 6.2171 17.5326 6.52966 17.2201L14.7915 8.95824M11.0415 5.20824L14.7915 8.95824" stroke="#7856FF" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                </button>
+                            </h4>
+                            <ul className="flex flex-col gap-2">
+                                {snipping.map((item, index) => (
+                                    <li className='flex items-center gap-1' key={index}>
+                                        <p className='text-xs'>{item.li}</p>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {modal &&
+                <Modal closeIconHide={false} innerClass='!max-w-[985px]'>
+                    <h4 className='mb-4 text-lg md:text-xl 2xl:text-2xl'>Duplicate order</h4>
+                    <Input className='mb-4 md:mb-5' type="text" placeholder="Search..." leftIcon={search} inputClass='!h-[38px]' />
+                    <table className='w-full'>
+                        <thead>
+                            <tr className="bg-[#F6F8FA]">
+                                {["Product", "In Stock", "Item Price",].map((item, index) => (
+                                    <th className='text-left text-sm text-[#525866] !font-normal py-2 px-3' key={index}>{item} </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {modalTable.map((item, index) => (
+                                <tr key={index} className='border-b border-[#E2E4E9]'>
+                                    <td className='md:w-[70%] px-3 py-2 md:py-2.5'>
+                                        <p className='text-[#0A0D14] md:text-base font-semibold'>{item.product} </p>
+                                        <span className='text-[#858585] font-medium font-inter'>${item.price} </span>
+                                    </td>
+                                    <td className='text-[#0A0D14] md:text-base font-semibold px-3 py-2'>{item.stock} </td>
+                                    <td className='text-[#0A0D14] md:text-base font-semibold px-3 py-2'>€{item.price} </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    <div className="flex flex-col md:flex-row justify-between my-3 md:my-5 gap-3 md:gap-4">
+                        <div className="max-w-[530px] w-full">
+                            <Input className='mb-3 md:mb-4' label="Notes" placeholder="Type here" name="" type='text' />
+                            <Input className='mb-0' label="Tags" placeholder="Type here" name="" type='text' />
+                        </div>
+                        <div className=" md:max-w-[183px] w-full flex flex-col justify-between gap-2 ">
+                            <ul className='flex flex-col gap-4'>
+                                <li className='flex items-center justify-between'>
+                                    <p className='text-[#525866]'>Taxes</p>
+                                    <p className='text-[#0A0D14] text-base font-semibold'>€ 0,00</p>
+                                </li>
+                                <li className='flex items-center justify-between'>
+                                    <p className='text-[#525866]'>Taxes</p>
+                                    <p className='text-[#0A0D14] text-base font-semibold'>€ 0,00</p>
+                                </li>
+                            </ul>
+                            <button className='btn bg-off w-full'>Create Draft Order</button>
+                        </div>
+                    </div>
+                    <div className=" flex md:items-center gap-3 flex-col-reverse md:flex-row justify-between">
+                        <button onClick={() => setModal(!modal)} className='btn bg-off !min-w-[74px]'>Cancel</button>
+                        <div className="flex flex-col md:flex-row gap-2 md:gap-4">
+                            <button className='btn bg-off'>Create Order as Pending</button>
+                            <button className='btn bg-prim'>Create Order as Paid</button>
+                        </div>
+                    </div>
+                </Modal>
+            }
+            {address &&
+                <Modal closeIconHide={false} innerClass='!max-w-[985px] ' className='overflow-auto'>
+                    <h4 className='mb-4 text-lg md:text-xl 2xl:text-2xl'>Edit Address</h4>
+                    <div className="grid grid-cols-12 gap-3 md:gap-5 ">
+                        <Input className='mb-0 col-span-12' label="Select Another Address" id="Select" placeholder="Type here" name="" type='text' />
+                        <Input className='mb-0 col-span-12 md:col-span-6' label="First Name" placeholder="Type here" name="" type='text' />
+                        <Input className='mb-0 col-span-12 md:col-span-6' label="Last Name" placeholder="Type here" name="" type='text' />
+                        <Input className='mb-0 col-span-12 md:col-span-6' label="Company" placeholder="Type here" name="" type='text' />
+                        <Input className='mb-0 col-span-12 md:col-span-6' label="Phone" placeholder="Type here" name="" type='number' />
+                        <Input className='mb-0 col-span-12 md:col-span-6' label="Address line 1" placeholder="Type here" name="" type='text' />
+                        <Input className='mb-0 col-span-12 md:col-span-6' label="Address line 2" placeholder="Type here" name="" type='text' />
+                        <Dropdown className='mb-0 col-span-12 md:col-span-6 lg:col-span-4' label="Country" placeholder="Select" items={country} search={true} />
+                        <Dropdown className='mb-0 col-span-12 md:col-span-6 lg:col-span-4' label="City" placeholder="Select" items={city} search={true} />
+                        <Input className='mb-0 col-span-12 md:col-span-6 lg:col-span-4' label="ZIP/Postal Code" placeholder="Type here" name="" type='text' />
+                        <div className=" flex md:items-center gap-3 col-span-12 justify-between">
+                            <button onClick={() => setAddress(!address)} className='!min-w-[74px] btn bg-off'>Cancel</button>
+                            <button className='btn bg-prim'>Save Changes</button>
+                        </div>
+                    </div>
+                </Modal>
+            }
+            {Order &&
+                <Modal closeIconHide={false} innerClass='!max-w-[985px]'>
+                    <h4 className='mb-4 text-lg md:text-xl 2xl:text-2xl'>Create Order</h4>
+                    <div className="relative z-[1]">
+                        <Input onClick={() => setSearchOrder(true)} className='mb-4 md:mb-5' type="text" label="Search Product" placeholder="Search..." leftIcon={search} inputClass='' />
+                        {OrderSearch &&
+                            <div className=' absolute -mt-0.5 top-full left-0 z-[2] border border-primary w-full overflow-hidden rounded-b-2xl bg-white'>
+                                {orderSearchTable.map((item, index) => (
+                                    <button onClick={() => setSearchOrder(false)} key={index} className='w-full flex items-center justify-between border-stroke border-b px-2 md:px-3 py-1 md:py-2'>
+                                        <span className="flex items-center gap-2 md:gap-3">
+                                            <span className="size-[30px]">
+                                                <img src={item.logo} alt="" />
+                                            </span>
+                                            <span className='text-[#0A0D14] text-xs md:text-sm font-semibold font-inter text-left'>${item.name} </span>
+                                        </span>
+                                        <span className='text-[#0A0D14] font-medium px-3 py-2'>{item.stock} </span>
+                                    </button>
+                                ))}
+                            </div>
+                        }
+                    </div>
+                    <div className="overflow-x-auto mb-3">
+                        <table className='w-max md:w-full'>
+                            <thead>
+                                <tr className="bg-[#F6F8FA]">
+                                    {["Product", "In Stock", "Item Price", "Actions", "Item Total",].map((item, index) => (
+                                        <th className='text-left text-sm text-[#525866] !font-normal py-2 px-3 last:text-end' key={index}>{item} </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {orderTable.map((item, index) => (
+                                    <tr key={index} className='border-b border-[#E2E4E9]'>
+                                        <td className='px-3 py-2 md:py-2.5'>
+                                            <div className="flex items-center gap-3">
+                                                <div className="size-[30px]">
+                                                    <img src={item.logo} alt="" />
+                                                </div>
+                                                <span className='text-[#0A0D14] font-semibold font-inter line-clamp-1'>${item.name} </span>
+                                            </div>
+                                        </td>
+                                        <td className=' font-medium px-3 py-2'>{item.stock} </td>
+                                        <td className=' font-medium px-3 py-2'>€{item.price} </td>
+                                        <td className='px-3 py-2'>
+                                            <div className="flex items-center gap-3">
+                                                <button onClick={handleDecrease} className='size-7 btn !p-0 !min-w-[0] text-[#858585] !rounded-full flex justify-center items-center'>
+                                                    <svg width="14" height="2" viewBox="0 0 14 2" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M1.5 1H12.5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+                                                    </svg>
+                                                </button>
+                                                <span>{quantity}</span>
+                                                <button onClick={handleIncrease} className='size-7 btn !p-0 !min-w-[0] bg-prim !rounded-full flex justify-center items-center'>
+                                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M7 1.5V7M7 7V12.5M7 7H1.5M7 7H12.5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td className='text-[#0A0D14] md:text-base font-semibold px-3 py-2 text-end'>€{item.total} </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="flex flex-col md:flex-row justify-between m5-3 md:mt-5  gap-3 md:gap-4">
+                        <div className="max-w-[407px] w-full">
+                            <Input className='mb-3 md:mb-4' label="Notes" placeholder="Add a note" name="" type='text' />
+                            <Input className='mb-0' label="Tags" placeholder="Add tags" name="" type='text' />
+                        </div>
+                        <div className=" md:max-w-[253px] w-full flex flex-col justify-between gap-2 ">
+                            <ul className='flex flex-col gap-3.5'>
+                                {orderList.map((item, index) => (
+                                    <li className='flex items-center justify-between'>
+                                        <p className={`text-[#525866] ${index === orderList.length - 1 && "font-semibold"}`}>{item.name} </p>
+                                        <p className={`text-base font-semibold ${index == 1 ? "text-[#0A0D14]" : index == orderList.length - 1 && "text-[#0A0D14]"}`}>{item.value} </p>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+                    <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4 mb-5 mt-4">
+                        <p className=' text-[#0A0D14] font-semibold'>Create draft order & send shopify invoice</p>
+                        <button className='btn !bg-black !text-white'>Create Draft Order </button>
+                    </div>
+                    <div className=" flex md:items-center gap-3 flex-col-reverse md:flex-row justify-between">
+                        <button onClick={() => setOrder(!Order)} className='btn bg-off min-w-[74px]'>Cancel</button>
+                        <div className="flex flex-col md:flex-row gap-2 md:gap-4">
+                            <button className='btn bg-off'>Create Order as Paid </button>
+                            <button className='btn bg-prim'>Create Order as Pending</button>
+                        </div>
+                    </div>
+                </Modal>
+            }
+            {refund &&
+                <Modal closeIconHide={false} innerClass='!max-w-[985px]'>
+                    <h4 className='mb-4 text-lg md:text-xl 2xl:text-2xl'>Refund Order</h4>
+                    <div className="overflow-x-auto mb-3">
+                        <table className='w-max md:w-full'>
+                            <thead>
+                                <tr className="bg-[#F6F8FA]">
+                                    {["Product", "In Stock", "Item Price", "Actions", "Item Total",].map((item, index) => (
+                                        <th className='text-left text-sm text-[#525866] !font-normal py-2 px-3 last:text-end' key={index}>{item} </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {orderTable.map((item, index) => (
+                                    <tr key={index} className='border-b border-[#E2E4E9]'>
+                                        <td className='px-3 py-2 md:py-2.5'>
+                                            <div className="flex items-center gap-3">
+                                                <div className="size-[30px]">
+                                                    <img src={item.logo} alt="" />
+                                                </div>
+                                                <span className='text-[#0A0D14] font-semibold font-inter line-clamp-1'>${item.name} </span>
+                                            </div>
+                                        </td>
+                                        <td className=' font-medium px-3 py-2'>{item.stock} </td>
+                                        <td className=' font-medium px-3 py-2'>€{item.price} </td>
+                                        <td className='px-3 py-2'>
+                                            <div className="flex items-center gap-3">
+                                                <button onClick={handleDecrease} className='size-7 btn !p-0 !min-w-[0] text-[#858585] !rounded-full flex justify-center items-center'>
+                                                    <svg width="14" height="2" viewBox="0 0 14 2" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M1.5 1H12.5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+                                                    </svg>
+                                                </button>
+                                                <span>{quantity}</span>
+                                                <button onClick={handleIncrease} className='size-7 btn !p-0 !min-w-[0] bg-prim !rounded-full flex justify-center items-center'>
+                                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M7 1.5V7M7 7V12.5M7 7H1.5M7 7H12.5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td className='text-[#0A0D14] md:text-base font-semibold px-3 py-2 text-end'>€{item.total} </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="flex flex-col md:flex-row justify-between my-3 md:my-5  gap-3 md:gap-4">
+                        <div className="">
+                            <div className="flex items-start gap-2 mb-2">
+                                <Checkbox id='res' />
+                                <div className="">
+                                    <label htmlFor="res" className='cursor-pointer text-heading font-semibold'>Restock Item</label>
+                                    <p className='text-xs mt-1'>The claimed quantity will be restocked back to your store. Note that custom items can’t be restocked.</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-2">
+                                <Checkbox id='Send' />
+                                <label htmlFor="Send" className='cursor-pointer text-heading font-semibold'>Send notification to customer</label>
+                            </div>
+                        </div>
+                        <div className=" md:max-w-[253px] w-full flex flex-col justify-between gap-2 ">
+                            <ul className='flex flex-col gap-3.5'>
+                                {orderList.map((item, index) => (
+                                    <li className='flex items-center justify-between'>
+                                        <p className={`text-[#525866] ${index === orderList.length - 1 && "font-semibold"}`}>{item.name} </p>
+                                        <p className={`text-base font-semibold ${index == 1 ? "text-[#0A0D14]" : index == orderList.length - 1 && "text-[#0A0D14]"}`}>{item.value} </p>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5 mb-5">
+                        <Input className='mb-0' label="Refund with" placeholder="Type here" name="" type='text' />
+                        <Input className='mb-0' label="Reason for refund " placeholder="Type here" name="" type='text' />
+                    </div>
+                    <div className=" flex md:items-center gap-3 flex-col-reverse md:flex-row justify-between">
+                        <button onClick={() => setRefund(!refund)} className='btn bg-off min-w-[74px]'>Cancel</button>
+                        <button className='btn bg-prim'>Refund €150 </button>
+                    </div>
+                </Modal>
+            }
+        </>
+
+    )
+}

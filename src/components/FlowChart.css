@@ -1,0 +1,56 @@
+/* FlowChart.css - Styles for react-flow-builder */
+
+.flow-builder-container {
+  min-height: 400px;
+  background: #f7f7f7;
+  border-radius: 20px;
+  padding: 20px;
+}
+
+/* Override default flow builder styles */
+.flow-builder-container .flow-builder {
+  background: transparent !important;
+}
+
+.flow-builder-container .flow-builder-node {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.flow-builder-container .flow-builder-line {
+  stroke: #7856ff !important;
+  stroke-width: 2px !important;
+}
+
+.flow-builder-container .flow-builder-arrow {
+  fill: #7856ff !important;
+}
+
+/* Ensure nodes maintain consistent spacing */
+.flow-builder-container .flow-builder-node-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Hide default add buttons */
+.flow-builder-container .flow-builder-add-button {
+  display: none !important;
+}
+
+/* Custom node styling */
+.flow-builder-container .node-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Ensure proper z-index for side panel */
+.flow-builder-container {
+  position: relative;
+  z-index: 1;
+}

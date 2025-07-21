@@ -1,0 +1,10 @@
+.layout {
+    &-menu {
+        & a.active {
+            @apply bg-[#F1EEFF];
+            & .text{
+                @apply text-[#111111];
+            }
+        }
+    }
+}

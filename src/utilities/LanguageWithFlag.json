@@ -1,0 +1,101 @@
+[{
+        "code": "en",
+        "name": "English",
+        "flag": "https://flagcdn.com/us.svg"
+    },
+    {
+        "code": "fr",
+        "name": "French",
+        "flag": "https://flagcdn.com/fr.svg"
+    },
+    {
+        "code": "es",
+        "name": "Spanish",
+        "flag": "https://flagcdn.com/es.svg"
+    },
+    {
+        "code": "de",
+        "name": "German",
+        "flag": "https://flagcdn.com/de.svg"
+    },
+    {
+        "code": "it",
+        "name": "Italian",
+        "flag": "https://flagcdn.com/it.svg"
+    },
+    {
+        "code": "pt",
+        "name": "Portuguese",
+        "flag": "https://flagcdn.com/pt.svg"
+    },
+    {
+        "code": "zh",
+        "name": "Chinese",
+        "flag": "https://flagcdn.com/cn.svg"
+    },
+    {
+        "code": "ja",
+        "name": "Japanese",
+        "flag": "https://flagcdn.com/jp.svg"
+    },
+    {
+        "code": "ko",
+        "name": "Korean",
+        "flag": "https://flagcdn.com/kr.svg"
+    },
+    {
+        "code": "ru",
+        "name": "Russian",
+        "flag": "https://flagcdn.com/ru.svg"
+    },
+    {
+        "code": "ar",
+        "name": "Arabic",
+        "flag": "https://flagcdn.com/sa.svg"
+    },
+    {
+        "code": "hi",
+        "name": "Hindi",
+        "flag": "https://flagcdn.com/in.svg"
+    },
+    {
+        "code": "tr",
+        "name": "Turkish",
+        "flag": "https://flagcdn.com/tr.svg"
+    },
+    {
+        "code": "nl",
+        "name": "Dutch",
+        "flag": "https://flagcdn.com/nl.svg"
+    },
+    {
+        "code": "sv",
+        "name": "Swedish",
+        "flag": "https://flagcdn.com/se.svg"
+    },
+    {
+        "code": "pl",
+        "name": "Polish",
+        "flag": "https://flagcdn.com/pl.svg"
+    },
+    {
+        "code": "th",
+        "name": "Thai",
+        "flag": "https://flagcdn.com/th.svg"
+    },
+    {
+        "code": "vi",
+        "name": "Vietnamese",
+        "flag": "https://flagcdn.com/vn.svg"
+    },
+    {
+        "code": "id",
+        "name": "Indonesian",
+        "flag": "https://flagcdn.com/id.svg"
+    },
+    {
+        "code": "fa",
+        "name": "Persian",
+        "flag": "https://flagcdn.com/ir.svg"
+    }
+]
