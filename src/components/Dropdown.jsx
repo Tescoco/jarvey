@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import ReactDOM from "react-dom";
 
 export default function Dropdown({
   search = false,
@@ -17,9 +18,13 @@ export default function Dropdown({
   desClass = "",
   onChange,
   value,
+  popUpText,
+  showPopup = false,
 }) {
   const [defaultItem, setDefaultItem] = useState("");
   const [searchValue, setSearchValue] = useState("");
+  const [popupVisible, setPopupVisible] = useState(false);
+  const [pendingSelection, setPendingSelection] = useState(null);
 
   useEffect(() => {
     if (value) {
@@ -43,6 +48,11 @@ export default function Dropdown({
 
   const [showDrop, setShowDrop] = useState(false);
   const handleChange = (selectedItem) => {
+    if (showPopup) {
+      setPendingSelection(selectedItem);
+      setPopupVisible(true);
+      return;
+    }
     setDefaultItem(selectedItem);
     setShowDrop(false);
     setSearchValue("");
@@ -58,6 +68,30 @@ export default function Dropdown({
         onChange(selectedItem); // Fallback
       }
     }
+  };
+
+  const handlePopupConfirm = () => {
+    if (pendingSelection) {
+      setDefaultItem(pendingSelection);
+      setShowDrop(false);
+      setSearchValue("");
+      if (onChange) {
+        if (pendingSelection.color) {
+          onChange(pendingSelection.color);
+        } else if (pendingSelection.name) {
+          onChange(pendingSelection.name);
+        } else {
+          onChange(pendingSelection);
+        }
+      }
+    }
+    setPopupVisible(false);
+    setPendingSelection(null);
+  };
+
+  const handlePopupCancel = () => {
+    setPopupVisible(false);
+    setPendingSelection(null);
   };
 
   const filteredData = items.filter((data) =>
@@ -189,6 +223,33 @@ export default function Dropdown({
           {des}
         </p>
       )}
+      {/* Confirmation Popup */}
+      {popupVisible &&
+        ReactDOM.createPortal(
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+            <div className="bg-white rounded-2xl shadow-xl p-8 max-w-[400px] w-full flex flex-col items-center">
+              <h2 className="text-2xl font-bold mb-4">Confirm your account</h2>
+              <p className="text-base text-gray-700 mb-6">
+                {popUpText || "Please confirm your account to proceed."}
+              </p>
+              <div className="flex gap-4 w-full justify-center">
+                <button
+                  className="btn bg-primary text-white px-6 py-2 rounded-lg"
+                  onClick={handlePopupConfirm}
+                >
+                  Confirm
+                </button>
+                <button
+                  className="btn bg-gray-200 text-gray-800 px-6 py-2 rounded-lg"
+                  onClick={handlePopupCancel}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

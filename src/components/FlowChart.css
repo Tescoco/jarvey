@@ -34,6 +34,7 @@
   flex-direction: column;
   align-items: center;
   gap: 20px;
+  position: relative;
 }
 
 /* Hide default add buttons */
@@ -53,4 +54,84 @@
 .flow-builder-container {
   position: relative;
   z-index: 1;
+}
+
+/* Custom plus button on connecting lines */
+.flow-builder-container .flow-builder-node-wrapper::after {
+  content: "";
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 32px;
+  background: #7856ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(120, 86, 255, 0.3);
+}
+
+.flow-builder-container .flow-builder-node-wrapper::after:hover {
+  background: #6b46c1;
+  transform: translateX(-50%) scale(1.1);
+}
+
+/* Plus icon using CSS */
+.flow-builder-container .flow-builder-node-wrapper::before {
+  content: "+";
+  position: absolute;
+  bottom: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  z-index: 11;
+  pointer-events: none;
+}
+
+/* Hide plus button on end nodes */
+.flow-builder-container .flow-builder-node-wrapper:last-child::after,
+.flow-builder-container .flow-builder-node-wrapper:last-child::before {
+  display: none;
+}
+
+/* Custom line with plus button container */
+.custom-line-with-plus {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.custom-plus-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 32px;
+  height: 32px;
+  background: #7856ff;
+  border: none;
+  border-radius: 50%;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(120, 86, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-plus-button:hover {
+  background: #6b46c1;
+  transform: translate(-50%, -50%) scale(1.1);
 }
