@@ -37,12 +37,12 @@ export default function Home() {
           path: "/onboarding/connect-support",
           stepId: "connect-support",
         },
-        {
-          title: "Answer a test ticket (2 mins)",
-          des: "Experience how ticketing works before going live.",
-          path: "/onboarding/answer-ticket",
-          stepId: "answer-ticket",
-        },
+        // {
+        //   title: "Answer a test ticket (2 mins)",
+        //   des: "Experience how ticketing works before going live.",
+        //   path: "/onboarding/answer-ticket",
+        //   stepId: "answer-ticket",
+        // },
         {
           title: "Add your support channels (7 mins)",
           des: "Facebook, Instagram, WhatsApp.",

@@ -9,14 +9,15 @@ export const ONBOARDING_STEPS_CONFIG = {
     title: "Connect your support email",
     description: "Link your email to start receiving support tickets",
     timeEstimate: "This should take about 2 minutes",
-    nextStep: "answer-ticket",
-  },
-  "answer-ticket": {
-    title: "Answer a test ticket",
-    description: "Experience how ticketing works before going live",
-    timeEstimate: "This should take about 2 minutes",
+    // nextStep: "answer-ticket",
     nextStep: "add-support-channels",
   },
+  // "answer-ticket": {
+  //   title: "Answer a test ticket",
+  //   description: "Experience how ticketing works before going live",
+  //   timeEstimate: "This should take about 2 minutes",
+  //   nextStep: "add-support-channels",
+  // },
   "add-support-channels": {
     title: "Add your support channels",
     description: "Facebook, Instagram, WhatsApp",
