@@ -199,7 +199,7 @@ export default function actions() {
     setRuleNodes(updateNodeRecursive(ruleNodes));
   };
 
-  const addChildNode = (parentId, childType) => {
+  const addChildNode = (parentId, childType, logicalOperator = null) => {
     const newNode = {
       id: Date.now(),
       type: childType,
@@ -210,6 +210,7 @@ export default function actions() {
       newNode.field = null;
       newNode.operator = null;
       newNode.value = null;
+      newNode.logicalOp = logicalOperator || "IF"; // Set the logical operator
     } else if (childType === "action") {
       newNode.action = null;
     }
@@ -260,37 +261,85 @@ export default function actions() {
   const renderNode = (node, depth = 0) => {
     const marginLeft = depth * 30;
 
+    // Different styling for different node types
+    const getNodeStyling = (nodeType) => {
+      switch (nodeType) {
+        case "when":
+          return {
+            container:
+              "mb-6 group relative p-5 rounded-xl border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 shadow-sm hover:shadow-md transition-all duration-300",
+            badge:
+              "bg-blue-600 text-white px-4 py-2 rounded-full font-bold text-sm tracking-wide shadow-md",
+          };
+        case "then":
+          return {
+            container:
+              "mb-4 group relative p-4 rounded-lg border border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50 shadow-sm hover:shadow-md transition-all duration-200",
+            badge:
+              "bg-purple-600 text-white px-3 py-1.5 rounded-full font-semibold text-sm",
+          };
+        case "if":
+          return {
+            container:
+              "mb-4 group relative p-4 rounded-lg border border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50 shadow-sm hover:shadow-md transition-all duration-200",
+            badge:
+              "bg-amber-600 text-white px-3 py-1.5 rounded-full font-semibold text-sm",
+          };
+        case "action":
+          return {
+            container:
+              "mb-4 group relative p-4 rounded-lg border border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 shadow-sm hover:shadow-md transition-all duration-200",
+            badge:
+              "bg-green-600 text-white px-3 py-1.5 rounded-full font-semibold text-sm",
+          };
+        default:
+          return {
+            container:
+              "mb-4 group relative p-4 rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all duration-200",
+            badge:
+              "bg-gray-600 text-white px-3 py-1.5 rounded-full font-semibold text-sm",
+          };
+      }
+    };
+
+    const styling = getNodeStyling(node.type);
+
     return (
       <div
         key={node.id}
-        className="mb-5 group relative p-4 rounded-lg border border-gray-100 hover:border-gray-200 transition-all duration-200"
+        className={styling.container}
         style={{ marginLeft: `${marginLeft}px` }}
       >
         {/* Delete button - shows on hover */}
         <button
           onClick={() => removeNode(node.id)}
-          className="absolute -right-2 -top-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-600 z-10 shadow-md"
+          className="absolute -right-2 -top-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-red-600 hover:scale-110 z-10 shadow-lg font-bold"
           title="Delete this rule"
         >
           ×
         </button>
 
         {node.type === "when" && (
-          <div className="flex items-center gap-4 flex-wrap p-2">
-            <Alert text="WHEN" variant="primary" />
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className={styling.badge}>🚀 WHEN</div>
             <RuleDropdown
               options={triggerEvents}
               value={node.trigger}
               onChange={(trigger) => updateNode(node.id, { trigger })}
-              placeholder="Select trigger..."
+              placeholder="Select trigger event..."
               variant="primary"
             />
+            {node.trigger && (
+              <div className="ml-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                ✓ Trigger set
+              </div>
+            )}
           </div>
         )}
 
         {node.type === "then" && (
-          <div className="flex items-center gap-4 flex-wrap p-2">
-            <Alert text="THEN" variant="primary" />
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className={styling.badge}>⚡ THEN</div>
             <RuleDropdown
               options={["Action", "IF statement"]}
               value={node.selectedType}
@@ -302,39 +351,38 @@ export default function actions() {
                   addChildNode(node.id, "if");
                 }
               }}
-              placeholder="Select type..."
+              placeholder="Choose what happens next..."
               variant="primary"
             />
           </div>
         )}
 
         {node.type === "action" && (
-          <div className="flex items-center gap-4 flex-wrap p-2">
-            <Alert text="SELECT ACTION" variant="success" />
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className={styling.badge}>🎯 ACTION</div>
             <RuleDropdown
               options={actionsList}
               value={node.action}
               onChange={(action) => updateNode(node.id, { action })}
-              placeholder="Choose action..."
+              placeholder="Choose action to perform..."
               variant="success"
             />
+            {node.action && (
+              <div className="ml-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                ✓ Action configured
+              </div>
+            )}
           </div>
         )}
 
         {node.type === "if" && (
-          <div className="flex items-center gap-4 flex-wrap p-2">
-            <RuleDropdown
-              options={logicalOperators}
-              value={node.logicalOp || "IF"}
-              onChange={(logicalOp) => updateNode(node.id, { logicalOp })}
-              placeholder="IF"
-              variant="primary"
-            />
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className={styling.badge}>🔍 {node.logicalOp || "IF"}</div>
             <RuleDropdown
               options={conditionFields}
               value={node.field}
               onChange={(field) => updateNode(node.id, { field })}
-              placeholder="Select field..."
+              placeholder="Select field to check..."
               variant="primary"
             />
             <RuleDropdown
@@ -349,25 +397,39 @@ export default function actions() {
               value={node.value || ""}
               onChange={(e) => updateNode(node.id, { value: e.target.value })}
               placeholder="Enter value..."
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary min-w-[150px]"
+              className="px-4 py-2 border-2 border-amber-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 min-w-[150px] bg-white shadow-sm"
             />
+            {node.field && node.operator && node.value && (
+              <div className="ml-2 px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-medium">
+                ✓ Condition set
+              </div>
+            )}
           </div>
         )}
 
-        {/* Render children */}
-        {node.children &&
-          node.children.map((child) => renderNode(child, depth + 1))}
+        {/* Render children with connecting lines */}
+        {node.children && node.children.length > 0 && (
+          <div className="mt-4 relative">
+            {/* Connecting line */}
+            <div className="absolute left-4 top-0 w-0.5 h-full bg-gradient-to-b from-gray-300 to-transparent"></div>
+            {node.children.map((child, index) => (
+              <div key={child.id} className="relative">
+                {/* Horizontal connector */}
+                <div className="absolute left-4 top-6 w-4 h-0.5 bg-gray-300"></div>
+                {renderNode(child, depth + 1)}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Add THEN button for WHEN nodes */}
         {node.type === "when" && node.trigger && (
-          <div
-            className="mt-4 pl-6"
-            style={{ marginLeft: `${marginLeft + 30}px` }}
-          >
+          <div className="mt-6 pl-8 border-l-2 border-blue-200">
             <button
-              className={`${add} px-3 py-2 rounded-md hover:bg-primary/10 transition-colors`}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
               onClick={() => addChildNode(node.id, "then")}
             >
+              <span>⚡</span>
               Add THEN condition
             </button>
           </div>
@@ -375,28 +437,28 @@ export default function actions() {
 
         {/* Add condition buttons for IF nodes */}
         {node.type === "if" && (
-          <div
-            className="mt-4 pl-6"
-            style={{ marginLeft: `${marginLeft + 30}px` }}
-          >
+          <div className="mt-4 pl-8 border-l-2 border-amber-200">
             <div className="flex gap-3 flex-wrap">
               <button
-                className={`${add} px-3 py-2 rounded-md hover:bg-primary/10 transition-colors`}
-                onClick={() => addChildNode(node.id, "if")}
+                className="inline-flex items-center gap-2 px-3 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
+                onClick={() => addChildNode(node.id, "if", "AND")}
               >
-                Add AND condition
+                <span>➕</span>
+                Add AND
               </button>
               <button
-                className={`${add} px-3 py-2 rounded-md hover:bg-primary/10 transition-colors`}
-                onClick={() => addChildNode(node.id, "if")}
+                className="inline-flex items-center gap-2 px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
+                onClick={() => addChildNode(node.id, "if", "OR")}
               >
-                Add OR condition
+                <span>🔄</span>
+                Add OR
               </button>
               <button
-                className={`${add} px-3 py-2 rounded-md hover:bg-primary/10 transition-colors`}
+                className="inline-flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
                 onClick={() => addChildNode(node.id, "then")}
               >
-                Add THEN statement
+                <span>⚡</span>
+                Add THEN
               </button>
             </div>
           </div>
@@ -562,16 +624,20 @@ export default function actions() {
                     Action Rules
                   </p>
                   <div className="overflow-x-auto">
-                    <div className="border border-[#E2E4E9] rounded-lg lg:rounded-2xl xl:rounded-[15px] p-6 lg:p-8 bg-gray-50/50">
+                    <div className="border-2 border-indigo-200 rounded-xl lg:rounded-2xl xl:rounded-[20px] p-6 lg:p-8 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 shadow-lg">
                       {ruleNodes.map((node) => renderNode(node))}
 
-                      <div className="mt-6 pt-6 border-t border-gray-200">
+                      <div className="mt-8 pt-6 border-t-2 border-indigo-200">
                         <button
-                          className={`${add} px-4 py-3 rounded-md hover:bg-primary/10 transition-colors border border-primary/20 hover:border-primary/40`}
+                          className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl hover:from-indigo-700 hover:to-blue-700 transition-all duration-200 font-medium text-sm shadow-lg hover:shadow-xl hover:scale-105"
                           onClick={addTriggerEvent}
                         >
-                          Add events...
+                          <span className="text-lg">🚀</span>
+                          Add new trigger event
                         </button>
+                        <p className="text-sm text-gray-600 mt-2 ml-1">
+                          Create additional WHEN conditions for your action
+                        </p>
                       </div>
                     </div>
                   </div>

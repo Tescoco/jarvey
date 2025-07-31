@@ -300,6 +300,10 @@ export default function App() {
           element: <NewTicket />,
         },
         {
+          path: "create-fields",
+          element: <CreateField />,
+        },
+        {
           path: "ticket/:tid",
           element: <TicketDetails />,
         },
@@ -338,7 +342,7 @@ export default function App() {
           element: <Predefined />,
         },
         {
-          path: "predefined-create",
+          path: "create-predefined",
           element: <PredefinedCreate />,
         },
         {
@@ -346,7 +350,7 @@ export default function App() {
           element: <PredefinedInstall />,
         },
         {
-          path: "predefined-install-update",
+          path: "predefined-update",
           element: <PredefinedInstallUpdate />,
         },
         {

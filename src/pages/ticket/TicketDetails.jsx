@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Dropdown from "../../components/Dropdown";
 import Top from "../../layouts/Top";
 import TableFilter from "../../components/TableFilter";
@@ -6,6 +6,7 @@ import Checkbox from "../../components/Checkbox";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import Modal from "../../components/Modal";
 import Input from "../../components/Input";
+import RichTextEditor from "../../components/RichTextEditor";
 import {
   city,
   country,
@@ -26,6 +27,21 @@ export default function Tickets() {
   const dispatch = useDispatch();
   const [quantity, setQuantity] = useState(3);
 
+  // Resizable sections state
+  const [leftWidth, setLeftWidth] = useState(260);
+  const [rightWidth, setRightWidth] = useState(290);
+  const [isResizingLeft, setIsResizingLeft] = useState(false);
+  const [isResizingRight, setIsResizingRight] = useState(false);
+  const leftResizerRef = useRef(null);
+  const rightResizerRef = useRef(null);
+  const animationFrameRef = useRef(null);
+  const initialMouseX = useRef(0);
+  const initialLeftWidth = useRef(260);
+  const initialRightWidth = useRef(290);
+
+  // Throttle resize updates for smoother performance
+  const throttledResize = useRef(null);
+
   const handleDecrease = () => {
     if (quantity > 1) setQuantity(quantity - 1);
   };
@@ -37,6 +53,7 @@ export default function Tickets() {
   const [activeTab2, setActiveTab2] = useState("Customer Details");
   const [addCustomer, setAddCustomer] = useState(false);
   const [chat, setChat] = useState(false);
+  const [replyContent, setReplyContent] = useState("");
 
   const message_sidebar_collapse = useSelector(
     (e) => e.toggle_left_bar.isHidden
@@ -792,23 +809,192 @@ export default function Tickets() {
     `Mark as spam`,
   ];
 
+  // Resize handlers
+  const handleMouseDownLeft = (e) => {
+    e.preventDefault();
+    initialMouseX.current = e.clientX;
+    initialLeftWidth.current = leftWidth;
+    setIsResizingLeft(true);
+  };
+
+  const handleMouseDownRight = (e) => {
+    e.preventDefault();
+    initialMouseX.current = e.clientX;
+    initialRightWidth.current = rightWidth;
+    setIsResizingRight(true);
+  };
+
+  const handleDoubleClickLeft = () => {
+    if (leftWidth > 50) {
+      setLeftWidth(50); // Collapse to minimum
+    } else {
+      setLeftWidth(260); // Expand to default
+    }
+  };
+
+  const handleDoubleClickRight = () => {
+    if (rightWidth > 50) {
+      setRightWidth(50); // Collapse to minimum
+    } else {
+      setRightWidth(290); // Expand to default
+    }
+  };
+
+  const handleMouseMove = (e) => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+
+    animationFrameRef.current = requestAnimationFrame(() => {
+      if (isResizingLeft) {
+        const deltaX = e.clientX - initialMouseX.current;
+        const newWidth = Math.max(
+          50,
+          Math.min(600, initialLeftWidth.current + deltaX)
+        );
+        setLeftWidth(newWidth);
+      }
+      if (isResizingRight) {
+        const deltaX = e.clientX - initialMouseX.current;
+        const newWidth = Math.max(
+          50,
+          Math.min(600, initialRightWidth.current - deltaX)
+        );
+        setRightWidth(newWidth);
+      }
+    });
+  };
+
+  const handleMouseUp = () => {
+    setIsResizingLeft(false);
+    setIsResizingRight(false);
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+  };
+
+  const resetLayout = () => {
+    setLeftWidth(260);
+    setRightWidth(290);
+  };
+
+  // Resize indicator component
+  const ResizeIndicator = () => {
+    if (!isResizingLeft && !isResizingRight) return null;
+
+    return (
+      <div className="fixed top-4 right-4 bg-black/90 backdrop-blur-sm text-white px-4 py-3 rounded-lg text-sm z-50 pointer-events-none shadow-xl border border-white/20 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="flex gap-6 font-mono">
+          <span
+            className={`transition-colors duration-200 ${
+              isResizingLeft ? "text-blue-300" : "text-gray-300"
+            }`}
+          >
+            Left: {leftWidth}px
+          </span>
+          <span
+            className={`transition-colors duration-200 ${
+              isResizingRight ? "text-blue-300" : "text-gray-300"
+            }`}
+          >
+            Right: {rightWidth}px
+          </span>
+        </div>
+        <div className="text-xs text-gray-400 mt-1 text-center">
+          {isResizingLeft ? "Resizing left panel" : "Resizing right panel"}
+        </div>
+      </div>
+    );
+  };
+
+  useEffect(() => {
+    const handleMouseMovePassive = (e) => {
+      handleMouseMove(e);
+    };
+
+    const handleMouseUpPassive = () => {
+      handleMouseUp();
+    };
+
+    if (isResizingLeft || isResizingRight) {
+      document.addEventListener("mousemove", handleMouseMovePassive, {
+        passive: true,
+      });
+      document.addEventListener("mouseup", handleMouseUpPassive);
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+      document.body.style.overflow = "hidden";
+      document.body.style.pointerEvents = "none";
+    } else {
+      document.removeEventListener("mousemove", handleMouseMovePassive);
+      document.removeEventListener("mouseup", handleMouseUpPassive);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      document.body.style.overflow = "";
+      document.body.style.pointerEvents = "";
+    }
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMovePassive);
+      document.removeEventListener("mouseup", handleMouseUpPassive);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      document.body.style.overflow = "";
+      document.body.style.pointerEvents = "";
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [isResizingLeft, isResizingRight]);
+
+  const handleReplyChange = (content) => {
+    setReplyContent(content);
+  };
+
   return (
     <>
-      <Top title="Tickets">
-        <Dropdown
-          className="mb-0 relative z-10"
-          btnClass="!min-w-[105px] !h-[34px] !text-primary !text-xs font-medium"
-          placeholder="All Stores"
-          items={stores}
+      {/* Resize overlay for smoother interaction */}
+      {(isResizingLeft || isResizingRight) && (
+        <div
+          className="fixed inset-0 z-40 cursor-col-resize"
+          style={{
+            backgroundColor: "transparent",
+            pointerEvents: "auto",
+          }}
         />
+      )}
+
+      <Top title="Tickets">
+        <div className="flex items-center gap-2">
+          <Dropdown
+            className="mb-0 relative z-10"
+            btnClass="!min-w-[105px] !h-[34px] !text-primary !text-xs font-medium"
+            placeholder="All Stores"
+            items={stores}
+          />
+          <button
+            onClick={resetLayout}
+            className="btn !min-w-[80px] !h-[34px] !text-xs font-medium text-gray-600 border-gray-300 hover:bg-gray-50"
+            title="Reset layout to default sizes"
+          >
+            Reset Layout
+          </button>
+        </div>
       </Top>
       <div className="flex items-center flex-wrap md:h-[calc(100vh-88px)]">
+        {/* Left sidebar */}
         <div
-          className={`h-full bg-[#F7F7F7] left w-full transition-all duration-300 ${
-            message_sidebar_collapse
-              ? "hidden overflow-hidden"
-              : "md:w-[260px] 2xl:w-[296px]"
-          } `}
+          className={`h-full bg-[#F7F7F7] left ${
+            message_sidebar_collapse ? "hidden overflow-hidden" : "md:block"
+          } ${
+            isResizingLeft
+              ? "transition-none"
+              : "transition-all duration-200 ease-out"
+          }`}
+          style={{
+            width: message_sidebar_collapse ? 0 : `${leftWidth}px`,
+            willChange: isResizingLeft ? "width" : "auto",
+          }}
         >
           <div className="p-2 md:p-3 !pb-0">
             <TableFilter
@@ -917,12 +1103,45 @@ export default function Tickets() {
             ))}
           </div>
         </div>
+
+        {/* Left resize handle */}
+        {!message_sidebar_collapse && (
+          <div
+            ref={leftResizerRef}
+            className={`hidden md:block w-1 cursor-col-resize transition-all duration-200 relative group ${
+              isResizingLeft
+                ? "bg-blue-500 shadow-lg"
+                : "bg-gray-200 hover:bg-blue-400"
+            }`}
+            onMouseDown={handleMouseDownLeft}
+            onDoubleClick={handleDoubleClickLeft}
+            style={{
+              minHeight: "100%",
+              transform: isResizingLeft ? "scaleX(2)" : "scaleX(1)",
+              zIndex: isResizingLeft ? 50 : 10,
+            }}
+            title="Drag to resize left panel • Double-click to toggle"
+          >
+            <div
+              className={`absolute inset-y-0 left-1/2 transform -translate-x-1/2 w-0.5 bg-blue-400 transition-opacity duration-200 ${
+                isResizingLeft
+                  ? "opacity-100"
+                  : "opacity-0 group-hover:opacity-100"
+              }`}
+            />
+          </div>
+        )}
+
+        {/* Middle section */}
         <div
-          className={`h-full mid w-full md:w-[calc(100%-260px)] transition-all duration-300 ${
-            message_sidebar_collapse
-              ? " xl:w-[calc(100%-0px-290px)] 2xl:w-[calc(100%-0px-335px)]"
-              : " xl:w-[calc(100%-260px-290px)] 2xl:w-[calc(100%-296px-335px)]"
+          className={`h-full mid flex-1 ${
+            isResizingLeft || isResizingRight
+              ? "transition-none"
+              : "transition-all duration-200 ease-out"
           }`}
+          style={{
+            willChange: isResizingLeft || isResizingRight ? "width" : "auto",
+          }}
         >
           <div className="p-3 md:p-4 border-b border-stroke">
             <div className="flex justify-between items-center mb-3">
@@ -1230,12 +1449,24 @@ export default function Tickets() {
                 </p>
               </div>
               <div className="pb-8 xl:pb-[90px]">
-                <button
-                  onClick={() => setChat(true)}
-                  className="max-w-[228px] text-xs !leading-[1.66] text-gray my-3 hover:text-primary"
-                >
-                  Click here to reply
-                </button>
+                {!chat ? (
+                  <button
+                    onClick={() => setChat(true)}
+                    className="max-w-[228px] text-xs !leading-[1.66] text-gray my-3 hover:text-primary"
+                  >
+                    Click here to reply
+                  </button>
+                ) : (
+                  <div className="my-3">
+                    <RichTextEditor
+                      value={replyContent}
+                      onChange={handleReplyChange}
+                      placeholder="Type your reply here..."
+                      className="bg-white"
+                      minHeight="150px"
+                    />
+                  </div>
+                )}
               </div>
               <div className="flex flex-col gap-2">
                 <p>Suggest Predefined Responses</p>
@@ -1270,8 +1501,44 @@ export default function Tickets() {
             </div>
           </div>
         </div>
+
+        {/* Right resize handle */}
         <div
-          className={`h-full overflow-y-auto md:hidden xl:block right w-full md:w-[290px] 2xl:w-[335px] border-l border-stroke`}
+          ref={rightResizerRef}
+          className={`hidden xl:block w-1 cursor-col-resize transition-all duration-200 relative group ${
+            isResizingRight
+              ? "bg-blue-500 shadow-lg"
+              : "bg-gray-200 hover:bg-blue-400"
+          }`}
+          onMouseDown={handleMouseDownRight}
+          onDoubleClick={handleDoubleClickRight}
+          style={{
+            minHeight: "100%",
+            transform: isResizingRight ? "scaleX(2)" : "scaleX(1)",
+            zIndex: isResizingRight ? 50 : 10,
+          }}
+          title="Drag to resize right panel • Double-click to toggle"
+        >
+          <div
+            className={`absolute inset-y-0 left-1/2 transform -translate-x-1/2 w-0.5 bg-blue-400 transition-opacity duration-200 ${
+              isResizingRight
+                ? "opacity-100"
+                : "opacity-0 group-hover:opacity-100"
+            }`}
+          />
+        </div>
+
+        {/* Right sidebar */}
+        <div
+          className={`h-full overflow-y-auto md:hidden xl:block right border-l border-stroke ${
+            isResizingRight
+              ? "transition-none"
+              : "transition-all duration-200 ease-out"
+          }`}
+          style={{
+            width: `${rightWidth}px`,
+            willChange: isResizingRight ? "width" : "auto",
+          }}
         >
           <div className="">
             <div className="pt-3">
@@ -1963,7 +2230,7 @@ export default function Tickets() {
                   </label>
                   <p className="text-xs mt-1">
                     The claimed quantity will be restocked back to your store.
-                    Note that custom items can’t be restocked.
+                    Note that custom items can't be restocked.
                   </p>
                 </div>
               </div>
@@ -2029,6 +2296,7 @@ export default function Tickets() {
           </div>
         </Modal>
       )}
+      <ResizeIndicator />
     </>
   );
 }

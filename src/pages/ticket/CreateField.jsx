@@ -49,7 +49,7 @@ export default function NewTicket() {
             >
               Ticket Fields
             </Link>
-            <span className="text-heading">></span>
+            <span className="text-heading"> {">"} </span>
             <span className="text-heading">New Field</span>
           </div>
           {/* <Dropdown className='mb-0 relative z-10' btnClass="!min-w-[105px] !h-10 !text-primary !text-xs font-medium" placeholder="All Stores" items={stores} /> */}

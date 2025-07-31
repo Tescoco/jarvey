@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useContext } from "react";
 import TextEditor from "../../components/OrderMangemanget/TextEditor";
 import TableFilter from "../../components/TableFilter";
 import { Link, useNavigate } from "react-router-dom";
 import { plus } from "../../utilities/Classes";
+import { OrderContext } from "./Layout";
 
 export default function Report() {
+  const { textEditorContent, setTextEditorContent } = useContext(OrderContext);
   const navigate = useNavigate();
   const table = [
     {

@@ -1,11 +1,21 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import Top from "../../layouts/Top";
 import { arrow_left } from "../../utilities/Classes";
 import Dropdown from "../Dropdown";
 import MultiSelectTags from "../MultiSelectTags";
 import Input from "../Input";
+import RichTextEditor from "../RichTextEditor";
 
 export default function PredefinedInstallUpdate() {
+  const [editorContent, setEditorContent] = useState(
+    "<p>Hello! Thank you for your order. We are currently processing your shipment and will notify you once it has been dispatched.</p><p><strong>Expected processing time:</strong> 2-3 business days</p><p>If you have any questions, please don't hesitate to contact us.</p>"
+  );
+
+  const handleEditorChange = (content) => {
+    setEditorContent(content);
+  };
+
   return (
     <div>
       <Top title={" "} className="!justify-start">
@@ -102,7 +112,13 @@ export default function PredefinedInstallUpdate() {
                 ]}
               />
             </div>
-            <p className="text-black text-xl">Text editor section</p>
+            <RichTextEditor
+              value={editorContent}
+              onChange={handleEditorChange}
+              placeholder="Type your response here..."
+              className="bg-white rounded-lg"
+              minHeight="250px"
+            />
           </div>
           <div className="md:flex items-center gap-5 lg:gap-6">
             <Dropdown

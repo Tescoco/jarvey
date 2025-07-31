@@ -1,11 +1,19 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import Top from "../../layouts/Top";
 import { arrow_left } from "../../utilities/Classes";
 import Dropdown from "../Dropdown";
 import MultiSelectTags from "../MultiSelectTags";
 import Input from "../Input";
+import RichTextEditor from "../RichTextEditor";
 
 export default function PredefinedInstall() {
+  const [editorContent, setEditorContent] = useState("");
+
+  const handleEditorChange = (content) => {
+    setEditorContent(content);
+  };
+
   return (
     <div>
       <Top title={" "} className="!justify-start">
@@ -124,7 +132,13 @@ export default function PredefinedInstall() {
                 ]}
               />
             </div>
-            <p className="text-black text-xl">Text editor section</p>
+            <RichTextEditor
+              value={editorContent}
+              onChange={handleEditorChange}
+              placeholder="Type your response here..."
+              className="bg-white rounded-lg"
+              minHeight="250px"
+            />
           </div>
           <div className="md:flex items-center gap-5 lg:gap-6">
             <Dropdown
