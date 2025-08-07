@@ -201,35 +201,61 @@ export default function Details() {
                 </button>
               ))}
               {activeActionBtn === "analysis" && (
-                <div className="flex flex-col gap-3 absolute top-full right-0 mt-2.5 p-3 bg-white min-w-full w-[310px] rounded-xl shadow-[0px_4px_16px_0px_rgba(0,0,0,0.12)]">
+                <div className="flex flex-col gap-4 absolute top-full right-0 mt-2.5 p-4 bg-white min-w-full w-[340px] rounded-xl shadow-[0px_4px_16px_0px_rgba(0,0,0,0.12)]">
+                  {/* Top row - Total starts and Automation rate */}
                   <div className="flex items-center bg-[#F7F7F7] rounded-xl">
-                    <div className="grow p-3 text-center flex flex-col gap-1 justify-center">
-                      <span className="text-[#858585] text-xs font-medium">
+                    <div className="flex-1 p-4 text-center flex flex-col gap-1 justify-center">
+                      <span className="text-[#858585] text-sm font-medium">
                         Total starts
                       </span>
-                      <strong className="text-heading font-semibold text-base !leading-normal">
-                        1
+                      <strong className="text-heading font-bold text-2xl !leading-normal">
+                        5
                       </strong>
                     </div>
-                    <div className="grow p-3 text-center flex flex-col gap-1 justify-center">
-                      <span className="text-[#858585] text-xs font-medium">
+                    <div className="flex-1 p-4 text-center flex flex-col gap-1 justify-center">
+                      <span className="text-[#858585] text-sm font-medium">
                         Automation rate
                       </span>
-                      <strong className="text-heading font-semibold text-base !leading-normal">
-                        0%{" "}
-                        <span className="text-gray text-xs inline-block ml-2">
-                          0%
-                        </span>
+                      <strong className="text-heading font-bold text-2xl !leading-normal">
+                        40%
+                      </strong>
+                    </div>
+                  </div>
+
+                  {/* Bottom row - Three metrics */}
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="text-center flex flex-col gap-1">
+                      <span className="text-green-600 text-sm font-medium">
+                        Automated
+                      </span>
+                      <strong className="text-heading font-bold text-2xl !leading-normal">
+                        2
+                      </strong>
+                    </div>
+                    <div className="text-center flex flex-col gap-1">
+                      <span className="text-red-500 text-sm font-medium">
+                        Drop off
+                      </span>
+                      <strong className="text-heading font-bold text-2xl !leading-normal">
+                        3
+                      </strong>
+                    </div>
+                    <div className="text-center flex flex-col gap-1">
+                      <span className="text-[#858585] text-sm font-medium">
+                        Tickets created
+                      </span>
+                      <strong className="text-heading font-bold text-2xl !leading-normal">
+                        0
                       </strong>
                     </div>
                   </div>
                 </div>
               )}
-              {activeActionBtn === "editor" && (
+              {/* {activeActionBtn === "editor" && (
                 <div className="flex flex-col gap-3 absolute top-full right-0 mt-2.5 p-3 bg-white  w-[310px] rounded-xl shadow-[0px_4px_16px_0px_rgba(0,0,0,0.12)]">
                   editor
                 </div>
-              )}
+              )} */}
             </div>
           </div>
           <div className="overflow-x-auto w-full">

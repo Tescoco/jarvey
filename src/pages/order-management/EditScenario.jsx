@@ -462,8 +462,8 @@ export default function EditScenario() {
           Order Conditions <span className="text-[#FE4333]">*</span>
         </h6>
         <p className="leading-normal text-xs font-medium">
-          CustomersThe options below will display when an order meets the
-          following condition.
+          Customers will see the options below when an order meets the following
+          condition.
         </p>
       </div>
       <div className="overflow-x-auto">

@@ -38,7 +38,7 @@ export default function Notification() {
     <>
       <MainInner className="!p-0 mt-16 md:mt-20 lg:mt-[88px]">
         <div
-          className={`rounded-[20px] mx-4 md:mx-auto lg:mx-0 px-3 md:px-4 pb-3 md:pb-4 max-w-[334px] max-h-[50vh] overflow-y-auto shadow-[0px_4px_24px_0px_rgba(0,0,0,0.16)]`}
+          className={`rounded-[20px] mx-4 md:mx-auto lg:mx-0 px-3 md:px-4 pb-3 md:pb-4 max-w-[380px] md:max-w-[420px] max-h-[70vh] md:max-h-[75vh] min-h-[400px] overflow-y-auto shadow-[0px_4px_24px_0px_rgba(0,0,0,0.16)] bg-white`}
         >
           <div className="flex items-center justify-between mb-3 md:mb-4 border-b border-stroke py-3 md:py-4 -mx-3 md:-mx-4 px-3 md:px-4">
             <div className="flex items-center gap-2 md:gap-3">
@@ -56,18 +56,18 @@ export default function Notification() {
               Mark All as Read
             </button>
           </div>
-          <div className="flex flex-col gap-2 md:gap-3">
+          <div className="flex flex-col gap-1.5 md:gap-2">
             {card.map((item, index) => (
               <div
-                className={`flex gap-2 md:gap-3 relative z-[1] ${c_16} ${
+                className={`flex gap-3 md:gap-4 relative z-[1] ${c_16} ${
                   item.status == "active" && "bg-[#F7F7F7]"
-                } p-2 md:p-3`}
+                } p-3 md:p-4 hover:bg-gray-50 transition-colors duration-200 cursor-pointer`}
                 key={index}
               >
-                <div className="size-6 md:size-7 bg-primary rounded-full flex items-center justify-center flex-[0_0_auto]">
+                <div className="size-8 md:size-9 bg-primary rounded-full flex items-center justify-center flex-[0_0_auto] mt-0.5">
                   <svg
-                    width="12"
-                    height="12"
+                    width="14"
+                    height="14"
                     viewBox="0 0 16 16"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
@@ -89,16 +89,18 @@ export default function Notification() {
                   </svg>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h5 className="text-sm md:text-base leading-normal mb-0.5 truncate">
+                  <h5 className="text-sm md:text-base font-semibold leading-normal mb-1 truncate">
                     {item.title}{" "}
                   </h5>
-                  <h6 className="text-xs md:text-sm line-clamp-2">
+                  <h6 className="text-xs md:text-sm line-clamp-2 mb-1 text-gray-700">
                     {item.massage}{" "}
                   </h6>
-                  <p className="text-xs text-gray-500">{item.des} </p>
+                  <p className="text-xs text-gray-500 line-clamp-2">
+                    {item.des}{" "}
+                  </p>
                 </div>
                 {item.status === "active" && (
-                  <div className="absolute top-2 right-2 size-1.5 rounded-full bg-[#FE4333]" />
+                  <div className="absolute top-3 right-3 size-2 rounded-full bg-[#FE4333]" />
                 )}
               </div>
             ))}

@@ -28,16 +28,29 @@ export default function Tickets() {
   const [quantity, setQuantity] = useState(3);
 
   // Resizable sections state
-  const [leftWidth, setLeftWidth] = useState(260);
-  const [rightWidth, setRightWidth] = useState(290);
+  const [leftWidth, setLeftWidth] = useState(280);
+  const [rightWidth, setRightWidth] = useState(320);
+  const [typingHeight, setTypingHeight] = useState(280);
   const [isResizingLeft, setIsResizingLeft] = useState(false);
   const [isResizingRight, setIsResizingRight] = useState(false);
+  const [isResizingTyping, setIsResizingTyping] = useState(false);
   const leftResizerRef = useRef(null);
   const rightResizerRef = useRef(null);
+  const typingResizerRef = useRef(null);
   const animationFrameRef = useRef(null);
   const initialMouseX = useRef(0);
-  const initialLeftWidth = useRef(260);
-  const initialRightWidth = useRef(290);
+  const initialMouseY = useRef(0);
+  const initialLeftWidth = useRef(280);
+  const initialRightWidth = useRef(320);
+  const initialTypingHeight = useRef(280);
+
+  // Size constraints
+  const MIN_LEFT_WIDTH = 200;
+  const MAX_LEFT_WIDTH = 500;
+  const MIN_RIGHT_WIDTH = 250;
+  const MAX_RIGHT_WIDTH = 450;
+  const MIN_TYPING_HEIGHT = 200;
+  const MAX_TYPING_HEIGHT = 600;
 
   // Throttle resize updates for smoother performance
   const throttledResize = useRef(null);
@@ -824,19 +837,34 @@ export default function Tickets() {
     setIsResizingRight(true);
   };
 
+  const handleMouseDownTyping = (e) => {
+    e.preventDefault();
+    initialMouseY.current = e.clientY;
+    initialTypingHeight.current = typingHeight;
+    setIsResizingTyping(true);
+  };
+
   const handleDoubleClickLeft = () => {
-    if (leftWidth > 50) {
-      setLeftWidth(50); // Collapse to minimum
+    if (leftWidth > MIN_LEFT_WIDTH + 20) {
+      setLeftWidth(MIN_LEFT_WIDTH); // Collapse to minimum
     } else {
-      setLeftWidth(260); // Expand to default
+      setLeftWidth(280); // Expand to default
     }
   };
 
   const handleDoubleClickRight = () => {
-    if (rightWidth > 50) {
-      setRightWidth(50); // Collapse to minimum
+    if (rightWidth > MIN_RIGHT_WIDTH + 20) {
+      setRightWidth(MIN_RIGHT_WIDTH); // Collapse to minimum
     } else {
-      setRightWidth(290); // Expand to default
+      setRightWidth(320); // Expand to default
+    }
+  };
+
+  const handleDoubleClickTyping = () => {
+    if (typingHeight > MIN_TYPING_HEIGHT + 20) {
+      setTypingHeight(MIN_TYPING_HEIGHT); // Collapse to minimum
+    } else {
+      setTypingHeight(280); // Expand to default
     }
   };
 
@@ -849,18 +877,26 @@ export default function Tickets() {
       if (isResizingLeft) {
         const deltaX = e.clientX - initialMouseX.current;
         const newWidth = Math.max(
-          50,
-          Math.min(600, initialLeftWidth.current + deltaX)
+          MIN_LEFT_WIDTH,
+          Math.min(MAX_LEFT_WIDTH, initialLeftWidth.current + deltaX)
         );
         setLeftWidth(newWidth);
       }
       if (isResizingRight) {
         const deltaX = e.clientX - initialMouseX.current;
         const newWidth = Math.max(
-          50,
-          Math.min(600, initialRightWidth.current - deltaX)
+          MIN_RIGHT_WIDTH,
+          Math.min(MAX_RIGHT_WIDTH, initialRightWidth.current - deltaX)
         );
         setRightWidth(newWidth);
+      }
+      if (isResizingTyping) {
+        const deltaY = e.clientY - initialMouseY.current;
+        const newHeight = Math.max(
+          MIN_TYPING_HEIGHT,
+          Math.min(MAX_TYPING_HEIGHT, initialTypingHeight.current - deltaY)
+        );
+        setTypingHeight(newHeight);
       }
     });
   };
@@ -868,19 +904,27 @@ export default function Tickets() {
   const handleMouseUp = () => {
     setIsResizingLeft(false);
     setIsResizingRight(false);
+    setIsResizingTyping(false);
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
     }
   };
 
   const resetLayout = () => {
-    setLeftWidth(260);
-    setRightWidth(290);
+    setLeftWidth(280);
+    setRightWidth(320);
+    setTypingHeight(280);
   };
 
   // Resize indicator component
   const ResizeIndicator = () => {
-    if (!isResizingLeft && !isResizingRight) return null;
+    if (!isResizingLeft && !isResizingRight && !isResizingTyping) return null;
+
+    const getConstraintText = (value, min, max, label) => {
+      if (value <= min) return `${label}: ${value}px (MIN)`;
+      if (value >= max) return `${label}: ${value}px (MAX)`;
+      return `${label}: ${value}px`;
+    };
 
     return (
       <div className="fixed top-4 right-4 bg-black/90 backdrop-blur-sm text-white px-4 py-3 rounded-lg text-sm z-50 pointer-events-none shadow-xl border border-white/20 animate-in fade-in slide-in-from-top-2 duration-200">
@@ -890,62 +934,81 @@ export default function Tickets() {
               isResizingLeft ? "text-blue-300" : "text-gray-300"
             }`}
           >
-            Left: {leftWidth}px
+            {getConstraintText(
+              leftWidth,
+              MIN_LEFT_WIDTH,
+              MAX_LEFT_WIDTH,
+              "Left"
+            )}
           </span>
           <span
             className={`transition-colors duration-200 ${
               isResizingRight ? "text-blue-300" : "text-gray-300"
             }`}
           >
-            Right: {rightWidth}px
+            {getConstraintText(
+              rightWidth,
+              MIN_RIGHT_WIDTH,
+              MAX_RIGHT_WIDTH,
+              "Right"
+            )}
           </span>
-        </div>
-        <div className="text-xs text-gray-400 mt-1 text-center">
-          {isResizingLeft ? "Resizing left panel" : "Resizing right panel"}
+          <span
+            className={`transition-colors duration-200 ${
+              isResizingTyping ? "text-blue-300" : "text-gray-300"
+            }`}
+          >
+            {getConstraintText(
+              typingHeight,
+              MIN_TYPING_HEIGHT,
+              MAX_TYPING_HEIGHT,
+              "Typing"
+            )}
+          </span>
         </div>
       </div>
     );
   };
 
+  // Event listeners for resize
   useEffect(() => {
-    const handleMouseMovePassive = (e) => {
-      handleMouseMove(e);
+    const handleGlobalMouseMove = (e) => {
+      if (isResizingLeft || isResizingRight || isResizingTyping) {
+        handleMouseMove(e);
+      }
     };
 
-    const handleMouseUpPassive = () => {
-      handleMouseUp();
+    const handleGlobalMouseUp = () => {
+      if (isResizingLeft || isResizingRight || isResizingTyping) {
+        handleMouseUp();
+      }
     };
 
-    if (isResizingLeft || isResizingRight) {
-      document.addEventListener("mousemove", handleMouseMovePassive, {
-        passive: true,
-      });
-      document.addEventListener("mouseup", handleMouseUpPassive);
-      document.body.style.cursor = "col-resize";
+    if (isResizingLeft || isResizingRight || isResizingTyping) {
+      document.addEventListener("mousemove", handleGlobalMouseMove);
+      document.addEventListener("mouseup", handleGlobalMouseUp);
+      document.body.style.cursor = isResizingTyping
+        ? "row-resize"
+        : "col-resize";
       document.body.style.userSelect = "none";
-      document.body.style.overflow = "hidden";
-      document.body.style.pointerEvents = "none";
-    } else {
-      document.removeEventListener("mousemove", handleMouseMovePassive);
-      document.removeEventListener("mouseup", handleMouseUpPassive);
-      document.body.style.cursor = "";
-      document.body.style.userSelect = "";
-      document.body.style.overflow = "";
-      document.body.style.pointerEvents = "";
     }
 
     return () => {
-      document.removeEventListener("mousemove", handleMouseMovePassive);
-      document.removeEventListener("mouseup", handleMouseUpPassive);
+      document.removeEventListener("mousemove", handleGlobalMouseMove);
+      document.removeEventListener("mouseup", handleGlobalMouseUp);
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
-      document.body.style.overflow = "";
-      document.body.style.pointerEvents = "";
+    };
+  }, [isResizingLeft, isResizingRight, isResizingTyping]);
+
+  // Cleanup animation frame on unmount
+  useEffect(() => {
+    return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [isResizingLeft, isResizingRight]);
+  }, []);
 
   const handleReplyChange = (content) => {
     setReplyContent(content);
@@ -954,9 +1017,11 @@ export default function Tickets() {
   return (
     <>
       {/* Resize overlay for smoother interaction */}
-      {(isResizingLeft || isResizingRight) && (
+      {(isResizingLeft || isResizingRight || isResizingTyping) && (
         <div
-          className="fixed inset-0 z-40 cursor-col-resize"
+          className={`fixed inset-0 z-40 ${
+            isResizingTyping ? "cursor-row-resize" : "cursor-col-resize"
+          }`}
           style={{
             backgroundColor: "transparent",
             pointerEvents: "auto",
@@ -981,10 +1046,10 @@ export default function Tickets() {
           </button>
         </div>
       </Top>
-      <div className="flex items-center flex-wrap md:h-[calc(100vh-88px)]">
+      <div className="flex h-[calc(100vh-88px)] overflow-hidden">
         {/* Left sidebar */}
         <div
-          className={`h-full bg-[#F7F7F7] left ${
+          className={`h-full bg-[#F7F7F7] left flex flex-col flex-shrink-0 ${
             message_sidebar_collapse ? "hidden overflow-hidden" : "md:block"
           } ${
             isResizingLeft
@@ -993,80 +1058,94 @@ export default function Tickets() {
           }`}
           style={{
             width: message_sidebar_collapse ? 0 : `${leftWidth}px`,
+            minWidth: message_sidebar_collapse ? 0 : `${MIN_LEFT_WIDTH}px`,
+            maxWidth: message_sidebar_collapse ? 0 : `${MAX_LEFT_WIDTH}px`,
             willChange: isResizingLeft ? "width" : "auto",
           }}
         >
-          <div className="p-2 md:p-3 !pb-0">
-            <TableFilter
-              hideSortDrop={true}
-              textHidden
-              BtnClass="!p-2"
-              className="relative !flex-nowrap md:!justify-end !mb-[8.5px]"
-              searchClass="!mr-0"
-            />
-          </div>
-          <div className="flex items-center gap-4 p-2 md:p-3">
-            <div className="flex items-center gap-2 mr-auto">
-              <Checkbox
-                id="all"
-                checked={isAllChecked}
-                onChange={handleSelectAll}
+          {/* Left sidebar header - fixed */}
+          <div className="flex-shrink-0">
+            <div className="p-2 md:p-3 !pb-0">
+              <TableFilter
+                hideSortDrop={true}
+                textHidden
+                BtnClass="!p-2"
+                className="relative !flex-nowrap md:!justify-end !mb-[8.5px]"
+                searchClass="!mr-0"
               />
-              <label
-                htmlFor="all"
-                className="text-[#0A0D14] font-medium font-sm font-inter cursor-pointer select-none"
-              >
-                Select All
-              </label>
             </div>
-            {flows.map((item, index) => (
-              <button key={index} title={item.name} className="size-4">
-                {item.icon}
-              </button>
-            ))}
-            <div className="relative z-[1] flex items-center">
-              <button
-                title="More"
-                className={`size-5 flex items-center justify-center text-[#858585] rounded-md ${
-                  more === true && "text-white bg-black"
-                }`}
-                onClick={() => setMore(!more)}
-              >
-                <svg
-                  width="12"
-                  height="4"
-                  viewBox="0 0 12 4"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
+            <div className="flex items-center gap-4 p-2 md:p-3">
+              <div className="flex items-center gap-2 mr-auto">
+                <Checkbox
+                  id="all"
+                  checked={isAllChecked}
+                  onChange={handleSelectAll}
+                />
+                <label
+                  htmlFor="all"
+                  className="text-[#0A0D14] font-medium font-sm font-inter cursor-pointer select-none"
                 >
-                  <path
-                    d="M1.33333 0.667969C0.6 0.667969 0 1.26797 0 2.0013C0 2.73463 0.6 3.33463 1.33333 3.33463C2.06667 3.33463 2.66667 2.73463 2.66667 2.0013C2.66667 1.26797 2.06667 0.667969 1.33333 0.667969ZM10.6667 0.667969C9.93333 0.667969 9.33333 1.26797 9.33333 2.0013C9.33333 2.73463 9.93333 3.33463 10.6667 3.33463C11.4 3.33463 12 2.73463 12 2.0013C12 1.26797 11.4 0.667969 10.6667 0.667969ZM6 0.667969C5.26667 0.667969 4.66667 1.26797 4.66667 2.0013C4.66667 2.73463 5.26667 3.33463 6 3.33463C6.73333 3.33463 7.33333 2.73463 7.33333 2.0013C7.33333 1.26797 6.73333 0.667969 6 0.667969Z"
-                    fill="currentColor"
-                  />
-                </svg>
-              </button>
-              {more && (
-                <div className="absolute top-full right-0 mt-2 min-w-[233px] rounded-2xl bg-white shadow-[0px_4px_16px_0px_rgba(0,0,0,0.12)] p-4 md:p-5 flex flex-col gap-4">
-                  {moreList.map((item, index) => (
+                  Select All
+                </label>
+              </div>
+              {flows.map((item, index) => (
+                <button
+                  key={index}
+                  title={item.name}
+                  className="size-4 flex-shrink-0"
+                >
+                  {item.icon}
+                </button>
+              ))}
+              <div className="relative z-[1] flex items-center flex-shrink-0">
+                <button
+                  title="More"
+                  className={`size-5 flex items-center justify-center text-[#858585] rounded-md ${
+                    more === true && "text-white bg-black"
+                  }`}
+                  onClick={() => setMore(!more)}
+                >
+                  <svg
+                    width="12"
+                    height="4"
+                    viewBox="0 0 12 4"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M1.33333 0.667969C0.6 0.667969 0 1.26797 0 2.0013C0 2.73463 0.6 3.33463 1.33333 3.33463C2.06667 3.33463 2.66667 2.73463 2.66667 2.0013C2.66667 1.26797 2.06667 0.667969 1.33333 0.667969ZM10.6667 0.667969C9.93333 0.667969 9.33333 1.26797 9.33333 2.0013C9.33333 2.73463 9.93333 3.33463 10.6667 3.33463C11.4 3.33463 12 2.73463 12 2.0013C12 1.26797 11.4 0.667969 10.6667 0.667969ZM6 0.667969C5.26667 0.667969 4.66667 1.26797 4.66667 2.0013C4.66667 2.73463 5.26667 3.33463 6 3.33463C6.73333 3.33463 7.33333 2.73463 7.33333 2.0013C7.33333 1.26797 6.73333 0.667969 6 0.667969Z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </button>
+                {more && (
+                  <div className="absolute top-full right-0 mt-2 min-w-[233px] rounded-2xl bg-white shadow-[0px_4px_16px_0px_rgba(0,0,0,0.12)] p-4 md:p-5 flex flex-col gap-4 z-10">
+                    {moreList.map((item, index) => (
+                      <button
+                        onClick={() => setMore(false)}
+                        className="text-heading font-medium text-left"
+                        key={index}
+                      >
+                        {item}{" "}
+                      </button>
+                    ))}
                     <button
                       onClick={() => setMore(false)}
-                      className="text-heading font-medium text-left"
-                      key={index}
+                      className="text-[#FE4333] text-left"
                     >
-                      {item}{" "}
+                      Delete
                     </button>
-                  ))}
-                  <button
-                    onClick={() => setMore(false)}
-                    className="text-[#FE4333] text-left"
-                  >
-                    Delete
-                  </button>
-                </div>
-              )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-          <div className="overflow-y-auto h-[calc(100vh-193px)]">
+
+          {/* Left sidebar content - scrollable */}
+          <div
+            className="flex-1 overflow-y-auto"
+            style={{ maxHeight: "calc(100vh - 88px - 120px)" }}
+          >
             {tickets.map((item, index) => (
               <div
                 className={`p-2 md:p-3 border-b border-[#E2E4E9] relative group  ${
@@ -1108,7 +1187,7 @@ export default function Tickets() {
         {!message_sidebar_collapse && (
           <div
             ref={leftResizerRef}
-            className={`hidden md:block w-1 cursor-col-resize transition-all duration-200 relative group ${
+            className={`hidden md:block w-1 cursor-col-resize transition-all duration-200 relative group flex-shrink-0 ${
               isResizingLeft
                 ? "bg-blue-500 shadow-lg"
                 : "bg-gray-200 hover:bg-blue-400"
@@ -1116,7 +1195,7 @@ export default function Tickets() {
             onMouseDown={handleMouseDownLeft}
             onDoubleClick={handleDoubleClickLeft}
             style={{
-              minHeight: "100%",
+              height: "100%",
               transform: isResizingLeft ? "scaleX(2)" : "scaleX(1)",
               zIndex: isResizingLeft ? 50 : 10,
             }}
@@ -1134,16 +1213,19 @@ export default function Tickets() {
 
         {/* Middle section */}
         <div
-          className={`h-full mid flex-1 ${
-            isResizingLeft || isResizingRight
+          className={`h-full mid flex-1 flex flex-col min-w-0 ${
+            isResizingLeft || isResizingRight || isResizingTyping
               ? "transition-none"
               : "transition-all duration-200 ease-out"
           }`}
           style={{
-            willChange: isResizingLeft || isResizingRight ? "width" : "auto",
+            willChange:
+              isResizingLeft || isResizingRight || isResizingTyping
+                ? "width"
+                : "auto",
           }}
         >
-          <div className="p-3 md:p-4 border-b border-stroke">
+          <div className="p-3 md:p-4 border-b border-stroke flex-shrink-0">
             <div className="flex justify-between items-center mb-3">
               <h4 className="text-lg inline-flex items-center gap-2">
                 <button className="btn h-7 px-3 min-w-max font-medium text-xs capitalize text-primary border-primary">
@@ -1332,170 +1414,208 @@ export default function Tickets() {
               </Link>
             </div>
           </div>
-          <div className="flex flex-col justify-between h-[calc(100%-96px)]">
+
+          {/* Scrollable content area */}
+          <div className="flex-1 overflow-y-auto">
+            {/* Messages area */}
             <div className="p-4">
-              {chat ? (
-                <div>
-                  <div className="flex items-start gap-2  max-w-[393px] ">
-                    <div className="size-[30px] flex items-center justify-center rounded-full bg-[#FFF0EF]">
-                      <span className="uppercase font-semibold text-xs font-inter !leading-[1.5] bg-[linear-gradient(114deg,#FF6B5F_49.41%,#FFC563_110.43%)] bg-clip-text text-transparent">
-                        jc
-                      </span>
-                    </div>
-                    <div className="w-full bg-[#F7F7F7] p-3 rounded-xl">
-                      <div className="flex items-center justify-between">
-                        <h6 className="text-xs">Julien C</h6>
-                        <span className="text-xs">01/09/2025</span>
-                      </div>
-                      <p className="text-xs mt-1 text-[#0A0D14]">
-                        Amet minim mollit non deserunt ullamco est sit aliqua
-                        dolor do amet sint. Velit officia consequat duis enim
-                        velit mollit. Exercitation veniam consequat sunt nostrud
-                        amet.
-                      </p>
-                    </div>
+              <div className="space-y-4">
+                <div className="flex items-start gap-2 max-w-[393px]">
+                  <div className="size-[30px] flex items-center justify-center rounded-full bg-[#FFF0EF]">
+                    <span className="uppercase font-semibold text-xs font-inter !leading-[1.5] bg-[linear-gradient(114deg,#FF6B5F_49.41%,#FFC563_110.43%)] bg-clip-text text-transparent">
+                      jc
+                    </span>
                   </div>
-                  <div className="flex items-start flex-row-reverse  ml-auto gap-2  ">
-                    <div className="size-[30px] flex items-center justify-center rounded-full bg-[#FFF0EF] flex-none">
-                      <span className="uppercase font-semibold text-xs font-inter !leading-[1.5] bg-[linear-gradient(114deg,#FF6B5F_49.41%,#FFC563_110.43%)] bg-clip-text text-transparent">
-                        jc
-                      </span>
+                  <div className="w-full bg-[#F7F7F7] p-3 rounded-xl">
+                    <div className="flex items-center justify-between">
+                      <h6 className="text-xs">Julien C</h6>
+                      <span className="text-xs">01/09/2025</span>
                     </div>
-                    <div className="w-full p-3 bg-primary rounded-xl max-w-[393px] text-white">
-                      <div className="flex items-center justify-between">
-                        <h6 className="text-xs text-white">Julien C</h6>
-                        <span className="text-xs text-white/70">
-                          01/09/2025
-                        </span>
-                      </div>
-                      <p className="text-xs mt-1 text-white">
-                        Amet minim mollit non deserunt ullamco est sit aliqua
-                        dolor do amet sint. Velit officia consequat duis enim
-                        velit mollit. Exercitation veniam consequat sunt nostrud
-                        amet.
-                      </p>
-                    </div>
+                    <p className="text-xs mt-1 text-[#0A0D14]">
+                      Amet minim mollit non deserunt ullamco est sit aliqua
+                      dolor do amet sint. Velit officia consequat duis enim
+                      velit mollit. Exercitation veniam consequat sunt nostrud
+                      amet.
+                    </p>
                   </div>
                 </div>
-              ) : (
-                <div className="flex items-center gap-2">
+                <div className="flex items-start flex-row-reverse ml-auto gap-2">
                   <div className="size-[30px] flex items-center justify-center rounded-full bg-[#FFF0EF] flex-none">
                     <span className="uppercase font-semibold text-xs font-inter !leading-[1.5] bg-[linear-gradient(114deg,#FF6B5F_49.41%,#FFC563_110.43%)] bg-clip-text text-transparent">
                       jc
                     </span>
                   </div>
-                  <div className="w-full">
+                  <div className="w-full p-3 bg-primary rounded-xl max-w-[393px] text-white">
                     <div className="flex items-center justify-between">
-                      <h6 className="text-xs">Julien C</h6>
-                      <span className="text-xs">01/09/2025</span>
+                      <h6 className="text-xs text-white">Julien C</h6>
+                      <span className="text-xs text-white/70">01/09/2025</span>
                     </div>
-                    <p className="text-xs mt-1">
-                      Hoi Ik heb besloten dat ik de cadeaubon niet meer wil Kan
-                      je deze weghalen
+                    <p className="text-xs mt-1 text-white">
+                      Amet minim mollit non deserunt ullamco est sit aliqua
+                      dolor do amet sint. Velit officia consequat duis enim
+                      velit mollit. Exercitation veniam consequat sunt nostrud
+                      amet.
                     </p>
                   </div>
                 </div>
-              )}
-            </div>
-            <div className="p-4 pt-3 bg-[#F8F6FF]">
-              <div className="flex items-end justify-center flex-wrap md:flex-nowrap gap-4 mb-2">
-                <Dropdown
-                  className="mb-0 "
-                  btnClass="!min-w-[75px] !rounded-md !h-[34px]"
-                  placeholder=""
-                  leftIcon={mailIcon}
-                  items={mail}
-                />
-                <Dropdown
-                  className="mb-0 grow"
-                  btnClass="!min-w-[75px] !rounded-md !h-[34px] text-[#111111]/50"
-                  label="To"
-                  placeholder="Search Customer "
-                  items={SearchCustomer}
-                />
-                <Dropdown
-                  className="mb-0 grow"
-                  btnClass="!min-w-[75px] !rounded-md !h-[34px] text-[#111111]/50"
-                  label="From"
-                  placeholder="Jarvey Support "
-                  items={JarveySupport}
-                />
-              </div>
-              <div className="flex items-center gap-2 py-2.5 border-y border-stroke">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M13.1663 9.24528C13.1663 15.8035 2.83301 15.8107 2.83301 9.24528C2.83301 4.31646 7.99967 1.5 7.99967 1.5C7.99967 1.5 13.1663 4.31646 13.1663 9.24528Z"
-                    stroke="#111111"
-                    strokeOpacity="0.5"
-                    strokeWidth="1.25"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M10.4997 11.6412C10.4997 15.0066 5.49967 15.0103 5.49967 11.6412C5.49967 9.11196 7.99967 7.66667 7.99967 7.66667C7.99967 7.66667 10.4997 9.11196 10.4997 11.6412Z"
-                    stroke="#111111"
-                    strokeOpacity="0.5"
-                    strokeWidth="1.25"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <p className="max-w-[228px] text-xs !leading-[1.66] text-gray">
-                  Search Predefined Responses by name, tag body
-                </p>
-              </div>
-              <div className="pb-8 xl:pb-[90px]">
-                {!chat ? (
-                  <button
-                    onClick={() => setChat(true)}
-                    className="max-w-[228px] text-xs !leading-[1.66] text-gray my-3 hover:text-primary"
-                  >
-                    Click here to reply
-                  </button>
-                ) : (
-                  <div className="my-3">
-                    <RichTextEditor
-                      value={replyContent}
-                      onChange={handleReplyChange}
-                      placeholder="Type your reply here..."
-                      className="bg-white"
-                      minHeight="150px"
-                    />
+                <div className="flex items-start flex-row-reverse ml-auto gap-2">
+                  <div className="size-[30px] flex items-center justify-center rounded-full bg-[#FFF0EF] flex-none">
+                    <span className="uppercase font-semibold text-xs font-inter !leading-[1.5] bg-[linear-gradient(114deg,#FF6B5F_49.41%,#FFC563_110.43%)] bg-clip-text text-transparent">
+                      jc
+                    </span>
                   </div>
-                )}
-              </div>
-              <div className="flex flex-col gap-2">
-                <p>Suggest Predefined Responses</p>
-                <div className="flex items-center gap-2">
-                  <button className="btn !text-gray !rounded !bg-white !h-9 text-xs md:!text-sm">
-                    Generic: How can i help?
-                  </button>
-                  <button className="btn !text-gray !rounded !bg-white !h-9 text-xs md:!text-sm">
-                    Generic:Sign off
-                  </button>
+                  <div className="w-full p-3 bg-primary rounded-xl max-w-[393px] text-white">
+                    <div className="flex items-center justify-between">
+                      <h6 className="text-xs text-white">Julien C</h6>
+                      <span className="text-xs text-white/70">01/09/2025</span>
+                    </div>
+                    <p className="text-xs mt-1 text-white">
+                      Amet minim mollit non deserunt ullamco est sit aliqua
+                      dolor do amet sint. Velit officia consequat duis enim
+                      velit mollit. Exercitation veniam consequat sunt nostrud
+                      amet.
+                    </p>
+                  </div>
                 </div>
               </div>
-              <div className="flex items-center justify-between flex-wrap gap-2 mt-3">
-                <ul className="flex items-center gap-2">
-                  {textEditor.map((item, index) => (
-                    <li key={index}>
-                      <button className="text-[#111111]/50 hover:text-primary">
-                        {item.icon}{" "}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-                <div className="flex items-center gap-2">
-                  <button className="btn !border-primary !text-primary hover:!text-white !min-w-[unset] !px-4">
-                    Send $ Close
-                  </button>
-                  <button className="btn !min-w-[63px] !px-0 !bg-primary !text-white">
-                    Send
-                  </button>
+            </div>
+
+            {/* Vertical resize handle for typing area */}
+            <div
+              ref={typingResizerRef}
+              className={`hidden md:block h-1 cursor-row-resize transition-all duration-200 relative group ${
+                isResizingTyping
+                  ? "bg-blue-500 shadow-lg"
+                  : "bg-gray-200 hover:bg-blue-400"
+              }`}
+              onMouseDown={handleMouseDownTyping}
+              onDoubleClick={handleDoubleClickTyping}
+              style={{
+                transform: isResizingTyping ? "scaleY(2)" : "scaleY(1)",
+                zIndex: isResizingTyping ? 50 : 10,
+              }}
+              title="Drag to resize typing area • Double-click to toggle"
+            >
+              <div
+                className={`absolute inset-x-0 top-1/2 transform -translate-y-1/2 h-0.5 bg-blue-400 transition-opacity duration-200 ${
+                  isResizingTyping
+                    ? "opacity-100"
+                    : "opacity-0 group-hover:opacity-100"
+                }`}
+              />
+            </div>
+
+            {/* Typing area */}
+            <div
+              className="bg-[#F8F6FF]"
+              style={{
+                height: `${typingHeight}px`,
+                minHeight: `${MIN_TYPING_HEIGHT}px`,
+                maxHeight: `${MAX_TYPING_HEIGHT}px`,
+              }}
+            >
+              <div className="p-4 pt-3 h-full flex flex-col overflow-y-auto">
+                <div className="flex items-end justify-center flex-wrap md:flex-nowrap gap-4 mb-2">
+                  <Dropdown
+                    className="mb-0 "
+                    btnClass="!min-w-[75px] !rounded-md !h-[34px]"
+                    placeholder=""
+                    leftIcon={mailIcon}
+                    items={mail}
+                  />
+                  <Dropdown
+                    className="mb-0 grow"
+                    btnClass="!min-w-[75px] !rounded-md !h-[34px] text-[#111111]/50"
+                    label="To"
+                    placeholder="Search Customer "
+                    items={SearchCustomer}
+                  />
+                  <Dropdown
+                    className="mb-0 grow"
+                    btnClass="!min-w-[75px] !rounded-md !h-[34px] text-[#111111]/50"
+                    label="From"
+                    placeholder="Jarvey Support "
+                    items={JarveySupport}
+                  />
+                </div>
+                <div className="flex items-center gap-2 py-2.5 border-y border-stroke">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M13.1663 9.24528C13.1663 15.8035 2.83301 15.8107 2.83301 9.24528C2.83301 4.31646 7.99967 1.5 7.99967 1.5C7.99967 1.5 13.1663 4.31646 13.1663 9.24528Z"
+                      stroke="#111111"
+                      strokeOpacity="0.5"
+                      strokeWidth="1.25"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M10.4997 11.6412C10.4997 15.0066 5.49967 15.0103 5.49967 11.6412C5.49967 9.11196 7.99967 7.66667 7.99967 7.66667C7.99967 7.66667 10.4997 9.11196 10.4997 11.6412Z"
+                      stroke="#111111"
+                      strokeOpacity="0.5"
+                      strokeWidth="1.25"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <p className="max-w-[280px] text-xs !leading-[1.66] text-gray">
+                    Search Predefined Responses by name, tag body
+                  </p>
+                </div>
+                <div className="flex-1 ">
+                  {!chat ? (
+                    <button
+                      onClick={() => setChat(true)}
+                      className="max-w-[228px] text-xs !leading-[1.66] text-gray my-3 hover:text-primary"
+                    >
+                      Click here to reply
+                    </button>
+                  ) : (
+                    <div className="my-3 flex-1">
+                      <RichTextEditor
+                        value={replyContent}
+                        onChange={handleReplyChange}
+                        placeholder="Type your reply here..."
+                        className="bg-white"
+                        minHeight="120px"
+                      />
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-col gap-2 mt-auto">
+                  <p className="text-xs !leading-[1.66] text-gray">
+                    Suggest Predefined Responses
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button className="btn !text-gray !rounded !bg-white !h-9 text-xs md:!text-sm">
+                      Generic: How can i help?
+                    </button>
+                    <button className="btn !text-gray !rounded !bg-white !h-9 text-xs md:!text-sm">
+                      Generic:Sign off
+                    </button>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between flex-wrap gap-2 mt-3">
+                  <ul className="flex items-center gap-2">
+                    {textEditor.map((item, index) => (
+                      <li key={index}>
+                        <button className="text-[#111111]/50 hover:text-primary">
+                          {item.icon}{" "}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="flex items-center gap-2">
+                    <button className="btn !border-primary !text-primary hover:!text-white !min-w-[unset] !px-4">
+                      Send $ Close
+                    </button>
+                    <button className="btn !min-w-[63px] !px-0 !bg-primary !text-white">
+                      Send
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1505,7 +1625,7 @@ export default function Tickets() {
         {/* Right resize handle */}
         <div
           ref={rightResizerRef}
-          className={`hidden xl:block w-1 cursor-col-resize transition-all duration-200 relative group ${
+          className={`hidden xl:block w-1 cursor-col-resize transition-all duration-200 relative group flex-shrink-0 ${
             isResizingRight
               ? "bg-blue-500 shadow-lg"
               : "bg-gray-200 hover:bg-blue-400"
@@ -1513,7 +1633,7 @@ export default function Tickets() {
           onMouseDown={handleMouseDownRight}
           onDoubleClick={handleDoubleClickRight}
           style={{
-            minHeight: "100%",
+            height: "100%",
             transform: isResizingRight ? "scaleX(2)" : "scaleX(1)",
             zIndex: isResizingRight ? 50 : 10,
           }}
@@ -1530,17 +1650,20 @@ export default function Tickets() {
 
         {/* Right sidebar */}
         <div
-          className={`h-full overflow-y-auto md:hidden xl:block right border-l border-stroke ${
+          className={`h-full md:hidden xl:block right border-l border-stroke flex flex-col flex-shrink-0 ${
             isResizingRight
               ? "transition-none"
               : "transition-all duration-200 ease-out"
           }`}
           style={{
             width: `${rightWidth}px`,
+            minWidth: `${MIN_RIGHT_WIDTH}px`,
+            maxWidth: `${MAX_RIGHT_WIDTH}px`,
             willChange: isResizingRight ? "width" : "auto",
           }}
         >
-          <div className="">
+          {/* Right sidebar header - fixed */}
+          <div className="flex-shrink-0">
             <div className="pt-3">
               <div className="border-b border-solid border-stroke flex items-center">
                 {["Customer Details", "AI Feedback"].map((item, index) => (
@@ -1565,6 +1688,13 @@ export default function Tickets() {
                 searchClass="!mr-0"
               />
             </div>
+          </div>
+
+          {/* Right sidebar content - scrollable */}
+          <div
+            className="flex-1 overflow-y-auto"
+            style={{ maxHeight: "calc(100vh - 88px - 120px)" }}
+          >
             <div className="py-3 px-4 flex flex-col gap-3 border-b border-stroke">
               <div className="flex items-center gap-3 ">
                 <div className="size-[30px] flex items-center justify-center rounded-full bg-[#FFF0EF]">
@@ -1608,7 +1738,7 @@ export default function Tickets() {
                     </button>
                   </div>
                   {addCustomer && (
-                    <div className="absolute top-full right-0 p-4 rounded-xl bg-white shadow-[0px_4px_16px_0px_rgba(0,0,0,0.12)] min-w-[240px] ">
+                    <div className="absolute top-full right-0 p-4 rounded-xl bg-white shadow-[0px_4px_16px_0px_rgba(0,0,0,0.12)] min-w-[240px] z-10">
                       <Input
                         type="search"
                         inputClass="!h-9"
@@ -1715,40 +1845,11 @@ export default function Tickets() {
                 </button>
                 <button
                   onClick={() => setRefund(!refund)}
-                  className="btn grow !px-0 !min-w-[unset] !border-primary !text-primary hover:!text-white"
+                  className="btn grow !px-0 !min-w-[unset] !bg-primary !text-white"
                 >
                   Refund
                 </button>
               </div>
-            </div>
-            <div className="py-3 px-4 flex flex-col gap-3 border-b border-stroke">
-              <h4 className="text-xl font-bold !leading-[140%] flex items-center gap-1">
-                Snipping Address
-                <button onClick={() => setAddress(!address)}>
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M11.0415 5.20824L13.4047 2.84509C14.0555 2.19422 15.1108 2.19421 15.7617 2.84509L17.1547 4.23807C17.8055 4.88894 17.8055 5.94422 17.1547 6.59509L14.7915 8.95824M11.0415 5.20824L2.77966 13.4701C2.4671 13.7827 2.2915 14.2066 2.2915 14.6486V17.7082H5.35115C5.79318 17.7082 6.2171 17.5326 6.52966 17.2201L14.7915 8.95824M11.0415 5.20824L14.7915 8.95824"
-                      stroke="#7856FF"
-                      strokeWidth="1.25"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-              </h4>
-              <ul className="flex flex-col gap-2">
-                {snipping.map((item, index) => (
-                  <li className="flex items-center gap-1" key={index}>
-                    <p className="text-xs">{item.li}</p>
-                  </li>
-                ))}
-              </ul>
             </div>
           </div>
         </div>
