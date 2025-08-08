@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, {
+  useState,
+  useEffect,
+  useContext,
+  useRef,
+  useLayoutEffect,
+} from "react";
 import ReactDOM from "react-dom";
 import FlowBuilder, {
   NodeContext,
@@ -9,7 +15,7 @@ import Input from "./Input";
 import Dropdown from "./Dropdown";
 import "./FlowChart.css";
 
-export default function FlowChart({ onSave }) {
+export default function FlowChart({ onSave, analysisMode = false }) {
   const [nodes, setNodes] = useState([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [sidePanel, setSidePanel] = useState({
@@ -21,6 +27,22 @@ export default function FlowChart({ onSave }) {
   const [nextNodeId, setNextNodeId] = useState(3);
   const [showModal, setShowModal] = useState(false);
   const [selectedNodeForAdd, setSelectedNodeForAdd] = useState(null);
+  // Pan/zoom state for movable canvas
+  const [viewportScale, setViewportScale] = useState(1);
+  const [viewportOffset, setViewportOffset] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const panStartRef = useRef({ x: 0, y: 0 });
+  const offsetStartRef = useRef({ x: 0, y: 0 });
+  const viewportRef = useRef(null);
+  const contentRef = useRef(null);
+  const hasCenteredRef = useRef(false);
+
+  const isInteractiveElement = (el) => {
+    if (!el) return false;
+    return !!el.closest(
+      'button, a, input, textarea, select, [role="button"], [contenteditable="true"]'
+    );
+  };
 
   // Handle page leave/refresh confirmation
   useEffect(() => {
@@ -414,12 +436,12 @@ export default function FlowChart({ onSave }) {
 
     return (
       <div className="custom-line-with-plus">
-        <div className="flex flex-col items-center my-4">
-          <div className="w-0.5 h-8 bg-primary"></div>
+        <div className="flex flex-col items-center my-2">
+          <div className="w-0.5 h-4 bg-primary"></div>
           <button onClick={handlePlusClick} className="custom-plus-button">
             +
           </button>
-          <div className="w-0.5 h-8 bg-primary"></div>
+          <div className="w-0.5 h-4 bg-primary"></div>
         </div>
       </div>
     );
@@ -429,10 +451,27 @@ export default function FlowChart({ onSave }) {
   const StartNodeDisplay = () => {
     const node = useContext(NodeContext);
 
+    if (analysisMode) {
+      return (
+        <div className="flex flex-col items-center">
+          <div className="p-3 rounded-xl border border-primary text-center bg-primary/10 flex flex-col gap-1 relative z-1 mb-[6px] w-[250px]">
+            <h4 className="text-xs font-bold">{node.data.title}</h4>
+            <p className="text-[10px] text-gray">{node.data.subtitle}</p>
+            <p className="text-heading text-sm">{node.data.content}</p>
+          </div>
+
+          {/* Connecting line for analysis mode */}
+          <div className="flex flex-col items-center my-2">
+            <div className="w-0.5 h-4 bg-primary"></div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="flex flex-col items-center">
         <div
-          className="p-4 rounded-2xl border border-primary text-center bg-primary/10 flex flex-col gap-2 relative z-1 mb-[9px] cursor-pointer hover:bg-primary/20 transition-colors w-[300px]"
+          className="p-3 rounded-xl border border-primary text-center bg-primary/10 flex flex-col gap-1 relative z-1 mb-[6px] cursor-pointer hover:bg-primary/20 transition-colors w-[250px]"
           onClick={() =>
             setSidePanel({
               open: true,
@@ -442,39 +481,48 @@ export default function FlowChart({ onSave }) {
             })
           }
         >
-          <h4 className="text-sm font-bold">{node.data.title}</h4>
-          <p className="text-xs text-gray">{node.data.subtitle}</p>
-          <p className="text-heading">{node.data.content}</p>
+          <h4 className="text-xs font-bold">{node.data.title}</h4>
+          <p className="text-[10px] text-gray">{node.data.subtitle}</p>
+          <p className="text-heading text-sm">{node.data.content}</p>
         </div>
 
         {/* Plus button after START node */}
-        <div className="flex flex-col items-center my-4">
-          <div className="w-0.5 h-8 bg-primary"></div>
-          <button
-            onClick={() => {
-              setSelectedNodeForAdd(node.id);
-              setShowModal(true);
-            }}
-            className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-dark transition-colors z-10 shadow-lg"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+        {!analysisMode && (
+          <div className="flex flex-col items-center my-2">
+            <div className="w-0.5 h-4 bg-primary"></div>
+            <button
+              onClick={() => {
+                setSelectedNodeForAdd(node.id);
+                setShowModal(true);
+              }}
+              className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-dark transition-colors z-10 shadow-lg"
             >
-              <path
-                d="M8 3.33333V12.6667M3.33333 8H12.6667"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-          <div className="w-0.5 h-8 bg-primary"></div>
-        </div>
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 16 16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M8 3.33333V12.6667M3.33333 8H12.6667"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+            <div className="w-0.5 h-4 bg-primary"></div>
+          </div>
+        )}
+
+        {/* Connecting line for analysis mode */}
+        {analysisMode && (
+          <div className="flex flex-col items-center my-2">
+            <div className="w-0.5 h-4 bg-primary"></div>
+          </div>
+        )}
       </div>
     );
   };
@@ -483,11 +531,53 @@ export default function FlowChart({ onSave }) {
   const EndNodeDisplay = () => {
     const node = useContext(NodeContext);
 
+    if (analysisMode) {
+      return (
+        <div className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[250px] relative z-1 text-start">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1 py-1 px-2 rounded-lg bg-[#F7F7F7] mb-1">
+              <span className="text-heading text-[10px] font-bold">
+                {node.data.title}
+              </span>
+            </div>
+          </div>
+
+          {/* Analysis metrics for END node */}
+          <div className="grid grid-cols-3 gap-2 mt-2">
+            <div className="text-center flex flex-col gap-1">
+              <span className="text-green-600 text-[10px] font-medium">
+                Automated
+              </span>
+              <strong className="text-heading font-bold text-sm !leading-normal">
+                2
+              </strong>
+            </div>
+            <div className="text-center flex flex-col gap-1">
+              <span className="text-red-500 text-[10px] font-medium">
+                Drop off
+              </span>
+              <strong className="text-heading font-bold text-sm !leading-normal">
+                3
+              </strong>
+            </div>
+            <div className="text-center flex flex-col gap-1">
+              <span className="text-[#858585] text-[10px] font-medium">
+                Tickets
+              </span>
+              <strong className="text-heading font-bold text-sm !leading-normal">
+                0
+              </strong>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
-      <div className="p-4 rounded-2xl border border-primary bg-white flex flex-col gap-2 w-[300px] relative z-1 text-start">
+      <div className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[250px] relative z-1 text-start">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1 py-1 px-2.5 rounded-lg bg-[#F7F7F7] mb-2">
-            <span className="text-heading text-xs font-bold">
+          <div className="flex items-center gap-1 py-1 px-2 rounded-lg bg-[#F7F7F7] mb-1">
+            <span className="text-heading text-[10px] font-bold">
               {node.data.title}
             </span>
           </div>
@@ -505,95 +595,148 @@ export default function FlowChart({ onSave }) {
     const isMultipleChoice = node.data.nodeType === "multiple-choice";
     const isBranchResponse = node.data.nodeType === "branch-response";
 
+    if (analysisMode) {
+      return (
+        <div className="flex flex-col items-center">
+          <div className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[250px] relative z-1 text-start">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1 py-1 px-2 rounded-lg bg-primary/10 mb-1">
+                <span className="text-primary font-semibold text-[10px]">
+                  {node.data.title}
+                </span>
+              </div>
+            </div>
+
+            {/* Display content based on node type - No options for Multiple Choice */}
+            {isBranchResponse ? (
+              <div>
+                <span className="text-heading font-medium text-sm">
+                  {node.data.content}
+                </span>
+                <div className="mt-1 text-[10px] text-gray-500">
+                  Choice: {node.data.parentChoice}
+                </div>
+              </div>
+            ) : (
+              <span className="text-heading font-medium text-sm">
+                {node.data.content}
+              </span>
+            )}
+
+            {/* Analysis metrics for Message nodes */}
+            <div className="flex justify-center gap-4 mt-2">
+              <div className="text-center flex flex-col gap-1">
+                <span className="text-[#858585] text-[10px] font-medium">
+                  Views
+                </span>
+                <strong className="text-heading font-bold text-sm !leading-normal">
+                  -
+                </strong>
+              </div>
+              <div className="text-center flex flex-col gap-1">
+                <span className="text-red-500 text-[10px] font-medium">
+                  Drop off
+                </span>
+                <strong className="text-heading font-bold text-sm !leading-normal">
+                  -
+                </strong>
+              </div>
+            </div>
+          </div>
+
+          {/* Connecting line for analysis mode */}
+          <div className="flex flex-col items-center my-2">
+            <div className="w-0.5 h-4 bg-primary"></div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="flex flex-col items-center">
-        <div className="p-4 rounded-2xl border border-primary bg-white flex flex-col gap-2 w-[300px] relative z-1 text-start">
+        <div className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[250px] relative z-1 text-start">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1 py-1 px-2.5 rounded-lg bg-primary/10 mb-2">
-              <span className="text-primary font-semibold text-xs">
+            <div className="flex items-center gap-1 py-1 px-2 rounded-lg bg-primary/10 mb-1">
+              <span className="text-primary font-semibold text-[10px]">
                 {node.data.title}
               </span>
             </div>
-            <button onClick={() => removeNode(node)}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="21"
-                viewBox="0 0 20 21"
-                fill="none"
+            {!analysisMode && (
+              <button
+                onClick={() => removeNode(node.id)}
+                className="text-gray-400 hover:text-red-500 transition-colors p-1"
               >
-                <path
-                  d="M4.69139 16.6503L5.34004 16.6084L4.69139 16.6503ZM15.3093 16.6503L14.6606 16.6084L15.3093 16.6503ZM2.29199 4.64297C1.93301 4.64297 1.64199 4.93398 1.64199 5.29297C1.64199 5.65195 1.93301 5.94297 2.29199 5.94297V4.64297ZM17.7087 5.94297C18.0676 5.94297 18.3587 5.65195 18.3587 5.29297C18.3587 4.93398 18.0676 4.64297 17.7087 4.64297V5.94297ZM8.77533 9.45964C8.77533 9.10065 8.48431 8.80964 8.12533 8.80964C7.76634 8.80964 7.47533 9.10065 7.47533 9.45964H8.77533ZM7.47533 14.043C7.47533 14.402 7.76634 14.693 8.12533 14.693C8.48431 14.693 8.77533 14.402 8.77533 14.043H7.47533ZM12.5253 9.45964C12.5253 9.10065 12.2343 8.80964 11.8753 8.80964C11.5163 8.80964 11.2253 9.10065 11.2253 9.45964H12.5253ZM11.2253 14.043C11.2253 14.402 11.5163 14.693 11.8753 14.693C12.2343 14.693 12.5253 14.402 12.5253 14.043H11.2253ZM12.5992 5.45499C12.6887 5.80264 13.043 6.01193 13.3907 5.92245C13.7383 5.83297 13.9476 5.47861 13.8581 5.13095L12.5992 5.45499ZM3.95866 5.29297L3.31001 5.33482L4.04274 16.6921L4.69139 16.6503L5.34004 16.6084L4.60731 5.25112L3.95866 5.29297ZM6.3546 18.2096V18.8596H13.6461V18.2096V17.5596H6.3546V18.2096ZM15.3093 16.6503L15.9579 16.6921L16.6906 5.33482L16.042 5.29297L15.3933 5.25112L14.6606 16.6084L15.3093 16.6503ZM16.042 5.29297V4.64297H3.95866V5.29297V5.94297H16.042V5.29297ZM2.29199 5.29297V5.94297H3.95866V5.29297V4.64297H2.29199V5.29297ZM16.042 5.29297V5.94297H17.7087V5.29297V4.64297H16.042V5.29297ZM13.6461 18.2096V18.8596C14.8676 18.8596 15.8793 17.9111 15.9579 16.6921L15.3093 16.6503L14.6606 16.6084C14.6261 17.1434 14.1821 17.5596 13.6461 17.5596V18.2096ZM4.69139 16.6503L4.04274 16.6921C4.12138 17.9111 5.13304 18.8596 6.3546 18.8596V18.2096V17.5596C5.81852 17.5596 5.37455 17.1434 5.34004 16.6084L4.69139 16.6503ZM8.12533 9.45964H7.47533V14.043H8.12533H8.77533V9.45964H8.12533ZM11.8753 9.45964H11.2253V14.043H11.8753H12.5253V9.45964H11.8753ZM10.0003 2.79297V3.44297C11.2498 3.44297 12.3013 4.29751 12.5992 5.45499L13.2287 5.29297L13.8581 5.13095C13.416 3.41305 11.8573 2.14297 10.0003 2.14297V2.79297ZM6.77202 5.29297L7.40151 5.45499C7.69942 4.29751 8.75091 3.44297 10.0003 3.44297V2.79297V2.14297C8.14338 2.14297 6.58470 3.41305 6.14254 5.13095L6.77202 5.29297Z"
-                  fill="#111111"
-                  fillOpacity="0.7"
-                />
-              </svg>
-            </button>
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M4.69139 16.6503L5.34004 16.6084L4.69139 16.6503ZM15.3093 16.6503L14.6606 16.6084L15.3093 16.6503ZM2.29199 4.64297C1.93301 4.64297 1.64199 4.93398 1.64199 5.29297C1.64199 5.65195 1.93301 5.94297 2.29199 5.94297V4.64297ZM17.7087 5.94297C18.0676 5.94297 18.3587 5.65195 18.3587 5.29297C18.3587 4.93398 18.0676 4.64297 17.7087 4.64297V5.94297ZM8.77533 9.45964C8.77533 9.10065 8.48431 8.80964 8.12533 8.80964C7.76634 8.80964 7.47533 9.10065 7.47533 9.45964H8.77533ZM7.47533 14.043C7.47533 14.402 7.76634 14.693 8.12533 14.693C8.48431 14.693 8.77533 14.402 8.77533 14.043H7.47533ZM12.5253 9.45964C12.5253 9.10065 12.2343 8.80964 11.8753 8.80964C11.5163 8.80964 11.2253 9.10065 11.2253 9.45964H12.5253ZM11.2253 14.043C11.2253 14.402 11.5163 14.693 11.8753 14.693C12.2343 14.693 12.5253 14.402 12.5253 14.043H11.2253ZM12.5992 5.45499C12.6887 5.80264 13.043 6.01193 13.3907 5.92245C13.7383 5.83297 13.9476 5.47861 13.8581 5.13095L12.5992 5.45499ZM3.95866 5.29297L3.31001 5.33482L4.04274 16.6921L4.69139 16.6503L5.34004 16.6084L4.60731 5.25112L3.95866 5.29297ZM6.3546 18.2096V18.8596H13.6461V18.2096V17.5596H6.3546V18.2096ZM15.3093 16.6503L15.9579 16.6921L16.6906 5.33482L16.042 5.29297L15.3933 5.25112L14.6606 16.6084L15.3093 16.6503ZM16.042 5.29297V4.64297H3.95866V5.29297V5.94297H16.042V5.29297ZM2.29199 5.29297V5.94297H3.95866V5.29297V4.64297H2.29199V5.29297ZM16.042 5.29297V5.94297H17.7087V5.29297V4.64297H16.042V5.29297ZM13.6461 18.2096V18.8596C14.8676 18.8596 15.8793 17.9111 15.9579 16.6921L15.3093 16.6503L14.6606 16.6084C14.6261 17.1434 14.1821 17.5596 13.6461 17.5596V18.2096ZM4.69139 16.6503L4.04274 16.6921C4.12138 17.9111 5.13304 18.8596 6.3546 18.8596V18.2096V17.5596C5.81852 17.5596 5.37455 17.1434 5.34004 16.6084L4.69139 16.6503ZM8.12533 9.45964H7.47533V14.043H8.12533H8.77533V9.45964H8.12533ZM11.8753 9.45964H11.2253V14.043H11.8753H12.5253V9.45964H11.8753ZM10.0003 2.79297V3.44297C11.2498 3.44297 12.3013 4.29751 12.5992 5.45499L13.2287 5.29297L13.8581 5.13095C13.416 3.41305 11.8573 2.14297 10.0003 2.14297V2.79297ZM6.77202 5.29297L7.40151 5.45499C7.69942 4.29751 8.75091 3.44297 10.0003 3.44297V2.79297V2.14297C8.14338 2.14297 6.58470 3.41305 6.14254 5.13095L6.77202 5.29297Z"
+                    fill="#111111"
+                    fillOpacity="0.7"
+                  />
+                </svg>
+              </button>
+            )}
           </div>
 
-          {/* Display content based on node type */}
-          {isMultipleChoice ? (
+          {/* Display content based on node type - No options for Multiple Choice */}
+          {isBranchResponse ? (
             <div>
-              <span className="text-heading font-medium block mb-3">
+              <span className="text-heading font-medium text-sm">
                 {node.data.content}
               </span>
-              {node.data.options && (
-                <div className="space-y-2">
-                  {node.data.options.map((option, index) => (
-                    <div
-                      key={index}
-                      className="px-3 py-2 bg-gray-50 rounded-lg border text-sm"
-                    >
-                      {option}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ) : isBranchResponse ? (
-            <div>
-              <span className="text-heading font-medium">
-                {node.data.content}
-              </span>
-              <div className="mt-2 text-xs text-gray-500">
+              <div className="mt-1 text-[10px] text-gray-500">
                 Choice: {node.data.parentChoice}
               </div>
             </div>
           ) : (
-            <span className="text-heading font-medium">
+            <span className="text-heading font-medium text-sm">
               {node.data.content}
             </span>
           )}
         </div>
 
         {/* Plus button after all Message nodes (including multiple choice) */}
-        <div className="flex flex-col items-center my-4">
-          <div className="w-0.5 h-8 bg-primary"></div>
-          <button
-            onClick={() => {
-              setSelectedNodeForAdd(node.id);
-              setShowModal(true);
-            }}
-            className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-dark transition-colors z-10 shadow-lg"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+        {!analysisMode && (
+          <div className="flex flex-col items-center my-2">
+            <div className="w-0.5 h-4 bg-primary"></div>
+            <button
+              onClick={() => {
+                setSelectedNodeForAdd(node.id);
+                setShowModal(true);
+              }}
+              className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-dark transition-colors z-10 shadow-lg"
             >
-              <path
-                d="M8 3.33333V12.6667M3.33333 8H12.6667"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-          <div className="w-0.5 h-8 bg-primary"></div>
-        </div>
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 16 16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M8 3.33333V12.6667M3.33333 8H12.6667"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+            <div className="w-0.5 h-4 bg-primary"></div>
+          </div>
+        )}
+
+        {/* Connecting line for analysis mode */}
+        {analysisMode && (
+          <div className="flex flex-col items-center my-2">
+            <div className="w-0.5 h-4 bg-primary"></div>
+          </div>
+        )}
       </div>
     );
   };
@@ -890,61 +1033,92 @@ export default function FlowChart({ onSave }) {
     return (
       <div className="flex flex-col items-center w-full">
         {/* Connecting lines from multiple choice to branches */}
-        <div className="flex justify-center items-start w-full mb-4">
-          <div className="w-0.5 h-8 bg-primary"></div>
+        <div className="flex justify-center items-start w-full mb-2">
+          <div className="w-0.5 h-4 bg-primary"></div>
         </div>
 
         {/* Horizontal branch nodes */}
-        <div className="flex justify-center items-start gap-8 w-full mb-4">
+        <div className="flex justify-center items-start gap-6 w-full mb-2">
           {branches.map((branch, index) => (
             <div key={branch.id} className="flex flex-col items-center">
               {/* Individual branch node */}
-              <div className="p-4 rounded-2xl border border-primary bg-white flex flex-col gap-2 w-[250px] relative z-1 text-start">
+              <div className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[200px] relative z-1 text-start">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1 py-1 px-2.5 rounded-lg bg-primary/10 mb-2">
-                    <span className="text-primary font-semibold text-xs">
+                  <div className="flex items-center gap-1 py-1 px-2 rounded-lg bg-primary/10 mb-1">
+                    <span className="text-primary font-semibold text-[10px]">
                       {branch.data.title}
                     </span>
                   </div>
                 </div>
                 <div>
-                  <span className="text-heading font-medium">
+                  <span className="text-heading font-medium text-sm">
                     {branch.data.content}
                   </span>
-                  <div className="mt-2 text-xs text-gray-500">
+                  <div className="mt-1 text-[10px] text-gray-500">
                     Choice: {branch.data.parentChoice}
                   </div>
                 </div>
+
+                {/* Analysis metrics for branch nodes */}
+                {analysisMode && (
+                  <div className="flex justify-center gap-4 mt-2">
+                    <div className="text-center flex flex-col gap-1">
+                      <span className="text-[#858585] text-[10px] font-medium">
+                        Views
+                      </span>
+                      <strong className="text-heading font-bold text-sm !leading-normal">
+                        -
+                      </strong>
+                    </div>
+                    <div className="text-center flex flex-col gap-1">
+                      <span className="text-red-500 text-[10px] font-medium">
+                        Drop off
+                      </span>
+                      <strong className="text-heading font-bold text-sm !leading-normal">
+                        -
+                      </strong>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Plus button after each branch */}
-              <div className="flex flex-col items-center my-4">
-                <div className="w-0.5 h-8 bg-primary"></div>
-                <button
-                  onClick={() => {
-                    setSelectedNodeForAdd(branch.id);
-                    setShowModal(true);
-                  }}
-                  className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-dark transition-colors z-10 shadow-lg"
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 16 16"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
+              {!analysisMode && (
+                <div className="flex flex-col items-center my-2">
+                  <div className="w-0.5 h-4 bg-primary"></div>
+                  <button
+                    onClick={() => {
+                      setSelectedNodeForAdd(branch.id);
+                      setShowModal(true);
+                    }}
+                    className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-dark transition-colors z-10 shadow-lg"
                   >
-                    <path
-                      d="M8 3.33333V12.6667M3.33333 8H12.6667"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-                <div className="w-0.5 h-8 bg-primary"></div>
-              </div>
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M8 3.33333V12.6667M3.33333 8H12.6667"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                  <div className="w-0.5 h-4 bg-primary"></div>
+                </div>
+              )}
+
+              {/* Connecting line for analysis mode */}
+              {analysisMode && (
+                <div className="flex flex-col items-center my-2">
+                  <div className="w-0.5 h-4 bg-primary"></div>
+                </div>
+              )}
 
               {/* Show additional nodes added to this branch */}
               {branchChains[branch.id] &&
@@ -953,47 +1127,78 @@ export default function FlowChart({ onSave }) {
                     key={chainNode.id}
                     className="flex flex-col items-center"
                   >
-                    <div className="p-4 rounded-2xl border border-primary bg-white flex flex-col gap-2 w-[250px] relative z-1 text-start">
+                    <div className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[200px] relative z-1 text-start">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1 py-1 px-2.5 rounded-lg bg-primary/10 mb-2">
-                          <span className="text-primary font-semibold text-xs">
+                        <div className="flex items-center gap-1 py-1 px-2 rounded-lg bg-primary/10 mb-1">
+                          <span className="text-primary font-semibold text-[10px]">
                             {chainNode.data.title}
                           </span>
                         </div>
                       </div>
-                      <span className="text-heading font-medium">
+                      <span className="text-heading font-medium text-sm">
                         {chainNode.data.content}
                       </span>
+
+                      {/* Analysis metrics for chain nodes */}
+                      {analysisMode && (
+                        <div className="flex justify-center gap-4 mt-2">
+                          <div className="text-center flex flex-col gap-1">
+                            <span className="text-[#858585] text-[10px] font-medium">
+                              Views
+                            </span>
+                            <strong className="text-heading font-bold text-sm !leading-normal">
+                              -
+                            </strong>
+                          </div>
+                          <div className="text-center flex flex-col gap-1">
+                            <span className="text-red-500 text-[10px] font-medium">
+                              Drop off
+                            </span>
+                            <strong className="text-heading font-bold text-sm !leading-normal">
+                              -
+                            </strong>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Plus button after each chain node */}
-                    <div className="flex flex-col items-center my-4">
-                      <div className="w-0.5 h-8 bg-primary"></div>
-                      <button
-                        onClick={() => {
-                          setSelectedNodeForAdd(chainNode.id);
-                          setShowModal(true);
-                        }}
-                        className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-dark transition-colors z-10 shadow-lg"
-                      >
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 16 16"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
+                    {!analysisMode && (
+                      <div className="flex flex-col items-center my-2">
+                        <div className="w-0.5 h-4 bg-primary"></div>
+                        <button
+                          onClick={() => {
+                            setSelectedNodeForAdd(chainNode.id);
+                            setShowModal(true);
+                          }}
+                          className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-dark transition-colors z-10 shadow-lg"
                         >
-                          <path
-                            d="M8 3.33333V12.6667M3.33333 8H12.6667"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </button>
-                      <div className="w-0.5 h-8 bg-primary"></div>
-                    </div>
+                          <svg
+                            width="12"
+                            height="12"
+                            viewBox="0 0 16 16"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M8 3.33333V12.6667M3.33333 8H12.6667"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </button>
+                        <div className="w-0.5 h-4 bg-primary"></div>
+                      </div>
+                    )}
+
+                    {/* Connecting line for analysis mode */}
+                    {analysisMode && (
+                      <div className="flex flex-col items-center my-2">
+                        <div className="w-0.5 h-4 bg-primary"></div>
+                      </div>
+                    )}
                   </div>
                 ))}
 
@@ -1007,33 +1212,85 @@ export default function FlowChart({ onSave }) {
                     >
                       {/* Render the relocated node based on its type */}
                       {relocatedNode.type === "end" ? (
-                        <div className="p-4 rounded-2xl border border-primary bg-white flex flex-col gap-2 w-[250px] relative z-1 text-start">
+                        <div className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[200px] relative z-1 text-start">
                           <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-1 py-1 px-2.5 rounded-lg bg-[#F7F7F7] mb-2">
-                              <span className="text-heading text-xs font-bold">
+                            <div className="flex items-center gap-1 py-1 px-2 rounded-lg bg-[#F7F7F7] mb-1">
+                              <span className="text-heading text-[10px] font-bold">
                                 {relocatedNode.data.title}
                               </span>
                             </div>
                           </div>
+
+                          {/* Analysis metrics for relocated END node */}
+                          {analysisMode && (
+                            <div className="grid grid-cols-3 gap-2 mt-2">
+                              <div className="text-center flex flex-col gap-1">
+                                <span className="text-green-600 text-[10px] font-medium">
+                                  Automated
+                                </span>
+                                <strong className="text-heading font-bold text-sm !leading-normal">
+                                  2
+                                </strong>
+                              </div>
+                              <div className="text-center flex flex-col gap-1">
+                                <span className="text-red-500 text-[10px] font-medium">
+                                  Drop off
+                                </span>
+                                <strong className="text-heading font-bold text-sm !leading-normal">
+                                  3
+                                </strong>
+                              </div>
+                              <div className="text-center flex flex-col gap-1">
+                                <span className="text-[#858585] text-[10px] font-medium">
+                                  Tickets
+                                </span>
+                                <strong className="text-heading font-bold text-sm !leading-normal">
+                                  0
+                                </strong>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ) : (
-                        <div className="p-4 rounded-2xl border border-primary bg-white flex flex-col gap-2 w-[250px] relative z-1 text-start">
+                        <div className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[200px] relative z-1 text-start">
                           <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-1 py-1 px-2.5 rounded-lg bg-primary/10 mb-2">
-                              <span className="text-primary font-semibold text-xs">
+                            <div className="flex items-center gap-1 py-1 px-2 rounded-lg bg-primary/10 mb-1">
+                              <span className="text-primary font-semibold text-[10px]">
                                 {relocatedNode.data.title}
                               </span>
                             </div>
                           </div>
-                          <span className="text-heading font-medium">
+                          <span className="text-heading font-medium text-sm">
                             {relocatedNode.data.content}
                           </span>
+
+                          {/* Analysis metrics for relocated nodes */}
+                          {analysisMode && (
+                            <div className="flex justify-center gap-4 mt-2">
+                              <div className="text-center flex flex-col gap-1">
+                                <span className="text-[#858585] text-[10px] font-medium">
+                                  Views
+                                </span>
+                                <strong className="text-heading font-bold text-sm !leading-normal">
+                                  -
+                                </strong>
+                              </div>
+                              <div className="text-center flex flex-col gap-1">
+                                <span className="text-red-500 text-[10px] font-medium">
+                                  Drop off
+                                </span>
+                                <strong className="text-heading font-bold text-sm !leading-normal">
+                                  -
+                                </strong>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
 
                       {/* Add connecting line if not the last relocated node */}
                       {nodeIndex < relocatedNodes.length - 1 && (
-                        <div className="w-0.5 h-8 bg-primary my-2"></div>
+                        <div className="w-0.5 h-4 bg-primary my-1"></div>
                       )}
                     </div>
                   ))}
@@ -1044,14 +1301,44 @@ export default function FlowChart({ onSave }) {
               {!(index === 0 && relocatedNodes.length > 0) &&
                 (!branchChains[branch.id] ||
                   branchChains[branch.id].length === 0) && (
-                  <div className="p-4 rounded-2xl border border-primary bg-white flex flex-col gap-2 w-[250px] relative z-1 text-start">
+                  <div className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[200px] relative z-1 text-start">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1 py-1 px-2.5 rounded-lg bg-[#F7F7F7] mb-2">
-                        <span className="text-heading text-xs font-bold">
+                      <div className="flex items-center gap-1 py-1 px-2 rounded-lg bg-[#F7F7F7] mb-1">
+                        <span className="text-heading text-[10px] font-bold">
                           END
                         </span>
                       </div>
                     </div>
+
+                    {/* Analysis metrics for individual END nodes */}
+                    {analysisMode && (
+                      <div className="grid grid-cols-3 gap-2 mt-2">
+                        <div className="text-center flex flex-col gap-1">
+                          <span className="text-green-600 text-[10px] font-medium">
+                            Automated
+                          </span>
+                          <strong className="text-heading font-bold text-sm !leading-normal">
+                            2
+                          </strong>
+                        </div>
+                        <div className="text-center flex flex-col gap-1">
+                          <span className="text-red-500 text-[10px] font-medium">
+                            Drop off
+                          </span>
+                          <strong className="text-heading font-bold text-sm !leading-normal">
+                            3
+                          </strong>
+                        </div>
+                        <div className="text-center flex flex-col gap-1">
+                          <span className="text-[#858585] text-[10px] font-medium">
+                            Tickets
+                          </span>
+                          <strong className="text-heading font-bold text-sm !leading-normal">
+                            0
+                          </strong>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
             </div>
@@ -1196,23 +1483,135 @@ export default function FlowChart({ onSave }) {
     );
   };
 
-  return (
-    <div className="pb-10 md:pb-14 lg:pb-20">
-      <FlowBuilder
-        nodes={nodes}
-        onChange={handleNodesChange}
-        registerNodes={registerNodes}
-        backgroundColor="#F7F7F7"
-        layout="vertical"
-        spaceX={20}
-        spaceY={20}
-        className="flow-builder-container"
-        readonly={false}
-        customLineComponent={CustomLineComponent}
-      />
-      {renderSidePanel()}
+  // Handlers for pan and zoom on the viewport
+  const handleWheel = (event) => {
+    // Zoom on pinch (trackpad) or ctrl/meta + wheel
+    if (event.ctrlKey || event.metaKey) {
+      event.preventDefault();
+      const rect = viewportRef.current?.getBoundingClientRect();
+      const mouseX = event.clientX - (rect?.left || 0);
+      const mouseY = event.clientY - (rect?.top || 0);
+      // Convert to world coordinates
+      const worldX = (mouseX - viewportOffset.x) / viewportScale;
+      const worldY = (mouseY - viewportOffset.y) / viewportScale;
+      const delta = -event.deltaY;
+      const factor = delta > 0 ? 1.05 : 0.95;
+      const newScale = Math.min(2.5, Math.max(0.5, viewportScale * factor));
+      // Keep cursor position stable during zoom
+      const newOffsetX = mouseX - worldX * newScale;
+      const newOffsetY = mouseY - worldY * newScale;
+      setViewportScale(newScale);
+      setViewportOffset({ x: newOffsetX, y: newOffsetY });
+    }
+  };
 
-      {showModal &&
+  const handleMouseDownCapture = (event) => {
+    // Left-button drag to pan
+    if (event.button !== 0) return;
+    if (isInteractiveElement(event.target)) return; // allow UI interactions
+    setIsPanning(true);
+    panStartRef.current = { x: event.clientX, y: event.clientY };
+    offsetStartRef.current = { ...viewportOffset };
+  };
+
+  const handleMouseMove = (event) => {
+    if (!isPanning) return;
+    const dx = event.clientX - panStartRef.current.x;
+    const dy = event.clientY - panStartRef.current.y;
+    setViewportOffset({
+      x: offsetStartRef.current.x + dx,
+      y: offsetStartRef.current.y + dy,
+    });
+  };
+
+  const endPan = () => setIsPanning(false);
+
+  // Touch support for panning
+  const handleTouchStartCapture = (event) => {
+    if (event.touches.length !== 1) return;
+    if (isInteractiveElement(event.target)) return;
+    const t = event.touches[0];
+    setIsPanning(true);
+    panStartRef.current = { x: t.clientX, y: t.clientY };
+    offsetStartRef.current = { ...viewportOffset };
+  };
+
+  const handleTouchMove = (event) => {
+    if (!isPanning || event.touches.length !== 1) return;
+    const t = event.touches[0];
+    const dx = t.clientX - panStartRef.current.x;
+    const dy = t.clientY - panStartRef.current.y;
+    setViewportOffset({
+      x: offsetStartRef.current.x + dx,
+      y: offsetStartRef.current.y + dy,
+    });
+  };
+
+  const handleTouchEnd = () => setIsPanning(false);
+
+  // Center the canvas on first render
+  useLayoutEffect(() => {
+    if (hasCenteredRef.current) return;
+    const viewportEl = viewportRef.current;
+    const contentEl = contentRef.current;
+    if (!viewportEl || !contentEl) return;
+
+    // Defer to ensure sizes are computed
+    const raf = requestAnimationFrame(() => {
+      const vw = viewportEl.clientWidth;
+      const vh = viewportEl.clientHeight;
+      const cw = contentEl.offsetWidth;
+      const ch = contentEl.offsetHeight;
+      if (vw && vh && cw && ch) {
+        const offsetX = (vw - cw * viewportScale) / 2;
+        const offsetY = (vh - ch * viewportScale) / 2;
+        setViewportOffset({ x: offsetX, y: offsetY });
+        hasCenteredRef.current = true;
+      }
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [viewportScale]);
+
+  return (
+    <div
+      ref={viewportRef}
+      className="pb-6 md:pb-8 lg:pb-10 h-[600px] rounded-lg overflow-hidden"
+      onWheel={handleWheel}
+      onMouseDownCapture={handleMouseDownCapture}
+      onMouseMove={handleMouseMove}
+      onMouseUp={endPan}
+      onMouseLeave={endPan}
+      onTouchStartCapture={handleTouchStartCapture}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      style={{ cursor: isPanning ? "grabbing" : "grab", position: "relative" }}
+    >
+      <div
+        ref={contentRef}
+        style={{
+          transform: `translate(${viewportOffset.x}px, ${viewportOffset.y}px) scale(${viewportScale})`,
+          transformOrigin: "0 0",
+          width: "max-content",
+          height: "max-content",
+        }}
+      >
+        <FlowBuilder
+          nodes={nodes}
+          onChange={handleNodesChange}
+          registerNodes={registerNodes}
+          backgroundColor="#F7F7F7"
+          layout="vertical"
+          spaceX={15}
+          spaceY={10}
+          className="flow-builder-container min-h-full"
+          readonly={false}
+          customLineComponent={CustomLineComponent}
+        />
+      </div>
+      {!analysisMode && renderSidePanel()}
+
+      {!analysisMode &&
+        showModal &&
         ReactDOM.createPortal(
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
             <div className="bg-white rounded-2xl shadow-xl max-w-[500px] w-full max-h-[80vh] overflow-y-auto m-4">

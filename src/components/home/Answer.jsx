@@ -20,10 +20,12 @@ import addIcon5 from "../../assets/img/tickets/add/5.png";
 import order_logo from "../../assets/img/tickets/order_logo.png";
 import { handleChange } from "../../store/MessageSidebarCollapse";
 import { useDispatch } from "react-redux";
+import { useAvailability } from "../../contexts/AvailabilityContext";
 
 export default function Answer() {
   const dispatch = useDispatch();
   const [quantity, setQuantity] = useState(3);
+  const { isAvailable } = useAvailability();
 
   const handleDecrease = () => {
     if (quantity > 1) setQuantity(quantity - 1);
@@ -836,10 +838,16 @@ export default function Answer() {
               {chat ? (
                 <div>
                   <div className="flex items-start gap-2  max-w-[393px] ">
-                    <div className="size-[30px] flex items-center justify-center rounded-full bg-[#FFF0EF]">
+                    <div className="size-[30px] flex items-center justify-center rounded-full bg-[#FFF0EF] relative">
                       <span className="uppercase font-semibold text-xs font-inter !leading-[1.5] bg-[linear-gradient(114deg,#FF6B5F_49.41%,#FFC563_110.43%)] bg-clip-text text-transparent">
                         jc
                       </span>
+                      {/* Status dot */}
+                      <div
+                        className={`absolute bottom-0 left-0 size-2.5 rounded-full border border-white ${
+                          isAvailable ? "bg-green-500" : "bg-red-500"
+                        }`}
+                      />
                     </div>
                     <div className="w-full bg-[#F7F7F7] p-3 rounded-xl">
                       <div className="flex items-center justify-between">
@@ -855,10 +863,16 @@ export default function Answer() {
                     </div>
                   </div>
                   <div className="flex items-start flex-row-reverse  ml-auto gap-2  ">
-                    <div className="size-[30px] flex items-center justify-center rounded-full bg-[#FFF0EF] flex-none">
+                    <div className="size-[30px] flex items-center justify-center rounded-full bg-[#FFF0EF] flex-none relative">
                       <span className="uppercase font-semibold text-xs font-inter !leading-[1.5] bg-[linear-gradient(114deg,#FF6B5F_49.41%,#FFC563_110.43%)] bg-clip-text text-transparent">
                         jc
                       </span>
+                      {/* Status dot */}
+                      <div
+                        className={`absolute bottom-0 left-0 size-2.5 rounded-full border border-white ${
+                          isAvailable ? "bg-green-500" : "bg-red-500"
+                        }`}
+                      />
                     </div>
                     <div className="w-full p-3 bg-primary rounded-xl max-w-[393px] text-white">
                       <div className="flex items-center justify-between">
@@ -878,10 +892,16 @@ export default function Answer() {
                 </div>
               ) : (
                 <div className="flex gap-2 min-h-[450px]">
-                  <div className="size-[30px] flex items-center justify-center rounded-full bg-[#FFF0EF] flex-none">
+                  <div className="size-[30px] flex items-center justify-center rounded-full bg-[#FFF0EF] flex-none relative">
                     <span className="uppercase font-semibold text-xs font-inter !leading-[1.5] bg-[linear-gradient(114deg,#FF6B5F_49.41%,#FFC563_110.43%)] bg-clip-text text-transparent">
                       jc
                     </span>
+                    {/* Status dot */}
+                    <div
+                      className={`absolute bottom-0 left-0 size-2.5 rounded-full border border-white ${
+                        isAvailable ? "bg-green-500" : "bg-red-500"
+                      }`}
+                    />
                   </div>
                   <div className="w-full">
                     <div className="flex items-center justify-between">
@@ -1679,7 +1699,7 @@ export default function Answer() {
                   </label>
                   <p className="text-xs mt-1">
                     The claimed quantity will be restocked back to your store.
-                    Note that custom items can’t be restocked.
+                    Note that custom items can't be restocked.
                   </p>
                 </div>
               </div>

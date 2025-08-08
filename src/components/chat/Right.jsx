@@ -62,22 +62,26 @@ export default function Right({ heightMinus, className, chatConfig, chatTab }) {
   // Get dynamic values from chatConfig with fallbacks
   const chatTitle = chatConfig?.chatTitle || "Chat Title";
   const mainColor = chatConfig?.mainColor || "#7856FF";
+  const conversionColor = chatConfig?.conversionColor || "#FE4234";
   const launcherLabel = chatConfig?.launcherLabel || "Chat with us";
+  const launcherType = chatConfig?.launcherType || "Icon";
   const font = chatConfig?.font || "Inter";
   const showBotLabel = chatConfig?.showBotLabel || false;
   const backgroundStyle = chatConfig?.backgroundStyle || "Gradient";
 
-  // Get welcome message based on business hours
+  // Get welcome message based on business hours with sensible fallbacks
   const welcomeMessage =
     chatTab === "During Business hours"
       ? chatConfig?.welcomeMessageDuringHours ||
+        chatConfig?.welcomeMessage ||
         "We will replay in a few moments."
       : chatConfig?.welcomeMessageOutsideHours ||
+        chatConfig?.welcomeMessage ||
         "We are currently offline. Leave us a message and we'll get back to you.";
 
   // Dynamic styles based on configuration
   const headerStyle = {
-    background: chatTab === "During Business hours" ? "#0A0D14" : "#6B7280",
+    background: conversionColor,
     fontFamily: font,
   };
 
@@ -178,6 +182,14 @@ export default function Right({ heightMinus, className, chatConfig, chatTab }) {
                 />
               </svg>
             </button>
+            {launcherType === "Icon and Label" && (
+              <span
+                className="px-3 h-[40px] inline-flex items-center rounded-lg bg-white text-sm"
+                style={{ color: mainColor, border: `1px solid ${mainColor}` }}
+              >
+                {launcherLabel}
+              </span>
+            )}
             <div className="relative z-[1] w-full">
               <input
                 type="text"

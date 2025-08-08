@@ -22,6 +22,7 @@ import addIcon5 from "../../assets/img/tickets/add/5.png";
 import order_logo from "../../assets/img/tickets/order_logo.png";
 import { handleChange } from "../../store/MessageSidebarCollapse";
 import { useDispatch, useSelector } from "react-redux";
+import { useAvailability } from "../../contexts/AvailabilityContext";
 
 export default function Tickets() {
   const dispatch = useDispatch();
@@ -1014,6 +1015,69 @@ export default function Tickets() {
     setReplyContent(content);
   };
 
+  const { isAvailable } = useAvailability();
+
+  // Refs for click-away detection
+  const moreRef = useRef(null);
+  const summariseRef = useRef(null);
+  const addCustomerRef = useRef(null);
+  const orderSearchRef = useRef(null);
+
+  // Robust global click-away using capture phase with fresh state refs
+  const openStatesRef = useRef({
+    more: false,
+    summarise: false,
+    addCustomer: false,
+    orderSearch: false,
+  });
+  useEffect(() => {
+    openStatesRef.current = {
+      more,
+      summarise,
+      addCustomer,
+      orderSearch: OrderSearch,
+    };
+  }, [more, summarise, addCustomer, OrderSearch]);
+
+  useEffect(() => {
+    const handleGlobalClickAway = (e) => {
+      const {
+        more: m,
+        summarise: s,
+        addCustomer: a,
+        orderSearch: o,
+      } = openStatesRef.current;
+      if (!m && !s && !a && !o) return;
+      const target = e.target;
+      const insideMore = moreRef.current && moreRef.current.contains(target);
+      const insideSummarise =
+        summariseRef.current && summariseRef.current.contains(target);
+      const insideAddCustomer =
+        addCustomerRef.current && addCustomerRef.current.contains(target);
+      const insideOrderSearch =
+        orderSearchRef.current && orderSearchRef.current.contains(target);
+      if (
+        insideMore ||
+        insideSummarise ||
+        insideAddCustomer ||
+        insideOrderSearch
+      )
+        return;
+      // Clicked outside all: close everything
+      if (m) setMore(false);
+      if (s) setSummarise(false);
+      if (a) setAddCustomer(false);
+      if (o) setSearchOrder(false);
+    };
+    // Capture phase to run before other handlers can stop propagation
+    document.addEventListener("click", handleGlobalClickAway, true);
+    document.addEventListener("touchstart", handleGlobalClickAway, true);
+    return () => {
+      document.removeEventListener("click", handleGlobalClickAway, true);
+      document.removeEventListener("touchstart", handleGlobalClickAway, true);
+    };
+  }, []);
+
   return (
     <>
       {/* Resize overlay for smoother interaction */}
@@ -1097,7 +1161,10 @@ export default function Tickets() {
                   {item.icon}
                 </button>
               ))}
-              <div className="relative z-[1] flex items-center flex-shrink-0">
+              <div
+                className="relative z-[1] flex items-center flex-shrink-0"
+                ref={moreRef}
+              >
                 <button
                   title="More"
                   className={`size-5 flex items-center justify-center text-[#858585] rounded-md ${
@@ -1278,7 +1345,7 @@ export default function Tickets() {
                     {item.icon}
                   </button>
                 ))}
-                <div className="relative z-[1]">
+                <div className="relative z-[1]" ref={summariseRef}>
                   <button
                     onClick={() => setSummarise(!summarise)}
                     className={`hover:bg-primary text-[#111111]/50 hover:text-white size-6 rounded-lg border border-stroke flex items-center justify-center ${
@@ -1421,10 +1488,19 @@ export default function Tickets() {
             <div className="p-4">
               <div className="space-y-4">
                 <div className="flex items-start gap-2 max-w-[393px]">
-                  <div className="size-[30px] flex items-center justify-center rounded-full bg-[#FFF0EF]">
+                  <div className="size-[30px] flex items-center justify-center rounded-full bg-[#FFF0EF] relative">
                     <span className="uppercase font-semibold text-xs font-inter !leading-[1.5] bg-[linear-gradient(114deg,#FF6B5F_49.41%,#FFC563_110.43%)] bg-clip-text text-transparent">
                       jc
                     </span>
+                    {/* Status dot */}
+                    <div
+                      style={{
+                        backgroundColor: isAvailable ? "#00FF00" : "#FF0000",
+                      }}
+                      className={`absolute bottom-0 left-0 size-2.5 rounded-full border border-white ${
+                        isAvailable ? "bg-green-500" : "bg-red-500"
+                      }`}
+                    />
                   </div>
                   <div className="w-full bg-[#F7F7F7] p-3 rounded-xl">
                     <div className="flex items-center justify-between">
@@ -1440,10 +1516,19 @@ export default function Tickets() {
                   </div>
                 </div>
                 <div className="flex items-start flex-row-reverse ml-auto gap-2">
-                  <div className="size-[30px] flex items-center justify-center rounded-full bg-[#FFF0EF] flex-none">
+                  <div className="size-[30px] flex items-center justify-center rounded-full bg-[#FFF0EF] flex-none relative">
                     <span className="uppercase font-semibold text-xs font-inter !leading-[1.5] bg-[linear-gradient(114deg,#FF6B5F_49.41%,#FFC563_110.43%)] bg-clip-text text-transparent">
                       jc
                     </span>
+                    {/* Status dot */}
+                    <div
+                      style={{
+                        backgroundColor: isAvailable ? "#00FF00" : "#FF0000",
+                      }}
+                      className={`absolute bottom-0 left-0 size-2.5 rounded-full border border-white ${
+                        isAvailable ? "bg-green-500" : "bg-red-500"
+                      }`}
+                    />
                   </div>
                   <div className="w-full p-3 bg-primary rounded-xl max-w-[393px] text-white">
                     <div className="flex items-center justify-between">
@@ -1459,10 +1544,19 @@ export default function Tickets() {
                   </div>
                 </div>
                 <div className="flex items-start flex-row-reverse ml-auto gap-2">
-                  <div className="size-[30px] flex items-center justify-center rounded-full bg-[#FFF0EF] flex-none">
+                  <div className="size-[30px] flex items-center justify-center rounded-full bg-[#FFF0EF] flex-none relative">
                     <span className="uppercase font-semibold text-xs font-inter !leading-[1.5] bg-[linear-gradient(114deg,#FF6B5F_49.41%,#FFC563_110.43%)] bg-clip-text text-transparent">
                       jc
                     </span>
+                    {/* Status dot */}
+                    <div
+                      style={{
+                        backgroundColor: isAvailable ? "#00FF00" : "#FF0000",
+                      }}
+                      className={`absolute bottom-0 left-0 size-2.5 rounded-full border border-white ${
+                        isAvailable ? "bg-green-500" : "bg-red-500"
+                      }`}
+                    />
                   </div>
                   <div className="w-full p-3 bg-primary rounded-xl max-w-[393px] text-white">
                     <div className="flex items-center justify-between">
@@ -1697,10 +1791,19 @@ export default function Tickets() {
           >
             <div className="py-3 px-4 flex flex-col gap-3 border-b border-stroke">
               <div className="flex items-center gap-3 ">
-                <div className="size-[30px] flex items-center justify-center rounded-full bg-[#FFF0EF]">
+                <div className="size-[30px] flex items-center justify-center rounded-full bg-[#FFF0EF] relative">
                   <span className="uppercase font-semibold text-xs font-inter !leading-[1.5] bg-[linear-gradient(114deg,#FF6B5F_49.41%,#FFC563_110.43%)] bg-clip-text text-transparent">
                     jc
                   </span>
+                  {/* Status dot */}
+                  <div
+                    style={{
+                      backgroundColor: isAvailable ? "#00FF00" : "#FF0000",
+                    }}
+                    className={`absolute bottom-0 left-0 size-2.5 rounded-full border border-white ${
+                      isAvailable ? "bg-green-500" : "bg-red-500"
+                    }`}
+                  />
                 </div>
                 <div className="flex items-center gap-2">
                   <h4>Julien C</h4>
@@ -1730,7 +1833,7 @@ export default function Tickets() {
                     </svg>
                   </button>
                 </div>
-                <div className="relative">
+                <div className="relative" ref={addCustomerRef}>
                   <div className="flex items-center gap-1 text-xs">
                     Customer Type:
                     <button onClick={() => setAddCustomer(!addCustomer)}>

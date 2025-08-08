@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import Switch from "../Switch";
 import { Link } from "react-router-dom";
 import Dropdown from "../Dropdown";
@@ -10,7 +10,7 @@ import img3 from "../../assets/img/help-center/test2.png";
 import img4 from "../../assets/img/help-center/test3.png";
 
 export default function SettingAutomate() {
-  const input = [
+  const initialItems = [
     {
       icon: (
         <svg
@@ -30,7 +30,7 @@ export default function SettingAutomate() {
         </svg>
       ),
       title: "Shipping policy",
-      des: "€What's your shipping policy?",
+      des: "🚚 What's your shipping policy?",
       path: (
         <svg
           width="20"
@@ -84,7 +84,7 @@ export default function SettingAutomate() {
         </svg>
       ),
       title: "Shelf life information",
-      des: "What's your products' shelf life?",
+      des: "🍎 What's your products' shelf life?",
       path: (
         <svg
           width="20"
@@ -138,7 +138,7 @@ export default function SettingAutomate() {
         </svg>
       ),
       title: "Product ingredients",
-      des: "What type of ingredients do you use?",
+      des: "🥬 What type of ingredients do you use?",
       path: (
         <svg
           width="20"
@@ -175,6 +175,33 @@ export default function SettingAutomate() {
     },
   ];
 
+  const [items, setItems] = useState(initialItems);
+  const dragIndexRef = useRef(null);
+
+  const handleDragStart = (index) => {
+    dragIndexRef.current = index;
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (index) => {
+    const from = dragIndexRef.current;
+    if (from === null || from === index) return;
+    setItems((prev) => {
+      const updated = [...prev];
+      const [moved] = updated.splice(from, 1);
+      updated.splice(index, 0, moved);
+      return updated;
+    });
+    dragIndexRef.current = null;
+  };
+
+  const handleDelete = (index) => {
+    setItems((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const Test = [
     {
       img: img,
@@ -186,18 +213,6 @@ export default function SettingAutomate() {
     },
     {
       name: "What shoe is right for me",
-    },
-    {
-      img: img2,
-      name: "What type of ingredients do you..",
-    },
-    {
-      img: img3,
-      name: "What type of ingredients do you..",
-    },
-    {
-      img: img4,
-      name: "What type of ingredients do you..",
     },
   ];
   const contact = [{ name: "Test" }, { name: "Test2" }, { name: "Test3" }];
@@ -213,15 +228,16 @@ export default function SettingAutomate() {
             customer requests.
           </p>
         </div>
-        {input.map((item, index) => (
+        {items.map((item, index) => (
           <div
-            className="px-3 py-2 border border-solid border-[#E2E4E9] rounded-2xl  mb-3"
-            key={index}
+            className="px-3 py-2 border border-solid border-[#E2E4E9] rounded-2xl  mb-3 select-none"
+            key={item.title}
+            draggable
+            onDragStart={() => handleDragStart(index)}
+            onDragOver={handleDragOver}
+            onDrop={() => handleDrop(index)}
           >
-            <div
-              className="flex items-center gap-2 justify-between"
-              key={index}
-            >
+            <div className="flex items-center gap-2 justify-between cursor-move">
               <div className="flex items-center justify-center gap-2">
                 <span>{item.icon}</span>
                 <div className="text">
@@ -234,8 +250,22 @@ export default function SettingAutomate() {
                 </div>
               </div>
               <div className="flex items-center justify-center gap-3">
-                <span className="cursor-pointer">{item.path}</span>
-                <span className="cursor-pointer">{item.icon2}</span>
+                <span
+                  className="cursor-pointer"
+                  onClick={() => {
+                    window.open(`/app/flows-details/${index + 1}`, "_blank");
+                  }}
+                >
+                  {item.path}
+                </span>
+                <button
+                  type="button"
+                  aria-label="Delete flow"
+                  onClick={() => handleDelete(index)}
+                  className="cursor-pointer hover:opacity-80"
+                >
+                  {item.icon2}
+                </button>
               </div>
             </div>
           </div>
@@ -296,15 +326,15 @@ export default function SettingAutomate() {
           />
         </div>
         <div className="mb-6 bg-[#7856FF] p-3 rounded-2xl">
-          {Test.map((item, index) => (
+          {items.map((item, index) => (
             <div
               className="p-4 bg-white border border-solid border-[#E2E4E9] rounded-xl flex items-center justify-between mb-4"
-              key={index}
+              key={`${item.title}-right`}
             >
               <div className="flex items-center gap-3">
-                <img className="flex-none" src={item.img} alt="" />
+                {/* <span>{item.icon}</span> */}
                 <h4 className="font-inter font-medium text-sm text-heading leading-[140%]">
-                  {item.name}
+                  {item.des}
                 </h4>
               </div>
               <svg

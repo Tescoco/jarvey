@@ -4,6 +4,7 @@ import {
   Navigate,
   RouterProvider,
 } from "react-router-dom";
+import { AvailabilityProvider } from "./contexts/AvailabilityContext";
 
 // all pages
 import Index from "./layouts/Index";
@@ -636,5 +637,9 @@ export default function App() {
       ],
     },
   ]);
-  return <RouterProvider router={router} />;
+  return (
+    <AvailabilityProvider>
+      <RouterProvider router={router} />
+    </AvailabilityProvider>
+  );
 }

@@ -2,8 +2,6 @@ import React from "react";
 import Checkbox from "../Checkbox";
 import Input from "../Input";
 import Dropdown from "../Dropdown";
-import message from "../../assets/img/chat/message.png";
-import chat from "../../assets/img/chat/chat-us.png";
 import { common_card } from "../../utilities/Classes";
 
 export default function Customize({ chatConfig, updateChatConfig }) {
@@ -24,6 +22,8 @@ export default function Customize({ chatConfig, updateChatConfig }) {
     { name: "Orange", color: "#F97316" },
     { name: "Black", color: "#000000" },
   ];
+
+  const mainColor = chatConfig?.mainColor || "#7856FF";
 
   return (
     <>
@@ -76,8 +76,26 @@ export default function Customize({ chatConfig, updateChatConfig }) {
                 Icon
               </label>
             </div>
-            <button className="hover:scale-110 size-[45px]">
-              <img src={message} className="w-full h-full" alt="" />
+            <button
+              className="hover:scale-110 size-[45px] rounded-full bg-white border flex items-center justify-center transition-transform"
+              style={{ borderColor: mainColor, borderWidth: 1 }}
+              aria-label="Launcher icon preview"
+            >
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M21 12C21 16.4183 16.9706 20 12 20C10.5575 20 9.19918 19.6993 8 19.1686L3 21L4.83143 16C4.30075 14.8008 4 13.4425 4 12C4 7.58172 8.02944 4 12 4C16.9706 4 21 7.58172 21 12Z"
+                  stroke={mainColor}
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </button>
           </div>
           <div className={`${common_card} flex items-center justify-between`}>
@@ -95,9 +113,30 @@ export default function Customize({ chatConfig, updateChatConfig }) {
                 Icon and Label
               </label>
             </div>
-            <button className="hover:scale-105 w-[127px] h-[43px]">
-              <img src={chat} className="w-full h-full" alt="" />
-            </button>
+            <div
+              className="hover:scale-105 h-[43px] inline-flex items-center gap-2 px-3 rounded-lg bg-white transition-transform"
+              style={{ border: `1px solid ${mainColor}`, color: mainColor }}
+              aria-label="Launcher icon and label preview"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M21 12C21 16.4183 16.9706 20 12 20C10.5575 20 9.19918 19.6993 8 19.1686L3 21L4.83143 16C4.30075 14.8008 4 13.4425 4 12C4 7.58172 8.02944 4 12 4C16.9706 4 21 7.58172 21 12Z"
+                  stroke={mainColor}
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span className="text-sm whitespace-nowrap">
+                {chatConfig?.launcherLabel || "Chat with us"}
+              </span>
+            </div>
           </div>
         </div>
         <Input

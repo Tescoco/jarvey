@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import Input from "../../components/Input";
 import Dropdown from "../../components/Dropdown";
 import { arrow_down, deleteIcon, search } from "../../utilities/Classes";
@@ -429,15 +429,137 @@ export default function EditScenario() {
     "flex items-center gap-1 font-semibold text-primary bg-[#F7F7F7] min-h-[35px] px-3 rounded-lg";
   const [selectedItem, setSelectedItem] = useState("");
 
+  // Dynamic conditions state
+  const STATUS_OPTIONS = {
+    order: ["Open", "Archived", "Cancelled"],
+    fulfillment: [
+      "Pending",
+      "Open",
+      "Success",
+      "Cancelled",
+      "Error",
+      "Failure",
+    ],
+    shipment: [
+      "Label printed",
+      "Label purchased",
+      "Attempted delivery",
+      "Ready for pickup",
+      "Confirmed",
+      "In transit",
+      "Out for delivery",
+      "Delivered",
+      "Failure",
+    ],
+    financial: [
+      "Pending",
+      "Authorized",
+      "Partially paid",
+      "Paid",
+      "Partially refunded",
+      "Refunded",
+      "Voided",
+    ],
+  };
+
+  const PARENT_META = {
+    order: { label: "Order status" },
+    fulfillment: { label: "Fulfilment Status" },
+    shipment: { label: "Shipment status" },
+  };
+
+  // Array of groups for the top section. The first item is the main group, others are OR blocks
+  const [conditionGroups, setConditionGroups] = useState([]); // {type, statuses, op: 'one'|'empty'}
+  const [financialStatuses, setFinancialStatuses] = useState([]);
+  const [financialOp, setFinancialOp] = useState("one");
+  const [showFinancial, setShowFinancial] = useState(false);
+  const [inputs, setInputs] = useState({}); // key => input text
+  const [openSuggestKey, setOpenSuggestKey] = useState(null);
+  const conditionsContainerRef = useRef(null);
+
+  // Close suggestions on outside click; also ensures only one is open at a time
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!openSuggestKey) return;
+      const host = e.target.closest("[data-suggest-key]");
+      if (
+        !host ||
+        host.getAttribute("data-suggest-key") !== String(openSuggestKey)
+      ) {
+        setOpenSuggestKey(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [openSuggestKey]);
+
+  const keyFor = (type, index) => `${type}-${index}`;
+
+  const addGroup = (type) => {
+    setConditionGroups((prev) => [...prev, { type, statuses: [], op: "one" }]);
+  };
+
+  const removeGroup = (index) => {
+    setConditionGroups((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const addStatusToGroup = (index, type, status) => {
+    setConditionGroups((prev) =>
+      prev.map((g, i) =>
+        i === index && !g.statuses.includes(status)
+          ? { ...g, statuses: [...g.statuses, status] }
+          : g
+      )
+    );
+    const k = keyFor(type, index);
+    setInputs((p) => ({ ...p, [k]: "" }));
+    // keep suggestions open for continuous entry
+    setOpenSuggestKey(k);
+  };
+
+  const removeStatusFromGroup = (index, status) => {
+    setConditionGroups((prev) =>
+      prev.map((g, i) =>
+        i === index
+          ? { ...g, statuses: g.statuses.filter((s) => s !== status) }
+          : g
+      )
+    );
+  };
+
+  const addFinancialStatus = (status) => {
+    setFinancialStatuses((prev) =>
+      prev.includes(status) ? prev : [...prev, status]
+    );
+  };
+
+  const removeFinancialStatus = (status) => {
+    setFinancialStatuses((prev) => prev.filter((s) => s !== status));
+  };
+
+  const availableForGroup = (type, index) => {
+    const taken = new Set(conditionGroups[index]?.statuses || []);
+    return STATUS_OPTIONS[type].filter((s) => !taken.has(s));
+  };
+
+  const handleAddConditionSelect = (name) => {
+    const normalized = name?.toLowerCase();
+    if (normalized.includes("order")) return addGroup("order");
+    if (normalized.includes("fulfil")) return addGroup("fulfillment");
+    if (normalized.includes("shipment")) return addGroup("shipment");
+    if (!showFinancial) {
+      if (normalized.includes("financial")) return setShowFinancial(true);
+    } else {
+      if (normalized.includes("financial")) return setShowFinancial(false);
+    }
+  };
+
   const isOne = [
     {
       name: "Is one of",
     },
     {
-      name: "Is one of-1",
-    },
-    {
-      name: "Is one of-2",
+      name: "Is empty",
     },
   ];
 
@@ -466,182 +588,250 @@ export default function EditScenario() {
           condition.
         </p>
       </div>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" ref={conditionsContainerRef}>
         <div className="w-max 4xl:w-full">
           <div className="px-4 py-6 bg-[#F7F7F7] rounded-2xl flex flex-col gap-4">
-            <div className="flex items-center gap-3">
+            {conditionGroups.length === 0 && (
+              <div className="text-xs text-gray-500">
+                Use "Add conditions" below to add a main condition.
+              </div>
+            )}
+            {conditionGroups.map((group, index) => {
+              const k = keyFor(group.type, index);
+              const isOr = index > 0;
+              const available = availableForGroup(group.type, index);
+              const inputVal = inputs[k] || "";
+              return (
+                <div
+                  key={k}
+                  className="relative bg-white rounded-xl w-full py-2 px-3"
+                  data-suggest-key={k}
+                >
+                  <div className="flex items-center flex-wrap gap-3">
+                    {isOr && (
+                      <div className="text-xs text-white font-semibold !leading-normal bg-[#FE4333] rounded-lg px-2.5 py-[8.5px]">
+                        OR
+                      </div>
+                    )}
+                    <Dropdown
+                      className="mb-0"
+                      placeholder={`${PARENT_META[group.type].label} `}
+                      leftIcon={Shopify}
+                      btnClass="!h-[35px] min-w-[152px] max-w-max text-heading font-semibold text-primary !bg-primary/10 border-0 shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)]"
+                      items={[{ name: PARENT_META[group.type].label }]}
+                      showDropdown={false}
+                    />
+                    <Dropdown
+                      className="mb-0"
+                      placeholder={
+                        group.op === "empty" ? "Is empty" : "Is one of"
+                      }
+                      btnClass="!h-[35px] min-w-[88px] w-max text-xs !px-2 font-semibold !bg-transparent"
+                      items={isOne}
+                      onChange={(val) => {
+                        setConditionGroups((prev) =>
+                          prev.map((g, i) =>
+                            i === index
+                              ? {
+                                  ...g,
+                                  op: val.toLowerCase().includes("empty")
+                                    ? "empty"
+                                    : "one",
+                                  statuses: val.toLowerCase().includes("empty")
+                                    ? []
+                                    : g.statuses,
+                                }
+                              : g
+                          )
+                        );
+                        if (val.toLowerCase().includes("empty"))
+                          setOpenSuggestKey(null);
+                        else setOpenSuggestKey(k);
+                      }}
+                    />
+                    {group.op !== "empty" &&
+                      group.statuses.map((s) => (
+                        <div key={s} className={`${btn}`}>
+                          {s}
+                          <button
+                            onClick={() => removeStatusFromGroup(index, s)}
+                          >
+                            {close}
+                          </button>
+                        </div>
+                      ))}
+                    {group.op !== "empty" && (
+                      <input
+                        value={inputVal}
+                        onChange={(e) => {
+                          setInputs((p) => ({ ...p, [k]: e.target.value }));
+                          setOpenSuggestKey(k);
+                        }}
+                        onFocus={() => setOpenSuggestKey(k)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            const match = available.find(
+                              (s) =>
+                                s.toLowerCase() ===
+                                inputVal.trim().toLowerCase()
+                            );
+                            if (match) {
+                              e.preventDefault();
+                              addStatusToGroup(index, group.type, match);
+                            }
+                          }
+                        }}
+                        className="outline-none flex-1 min-w-[180px]"
+                        type="text"
+                        placeholder="Add statuses..."
+                      />
+                    )}
+                    <button
+                      onClick={() => removeGroup(index)}
+                      className="ml-auto text-[#FE4333] hover:text-red-600"
+                      title="Remove condition"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  {group.op !== "empty" &&
+                    openSuggestKey === k &&
+                    available.length > 0 && (
+                      <div className="absolute left-0 top-full mt-1 w-full max-w-[560px] bg-white border border-stroke rounded-lg shadow-sm p-1 z-50">
+                        {available
+                          .filter((s) =>
+                            s
+                              .toLowerCase()
+                              .includes((inputVal || "").toLowerCase())
+                          )
+                          .map((s) => (
+                            <button
+                              key={s}
+                              onMouseDown={(e) => e.preventDefault()}
+                              onClick={() =>
+                                addStatusToGroup(index, group.type, s)
+                              }
+                              className="block w-full text-left text-sm px-3 py-2 rounded hover:bg-gray-100"
+                            >
+                              {s}
+                            </button>
+                          ))}
+                      </div>
+                    )}
+                </div>
+              );
+            })}
+          </div>
+          {showFinancial && (
+            <div
+              className="relative bg-white rounded-xl w-full py-2 px-3 mt-3 flex items-center flex-wrap gap-3"
+              data-suggest-key="financial"
+            >
+              {conditionGroups.length > 0 && (
+                <div className="text-xs text-white font-semibold !leading-normal bg-[#FE4333] rounded-lg px-2.5 py-[8.5px]">
+                  AND
+                </div>
+              )}
               <Dropdown
-                className=""
+                className="mb-0"
                 placeholder={"Financial status "}
                 leftIcon={Shopify}
                 btnClass="!h-[35px] min-w-[152px] max-w-max text-heading font-semibold text-primary !bg-primary/10 border-0 shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)]"
-                items={[
-                  { name: "Financial status" },
-                  { name: "Financial status-2" },
-                ]}
-              />
-              <h6 className="text-sm font-semibold !leading-[1.42]">
-                is one of
-              </h6>
-              <div className="flex items-center gap-3 bg-white rounded-xl flex-wrap w-[calc(100%-255px)] py-2 px-3">
-                <div className={`${btn}`}>
-                  Partially Refunded<button>{close}</button>
-                </div>
-                <div className={`${btn}`}>
-                  Refunded<button>{close}</button>
-                </div>
-                <input type="text" placeholder="Add statuses" />
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Dropdown
-                className=""
-                placeholder={"Order status "}
-                leftIcon={Shopify}
-                btnClass="!h-[35px] min-w-[152px] max-w-max text-heading font-semibold text-primary !bg-primary/10 border-0 shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)]"
-                items={[{ name: "Order status" }, { name: "Order status-2" }]}
+                items={[{ name: "Financial status" }]}
+                showDropdown={false}
               />
               <Dropdown
-                className=""
-                placeholder="Is one of"
+                className="mb-0"
+                placeholder={financialOp === "empty" ? "Is empty" : "Is one of"}
                 btnClass="!h-[35px] min-w-[88px] w-max text-xs !px-2 font-semibold !bg-transparent"
                 items={isOne}
+                onChange={(val) => {
+                  const isEmpty = val.toLowerCase().includes("empty");
+                  setFinancialOp(isEmpty ? "empty" : "one");
+                  if (isEmpty) {
+                    setFinancialStatuses([]);
+                    setOpenSuggestKey(null);
+                  } else {
+                    setOpenSuggestKey("financial");
+                  }
+                }}
               />
-              <div className="flex items-center gap-3 bg-white rounded-xl flex-wrap w-[calc(100%-255px)] py-2 px-3">
-                <div className={`${btn}`}>
-                  Open<button>{close}</button>
-                </div>
-                <div className={`${btn}`}>
-                  Archived<button>{close}</button>
-                </div>
-                <div className={`${btn}`}>
-                  Cancelled<button>{close}</button>
-                </div>
-                <input type="text" placeholder="Add statuses" />
-              </div>
-            </div>
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-3">
-                <div className="text-xs text-white font-semibold !leading-normal bg-[#FE4333] rounded-lg px-2.5 py-[8.5px]">
-                  OR
-                </div>
-                <Dropdown
-                  className=""
-                  placeholder={"Fulfilment Status "}
-                  leftIcon={Shopify}
-                  btnClass="!h-[35px] min-w-[152px] max-w-max text-heading font-semibold text-primary !bg-primary/10 border-0 shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)]"
-                  items={[
-                    { name: "Fulfilment Status" },
-                    { name: "Fulfilment Status-2" },
-                  ]}
+              {financialOp !== "empty" &&
+                financialStatuses.map((s) => (
+                  <div key={s} className={`${btn}`}>
+                    {s}
+                    <button onClick={() => removeFinancialStatus(s)}>
+                      {close}
+                    </button>
+                  </div>
+                ))}
+              {financialOp !== "empty" && (
+                <input
+                  type="text"
+                  placeholder="Add statuses..."
+                  className="outline-none flex-1 min-w-[180px]"
+                  onChange={(e) =>
+                    setInputs((p) => ({ ...p, financial: e.target.value }))
+                  }
+                  onFocus={() => setOpenSuggestKey("financial")}
+                  value={inputs.financial || ""}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      const v = (inputs.financial || "").trim();
+                      const match = STATUS_OPTIONS.financial.find(
+                        (s) => s.toLowerCase() === v.toLowerCase()
+                      );
+                      if (match) {
+                        e.preventDefault();
+                        addFinancialStatus(match);
+                        setInputs((p) => ({ ...p, financial: "" }));
+                        setOpenSuggestKey("financial");
+                      }
+                    }
+                  }}
                 />
-                <Dropdown
-                  className=""
-                  placeholder="Is one of"
-                  btnClass="!h-[35px] min-w-[88px] w-max text-xs !px-2 font-semibold !bg-transparent"
-                  items={isOne}
-                />
-              </div>
-              <div className="flex items-center gap-3 bg-white rounded-xl flex-wrap w-full py-2 px-3">
-                <div className={`${btn}`}>
-                  Pending<button>{close}</button>
+              )}
+              <button
+                onClick={() => {
+                  setShowFinancial(false);
+                  setFinancialStatuses([]);
+                  setFinancialOp("one");
+                  setInputs((p) => ({ ...p, financial: "" }));
+                  setOpenSuggestKey(null);
+                }}
+                className="ml-auto text-[#FE4333] hover:text-red-600"
+                title="Remove condition"
+              >
+                ×
+              </button>
+              {financialOp !== "empty" && openSuggestKey === "financial" && (
+                <div className="absolute left-0 top-full mt-1 w-full max-w-[560px] bg-white border border-stroke rounded-lg shadow-sm p-1 z-50">
+                  {STATUS_OPTIONS.financial
+                    .filter(
+                      (s) =>
+                        !financialStatuses.includes(s) &&
+                        s
+                          .toLowerCase()
+                          .includes((inputs.financial || "").toLowerCase())
+                    )
+                    .map((s) => (
+                      <button
+                        key={s}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => {
+                          addFinancialStatus(s);
+                          setInputs((p) => ({ ...p, financial: "" }));
+                          setOpenSuggestKey("financial");
+                        }}
+                        className="block w-full text-left text-sm px-3 py-2 rounded hover:bg-gray-100"
+                      >
+                        {s}
+                      </button>
+                    ))}
                 </div>
-                <div className={`${btn}`}>
-                  Open<button>{close}</button>
-                </div>
-                <div className={`${btn}`}>
-                  Success<button>{close}</button>
-                </div>
-                <div className={`${btn}`}>
-                  Cancelled<button>{close}</button>
-                </div>
-                <div className={`${btn}`}>
-                  Error<button>{close}</button>
-                </div>
-                <div className={`${btn}`}>
-                  Failure<button>{close}</button>
-                </div>
-                <input type="text" placeholder="Add statuses" />
-              </div>
+              )}
             </div>
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-3">
-                <div className="text-xs text-white font-semibold !leading-normal bg-[#FE4333] rounded-lg px-2.5 py-[8.5px]">
-                  OR
-                </div>
-                <Dropdown
-                  className=""
-                  placeholder={"Shipment status  "}
-                  leftIcon={Shopify}
-                  btnClass="!h-[35px] min-w-[152px] max-w-max text-heading font-semibold text-primary !bg-primary/10 border-0 shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)]"
-                  items={[
-                    { name: "Shipment status " },
-                    { name: "Shipment status -2" },
-                  ]}
-                />
-                <Dropdown
-                  className=""
-                  placeholder="Is one of"
-                  btnClass="!h-[35px] min-w-[88px] w-max text-xs !px-2 font-semibold !bg-transparent"
-                  items={isOne}
-                />
-              </div>
-              <div className="flex items-center gap-3 bg-white rounded-xl flex-wrap w-full py-2 px-3">
-                <div className={`${btn}`}>
-                  Level Printed<button>{close}</button>
-                </div>
-                <div className={`${btn}`}>
-                  Label purchased<button>{close}</button>
-                </div>
-                <div className={`${btn}`}>
-                  Attempted delivery<button>{close}</button>
-                </div>
-                <div className={`${btn}`}>
-                  Ready for pickup<button>{close}</button>
-                </div>
-                <div className={`${btn}`}>
-                  Confirmed<button>{close}</button>
-                </div>
-                <div className={`${btn}`}>
-                  In transit<button>{close}</button>
-                </div>
-                <div className={`${btn}`}>
-                  Out of delivery<button>{close}</button>
-                </div>
-                <div className={`${btn}`}>
-                  Delivered<button>{close}</button>
-                </div>
-                <input type="text" placeholder="Add statuses" />
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="text-xs text-white font-semibold !leading-normal bg-[#FE4333] rounded-lg px-2.5 py-[8.5px]">
-              AND
-            </div>
-            <Dropdown
-              className=""
-              placeholder={"Financial status "}
-              leftIcon={Shopify}
-              btnClass="!h-[35px] min-w-[152px] max-w-max text-heading font-semibold text-primary !bg-primary/10 border-0 shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)]"
-              items={[
-                { name: "Financial status" },
-                { name: "Financial status-2" },
-              ]}
-            />
-            <h6 className="text-sm text-[#858585] font-semibold !leading-[1.42]">
-              is one of
-            </h6>
-            <div className="flex items-center gap-3 bg-white rounded-xl flex-wrap w-[calc(100%-400px)] py-2 px-3">
-              <div className={`${btn}`}>
-                Partially Refunded<button>{close}</button>
-              </div>
-              <div className={`${btn}`}>
-                Refunded<button>{close}</button>
-              </div>
-              <input type="text" placeholder="Add statuses" />
-            </div>
-          </div>
+          )}
         </div>
       </div>
       <div className="">
@@ -649,12 +839,22 @@ export default function EditScenario() {
           className=""
           placeholder={"Add conditions"}
           btnClass="min-w-[152px] max-w-max text-heading font-semibold !bg-[#F7F7F7] shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)]"
-          items={[
-            { icon: Shopify2, name: "Shopify" },
-            { name: "Order Status" },
-            { name: "Fulfilment status" },
-            { name: "Shipment Status" },
-          ]}
+          items={(() => {
+            const counts = conditionGroups.reduce((acc, g) => {
+              acc[g.type] = (acc[g.type] || 0) + 1;
+              return acc;
+            }, {});
+            const available = [];
+            if ((counts.order || 0) < 2)
+              available.push({ name: "Order Status" });
+            if ((counts.fulfillment || 0) < 2)
+              available.push({ name: "Fulfilment status" });
+            if ((counts.shipment || 0) < 2)
+              available.push({ name: "Shipment Status" });
+            if (!showFinancial) available.push({ name: "Financial status" });
+            return [{ icon: Shopify2, name: "Shopify" }, ...available];
+          })()}
+          onChange={handleAddConditionSelect}
         />
       </div>
       <h6 className="text-sm font-semibold !leading-[1.42] -mb-4">

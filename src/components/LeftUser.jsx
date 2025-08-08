@@ -3,11 +3,13 @@ import ProgressBar from "../components/ProgressBar";
 import { Link } from "react-router-dom";
 import { langList } from "../utilities/Classes";
 import Dropdown from "../components/Dropdown";
+import { useAvailability } from "../contexts/AvailabilityContext";
 
 import user_img from "../assets/img/user.png";
 import Switch from "./Switch";
 
 export default function LeftUser({ className }) {
+  const { isAvailable, setIsAvailable } = useAvailability();
   const menu = [
     {
       icon: (
@@ -173,6 +175,12 @@ export default function LeftUser({ className }) {
           className="w-full h-auto min-h-full object-cover absolute top-0 left-0"
           alt=""
         />
+        {/* Status dot */}
+        <div
+          className={`absolute bottom-0 left-0 size-3 rounded-full border-2 border-white ${
+            isAvailable ? "bg-green-500" : "bg-red-500"
+          }`}
+        />
       </div>
       <div className="flex-none grow">
         <div className="flex items-center justify-between gap-1">
@@ -286,7 +294,11 @@ export default function LeftUser({ className }) {
                   <span className="text-sm text-heading font-medium">
                     Available
                   </span>
-                  <Switch checked id="available" />
+                  <Switch
+                    checked={isAvailable}
+                    id="available"
+                    onChange={(e) => setIsAvailable(e.target.checked)}
+                  />
                 </label>
 
                 <div className="p-4 flex flex-col gap-2 max-h-[450px] overflow-y-auto">

@@ -74,7 +74,7 @@ export default function Details() {
       </defs>
     </svg>,
   ];
-  const actionsBtns = ["analysis", "editor"];
+  const actionsBtns = ["editor", "analysis"];
   const [activeActionBtn, setActiveActionBtn] = useState(actionsBtns[0]);
 
   // Handle save functionality
@@ -200,57 +200,8 @@ export default function Details() {
                   {item}
                 </button>
               ))}
-              {activeActionBtn === "analysis" && (
-                <div className="flex flex-col gap-4 absolute top-full right-0 mt-2.5 p-4 bg-white min-w-full w-[340px] rounded-xl shadow-[0px_4px_16px_0px_rgba(0,0,0,0.12)]">
-                  {/* Top row - Total starts and Automation rate */}
-                  <div className="flex items-center bg-[#F7F7F7] rounded-xl">
-                    <div className="flex-1 p-4 text-center flex flex-col gap-1 justify-center">
-                      <span className="text-[#858585] text-sm font-medium">
-                        Total starts
-                      </span>
-                      <strong className="text-heading font-bold text-2xl !leading-normal">
-                        5
-                      </strong>
-                    </div>
-                    <div className="flex-1 p-4 text-center flex flex-col gap-1 justify-center">
-                      <span className="text-[#858585] text-sm font-medium">
-                        Automation rate
-                      </span>
-                      <strong className="text-heading font-bold text-2xl !leading-normal">
-                        40%
-                      </strong>
-                    </div>
-                  </div>
-
-                  {/* Bottom row - Three metrics */}
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="text-center flex flex-col gap-1">
-                      <span className="text-green-600 text-sm font-medium">
-                        Automated
-                      </span>
-                      <strong className="text-heading font-bold text-2xl !leading-normal">
-                        2
-                      </strong>
-                    </div>
-                    <div className="text-center flex flex-col gap-1">
-                      <span className="text-red-500 text-sm font-medium">
-                        Drop off
-                      </span>
-                      <strong className="text-heading font-bold text-2xl !leading-normal">
-                        3
-                      </strong>
-                    </div>
-                    <div className="text-center flex flex-col gap-1">
-                      <span className="text-[#858585] text-sm font-medium">
-                        Tickets created
-                      </span>
-                      <strong className="text-heading font-bold text-2xl !leading-normal">
-                        0
-                      </strong>
-                    </div>
-                  </div>
-                </div>
-              )}
+              {/* Analysis dropdown removed - statistics now shown directly on flowchart nodes */}
+              {/* Editor dropdown also commented out for now */}
               {/* {activeActionBtn === "editor" && (
                 <div className="flex flex-col gap-3 absolute top-full right-0 mt-2.5 p-3 bg-white  w-[310px] rounded-xl shadow-[0px_4px_16px_0px_rgba(0,0,0,0.12)]">
                   editor
@@ -259,7 +210,10 @@ export default function Details() {
             </div>
           </div>
           <div className="overflow-x-auto w-full">
-            <FlowChart onSave={handleSave} />
+            <FlowChart
+              onSave={handleSave}
+              analysisMode={activeActionBtn === "analysis"}
+            />
           </div>
         </div>
       </MainInner>

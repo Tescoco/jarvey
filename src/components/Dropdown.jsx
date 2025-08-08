@@ -20,6 +20,7 @@ export default function Dropdown({
   value,
   popUpText,
   showPopup = false,
+  showDropdown = true,
 }) {
   const [defaultItem, setDefaultItem] = useState("");
   const [searchValue, setSearchValue] = useState("");
@@ -160,7 +161,7 @@ export default function Dropdown({
               {defaultItem.name}
             </span>
           </div>
-          {isArrow && (
+          {showDropdown && isArrow && (
             <span className={`${showDrop ? "-scale-y-100" : "scale-y-100"}`}>
               <svg
                 width="20"
@@ -177,7 +178,7 @@ export default function Dropdown({
             </span>
           )}
         </button>
-        {showDrop && (
+        {showDropdown && showDrop && (
           <div
             className={`p-2 absolute z-[1] ${
               position === "top" ? "top-full mt-1" : "bottom-full mb-1"

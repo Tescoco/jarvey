@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import MainInner from "../../components/MainInner";
 import Dropdown from "../../components/Dropdown";
 import { c_16 } from "../../utilities/Classes";
 import { search } from "../../utilities/Classes";
 import Input from "../../components/Input";
 import TableFilter from "../../components/TableFilter";
+import { useAvailability } from "../../contexts/AvailabilityContext";
 
 import addIcon1 from "../../assets/img/tickets/add/1.png";
 import addIcon2 from "../../assets/img/tickets/add/2.png";
@@ -15,6 +16,7 @@ import img from "../../assets/img/logo.svg";
 import Top from "../../layouts/Top";
 
 export default function Details() {
+  const { isAvailable } = useAvailability();
   const card = [
     {
       title: "Extend vour Goraiss trial before it ends",
@@ -476,10 +478,16 @@ export default function Details() {
           <div className="py-3 px-4 flex flex-col gap-3 border-b border-stroke">
             <div className="flex justify-between">
               <div className="flex items-center gap-3 ">
-                <div className="size-[30px] flex items-center justify-center rounded-full bg-[#FFF0EF]">
+                <div className="size-[30px] flex items-center justify-center rounded-full bg-[#FFF0EF] relative">
                   <span className="uppercase font-semibold text-xs font-inter !leading-[1.5] bg-[linear-gradient(114deg,#FF6B5F_49.41%,#FFC563_110.43%)] bg-clip-text text-transparent">
                     jc
                   </span>
+                  {/* Status dot */}
+                  <div
+                    className={`absolute bottom-0 left-0 size-2.5 rounded-full border border-white ${
+                      isAvailable ? "bg-green-500" : "bg-red-500"
+                    }`}
+                  />
                 </div>
                 <div className="flex items-center gap-2">
                   <h4 className="text-base text-heading">Romain Lapeyere</h4>
