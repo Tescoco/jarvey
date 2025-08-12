@@ -13,13 +13,35 @@ export default function GlobalTemplate() {
   });
 
   const colorOptions = [
+    // Core brand
     { name: "Primary", color: "#7856FF" },
+    // Purples / Violets
     { name: "Purple", color: "#886AFF" },
-    { name: "Green", color: "#10B981" },
-    { name: "Blue", color: "#3B82F6" },
+    { name: "Indigo", color: "#6366F1" },
+    { name: "Violet", color: "#8B5CF6" },
+    { name: "Fuchsia", color: "#D946EF" },
+    // Reds / Pinks
+    { name: "Pink", color: "#EC4899" },
+    { name: "Rose", color: "#F43F5E" },
     { name: "Red", color: "#EF4444" },
+    // Oranges / Yellows
     { name: "Orange", color: "#F97316" },
+    { name: "Amber", color: "#F59E0B" },
+    { name: "Yellow", color: "#EAB308" },
+    // Greens
+    { name: "Lime", color: "#84CC16" },
+    { name: "Green", color: "#10B981" },
+    { name: "Emerald", color: "#059669" },
+    { name: "Teal", color: "#14B8A6" },
+    // Cyans / Blues
+    { name: "Cyan", color: "#06B6D4" },
+    { name: "Sky", color: "#0EA5E9" },
+    { name: "Blue", color: "#3B82F6" },
+    // Neutrals
+    { name: "Slate", color: "#64748B" },
+    { name: "Gray", color: "#9CA3AF" },
     { name: "Black", color: "#000000" },
+    { name: "White", color: "#FFFFFF" },
   ];
 
   const updateTemplateConfig = (updates) => {

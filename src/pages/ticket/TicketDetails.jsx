@@ -1958,7 +1958,12 @@ export default function Tickets() {
         </div>
       </div>
       {modal && (
-        <Modal closeIconHide={false} innerClass="!max-w-[985px]">
+        <Modal
+          closeIconHide={false}
+          innerClass="!max-w-[985px]"
+          closeOnClick={() => setModal(false)}
+          onClick={() => setModal(false)}
+        >
           <h4 className="mb-4 text-lg md:text-xl 2xl:text-2xl">
             Duplicate order
           </h4>
@@ -2057,6 +2062,8 @@ export default function Tickets() {
           closeIconHide={false}
           innerClass="!max-w-[985px] "
           className="overflow-auto"
+          closeOnClick={() => setAddress(false)}
+          onClick={() => setAddress(false)}
         >
           <h4 className="mb-4 text-lg md:text-xl 2xl:text-2xl">Edit Address</h4>
           <div className="grid grid-cols-12 gap-3 md:gap-5 ">
@@ -2144,7 +2151,12 @@ export default function Tickets() {
         </Modal>
       )}
       {Order && (
-        <Modal closeIconHide={false} innerClass="!max-w-[985px]">
+        <Modal
+          closeIconHide={false}
+          innerClass="!max-w-[985px]"
+          closeOnClick={() => setOrder(false)}
+          onClick={() => setOrder(false)}
+        >
           <h4 className="mb-4 text-lg md:text-xl 2xl:text-2xl">Create Order</h4>
           <div className="relative z-[1]">
             <Input
@@ -2332,7 +2344,12 @@ export default function Tickets() {
         </Modal>
       )}
       {refund && (
-        <Modal closeIconHide={false} innerClass="!max-w-[985px]">
+        <Modal
+          closeIconHide={false}
+          innerClass="!max-w-[985px]"
+          closeOnClick={() => setRefund(false)}
+          onClick={() => setRefund(false)}
+        >
           <h4 className="mb-4 text-lg md:text-xl 2xl:text-2xl">Refund Order</h4>
           <div className="overflow-x-auto mb-3">
             <table className="w-max md:w-full">

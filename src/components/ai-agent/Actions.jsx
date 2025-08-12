@@ -453,13 +453,13 @@ export default function actions() {
                 <span>🔄</span>
                 Add OR
               </button>
-              <button
+              {/* <button
                 className="inline-flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
                 onClick={() => addChildNode(node.id, "then")}
               >
                 <span>⚡</span>
                 Add THEN
-              </button>
+              </button> */}
             </div>
           </div>
         )}

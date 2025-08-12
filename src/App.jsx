@@ -5,6 +5,7 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import { AvailabilityProvider } from "./contexts/AvailabilityContext";
+import { GlobalDismissProvider } from "./contexts/GlobalDismissContext";
 
 // all pages
 import Index from "./layouts/Index";
@@ -639,7 +640,9 @@ export default function App() {
   ]);
   return (
     <AvailabilityProvider>
-      <RouterProvider router={router} />
+      <GlobalDismissProvider>
+        <RouterProvider router={router} />
+      </GlobalDismissProvider>
     </AvailabilityProvider>
   );
 }

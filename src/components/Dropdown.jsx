@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import ReactDOM from "react-dom";
+import { useDismissibleDropdown } from "../hooks/useDismissible";
 
 export default function Dropdown({
   search = false,
@@ -26,6 +27,8 @@ export default function Dropdown({
   const [searchValue, setSearchValue] = useState("");
   const [popupVisible, setPopupVisible] = useState(false);
   const [pendingSelection, setPendingSelection] = useState(null);
+  const [showDrop, setShowDrop] = useState(false);
+  const triggerRef = useRef(null);
 
   useEffect(() => {
     if (value) {
@@ -47,7 +50,11 @@ export default function Dropdown({
     }
   }, [placeholder, value, items]);
 
-  const [showDrop, setShowDrop] = useState(false);
+  // Register dropdown for global dismiss
+  useDismissibleDropdown(showDrop, () => setShowDrop(false), triggerRef);
+
+  // Register confirmation popup for global dismiss (essential popup - won't auto-dismiss)
+  // No hook needed since this is handled by the portal modal's own click handler
   const handleChange = (selectedItem) => {
     if (showPopup) {
       setPendingSelection(selectedItem);
@@ -146,6 +153,7 @@ export default function Dropdown({
       )}
       <div className="relative">
         <button
+          ref={triggerRef}
           onClick={() => setShowDrop(!showDrop)}
           className={`flex items-center justify-between font-inter font-normal text-sm text-[#111111]/70 h-11 md:h-12 px-3 w-full bg-white border border-solid border-stroke focus:border-primary/50 shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)] rounded-[10px] ${btnClass}`}
         >
@@ -180,6 +188,7 @@ export default function Dropdown({
         </button>
         {showDropdown && showDrop && (
           <div
+            data-dropdown-content
             className={`p-2 absolute z-[1] ${
               position === "top" ? "top-full mt-1" : "bottom-full mb-1"
             } left-0 w-full md:max-w-[300px] bg-white border border-solid border-stroke rounded-lg max-h-[250px] overflow-y-auto flex flex-col items-start ${dropDownClass}`}
@@ -228,7 +237,10 @@ export default function Dropdown({
       {popupVisible &&
         ReactDOM.createPortal(
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-            <div className="bg-white rounded-2xl shadow-xl p-8 max-w-[400px] w-full flex flex-col items-center">
+            <div
+              data-modal-content
+              className="bg-white rounded-2xl shadow-xl p-8 max-w-[400px] w-full flex flex-col items-center"
+            >
               <h2 className="text-2xl font-bold mb-4">Confirm your account</h2>
               <p className="text-base text-gray-700 mb-6">
                 {popUpText || "Please confirm your account to proceed."}

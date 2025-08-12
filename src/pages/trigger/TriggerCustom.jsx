@@ -3,7 +3,8 @@ import Switch from "../../components/Switch";
 import Top from "../../layouts/Top";
 import { arrow_left } from "../../utilities/Classes";
 import Input from "../../components/Input";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import { useDismissibleDropdown } from "../../hooks/useDismissible";
 
 export const Alert = ({
   text,
@@ -81,17 +82,25 @@ const RuleDropdown = ({
   variant = "primary",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const triggerRef = useRef(null);
+
+  // Register dropdown for global dismiss
+  useDismissibleDropdown(isOpen, () => setIsOpen(false), triggerRef);
 
   return (
     <div className="relative">
       <Alert
+        ref={triggerRef}
         text={value || placeholder}
         variant={variant}
         rightIcon="arrow"
         onClick={() => setIsOpen(!isOpen)}
       />
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[200px] max-h-[200px] overflow-y-auto">
+        <div
+          data-dropdown-content
+          className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[200px] max-h-[200px] overflow-y-auto"
+        >
           {options.map((option, index) => (
             <button
               key={index}
@@ -503,13 +512,13 @@ export default function TriggerCustom() {
                 <span>🔄</span>
                 Add OR
               </button>
-              <button
+              {/* <button
                 className="inline-flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
                 onClick={() => addChildNode(node.id, "then")}
               >
                 <span>⚡</span>
                 Add THEN
-              </button>
+              </button> */}
             </div>
           </div>
         )}
