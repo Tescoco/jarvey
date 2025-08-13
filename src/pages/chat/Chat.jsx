@@ -61,7 +61,19 @@ export default function Chat() {
 
   return (
     <>
-      <Top title="Chat > Store 1">
+      <Top
+        title={
+          <>
+            <Link
+              to="/app/chat-settings"
+              className="text-primary underline hover:no-underline"
+            >
+              Chat
+            </Link>
+            {" > Store 1"}
+          </>
+        }
+      >
         <Dropdown
           className="mb-0"
           btnClass="text-primary !font-bold !h-[34px] !min-w-[97px] max-w-max"

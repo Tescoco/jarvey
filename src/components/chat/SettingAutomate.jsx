@@ -175,6 +175,24 @@ export default function SettingAutomate() {
     },
   ];
 
+  const subItems = [
+    {
+      img: img2,
+      name: "Track",
+      path: "#",
+    },
+    {
+      img: img3,
+      name: "Return",
+      path: "#",
+    },
+    {
+      img: img4,
+      name: "Cancel",
+      path: "#",
+    },
+  ];
+
   const [items, setItems] = useState(initialItems);
   const dragIndexRef = useRef(null);
 
@@ -217,7 +235,7 @@ export default function SettingAutomate() {
   ];
   const contact = [{ name: "Test" }, { name: "Test2" }, { name: "Test3" }];
   return (
-    <div className="Automate md:flex justify-between gap-5">
+    <div className="Automate md:flex justify-between gap-5 ">
       <div className="left mb-6 max-w-[510px] w-full">
         <div className="text mb-4 md:mb-5">
           <h2 className="text-lg text-black font-inter font-semibold !leading-[130%] mb-1">
@@ -270,7 +288,7 @@ export default function SettingAutomate() {
             </div>
           </div>
         ))}
-        <div className="flex mt-4 mb-3">
+        <div className="flex mt-4 mb-3 ml-2">
           <button className="btn shadow !text-[#7856FF] mb-[10px] !bg-transparent cursor-pointer min-w-max">
             Add Flow
           </button>
@@ -351,6 +369,33 @@ export default function SettingAutomate() {
                 />
               </svg>
             </div>
+          ))}
+          {subItems.map((item, index) => (
+            <Link
+              to={item.path || "#"}
+              className="p-4 w-full bg-white border border-solid border-[#E2E4E9] rounded-xl flex items-center justify-between mb-4 hover:bg-gray-50 transition-colors"
+              key={index}
+            >
+              <div className="flex items-center gap-3">
+                <img className="flex-none" src={item.img} alt="" />
+                <h4 className="font-inter font-medium text-sm text-heading leading-[140%]">
+                  {item.name}
+                </h4>
+              </div>
+              <svg
+                className="flex-none"
+                width="15"
+                height="16"
+                viewBox="0 0 15 16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M7.04541 13.1955C6.98902 13.2551 6.94494 13.3253 6.91568 13.402C6.88642 13.4787 6.87256 13.5605 6.87488 13.6425C6.8772 13.7246 6.89566 13.8054 6.92921 13.8803C6.96276 13.9552 7.01074 14.0228 7.07041 14.0792C7.13008 14.1356 7.20027 14.1797 7.27698 14.2089C7.35368 14.2382 7.4354 14.2521 7.51746 14.2497C7.59953 14.2474 7.68033 14.229 7.75526 14.1954C7.83019 14.1619 7.89777 14.1139 7.95416 14.0542L13.2667 8.42922C13.3764 8.31318 13.4375 8.15954 13.4375 7.99984C13.4375 7.84015 13.3764 7.68651 13.2667 7.57047L7.95416 1.94484C7.89815 1.88387 7.83058 1.83463 7.75537 1.79999C7.68017 1.76535 7.59883 1.746 7.51608 1.74306C7.43334 1.74012 7.35083 1.75365 7.27336 1.78286C7.19588 1.81208 7.12499 1.8564 7.06479 1.91324C7.00459 1.97009 6.95628 2.03833 6.92268 2.11401C6.88908 2.18968 6.87084 2.27127 6.86904 2.35405C6.86724 2.43683 6.8819 2.51915 6.91218 2.59621C6.94246 2.67327 6.98774 2.74355 7.04541 2.80297L11.9529 7.99984L7.04541 13.1955Z"
+                  fill="black"
+                />
+              </svg>
+            </Link>
           ))}
         </div>
         <button className="btn w-full shadow text-white">Live chat</button>

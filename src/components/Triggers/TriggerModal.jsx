@@ -1,8 +1,7 @@
 import React from "react";
 import Checkbox from "../Checkbox";
-import { Link } from "react-router-dom";
 
-export default function TriggerModal({ onClick }) {
+export default function TriggerModal({ onClick, onInstall, title }) {
   const Items = [
     {
       title: "INSTALL TO TARGET UP TO",
@@ -21,7 +20,7 @@ export default function TriggerModal({ onClick }) {
     <div className="p-1">
       <div className="md:flex items-center gap-4 lg:gap-5 mb-4 lg:mb-5">
         <h6 className="!font-inter mb-3 md:mb-0 text-[#0A0D14] text-lg lg:text-xl xl:text-2xl font-semibold !leading-[1.5]">
-          Tag tickets by business hour
+          {title || "Tag tickets by business hour"}
         </h6>
         <p
           className={`text-[#7856FF] bg-[rgba(120,86,255,0.10)] text-xs font-semibold !leading-[1.42] tracking-[-0.084px] rounded-md lg:rounded-lg py-[6px] px-[10px] max-w-max`}
@@ -75,9 +74,9 @@ export default function TriggerModal({ onClick }) {
         >
           Cancel
         </button>
-        <Link to="/app/triggers" className="btn !bg-[#7856FF] !text-white">
+        <button onClick={onInstall} className="btn !bg-[#7856FF] !text-white">
           Install Rule
-        </Link>
+        </button>
       </div>
     </div>
   );

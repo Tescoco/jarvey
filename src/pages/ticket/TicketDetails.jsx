@@ -53,6 +53,191 @@ export default function Tickets() {
   const MIN_TYPING_HEIGHT = 200;
   const MAX_TYPING_HEIGHT = 600;
 
+  function TableFilterCustom({
+    children,
+    className = "",
+    searchClass = "w-full md:max-w-[300px] xl:max-w-[400px]",
+    lang = false,
+    textHidden = false,
+    BtnClass,
+    csv = false,
+    hideSortDrop,
+  }) {
+    const btnClass =
+      "flex items-center gap-1 py-2 px-[10px] font-inter font-medium text-sm text-[#111]/60 bg-white border border-solid border-[#E2E4E9] rounded-lg shadow-[0px_1px_2px_0px_rgba(82,88,102,0.06)]";
+    const [sortDrop, setSortDrop] = useState(false);
+    const sorts = [
+      `Last message`,
+      `Last message`,
+      `Last Received message`,
+      `Last Received message `,
+      `Created`,
+      `Created`,
+      `Updated`,
+      `Updated`,
+    ];
+    const [defaultSort, setDefaultSort] = useState(sorts[0]);
+
+    return (
+      <div
+        className={`flex items-center justify-between flex-wrap gap-3 mb-4 md:mb-5 ${className}`}
+      >
+        <div className={`search ${searchClass} mr-auto grow-1 md:grow-0`}>
+          <Input
+            className="mb-0"
+            type="text"
+            placeholder="Search..."
+            leftIcon={search}
+            inputClass="!h-[38px]"
+          />
+        </div>
+        <div className="relative">
+          <button
+            onClick={() => {
+              setEditCustomerData({
+                name: "Jenny Wilson",
+                phone: "(+33)7 35 5 46 14",
+                email: "Wade Warren",
+                note: "",
+              });
+              setEditCustomerModalOpen(true);
+            }}
+            className={`${btnClass} ${BtnClass}`}
+            title="Edit customer"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12.0104 3.077C12.8113 2.27612 14.1106 2.27612 14.9115 3.077L16.2565 4.42201C17.0574 5.22289 17.0574 6.5222 16.2565 7.32309L8.9409 14.6387C8.63584 14.9437 8.25892 15.1627 7.84234 15.272L4.99984 16.0313C4.66263 16.1216 4.35217 15.8112 4.44247 15.474L5.20176 12.6315C5.31108 12.2149 5.53006 11.838 5.83513 11.533L12.0104 5.35767M12.0104 3.077L13.3554 4.42201M12.0104 3.077L5.83513 9.25234"
+                stroke="#888888"
+                strokeWidth="1.25"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            {!textHidden && <span className="block pr-1">Edit</span>}
+          </button>
+        </div>
+
+        {/* language */}
+        {lang && (
+          <Dropdown
+            btnClass="!h-[38px]"
+            className="mb-0 min-w-[110px]"
+            placeholder="Language"
+            items={langList}
+            dropDownClass="w-max !left-auto !right-0"
+            search={true}
+          />
+        )}
+        {/* language */}
+
+        {hideSortDrop && (
+          <div className="relative z-[2]">
+            <button
+              className={`${btnClass} ${BtnClass} ${
+                sortDrop === true && "!bg-black !text-white"
+              }`}
+              onClick={() => setSortDrop(!sortDrop)}
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M5.00133 3.95801V16.0413M5.00133 16.0413L2.5 13.5413M5.00133 16.0413L7.5 13.5413M9.79167 5.62467H16.875M13.125 14.3747H16.875M11.4583 9.99967H16.875"
+                  stroke="currentColor"
+                  strokeWidth="1.25"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              {!textHidden && (
+                <>
+                  <span className="mx-1 block">{defaultSort}</span>
+                  <svg
+                    className={`${sortDrop ? "-scale-y-100" : "scale-x-100"}`}
+                    width="10"
+                    height="6"
+                    viewBox="0 0 10 6"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M5.00005 3.87852L8.71255 0.166016L9.77305 1.22652L5.00005 5.99952L0.227051 1.22652L1.28755 0.166016L5.00005 3.87852Z"
+                      fill="#111111"
+                      fillOpacity="0.5"
+                    />
+                  </svg>
+                </>
+              )}
+            </button>
+            {sortDrop && (
+              <div className="mt-1 py-1 absolute right-0 w-max max-w-[300px] bg-white border border-solid border-stroke rounded-lg max-h-[250px] overflow-y-auto flex flex-col items-start">
+                {sorts.map((item, index) => (
+                  <span
+                    key={index}
+                    onClick={() => {
+                      setDefaultSort(item);
+                      setSortDrop(false);
+                    }}
+                    className="flex items-center gap-3 text-sm font-normal py-2 px-3 cursor-pointer text-heading hover:text-primary"
+                  >
+                    <svg
+                      className={`${index % 2 != 0 && "-rotate-180"}`}
+                      width="11"
+                      height="14"
+                      viewBox="0 0 11 14"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        clip-rule="evenodd"
+                        d="M5.12416 0.956147C5.22377 0.856661 5.3588 0.800781 5.49958 0.800781C5.64036 0.800781 5.77539 0.856661 5.875 0.956147L10.125 5.20615C10.1772 5.25478 10.2191 5.31343 10.2481 5.3786C10.2771 5.44377 10.2927 5.51411 10.294 5.58544C10.2953 5.65677 10.2821 5.72763 10.2554 5.79378C10.2287 5.85993 10.1889 5.92002 10.1385 5.97047C10.088 6.02091 10.0279 6.06068 9.96179 6.0874C9.89564 6.11412 9.82479 6.12724 9.75346 6.12598C9.68213 6.12472 9.61178 6.10911 9.54661 6.08007C9.48145 6.05104 9.4228 6.00917 9.37416 5.95698L6.03083 2.61365V12.6649C6.03083 12.8058 5.97486 12.9409 5.87523 13.0405C5.7756 13.1402 5.64048 13.1961 5.49958 13.1961C5.35868 13.1961 5.22356 13.1402 5.12393 13.0405C5.0243 12.9409 4.96833 12.8058 4.96833 12.6649V2.61365L1.625 5.95698C1.57636 6.00917 1.51771 6.05104 1.45254 6.08007C1.38738 6.10911 1.31703 6.12472 1.2457 6.12598C1.17437 6.12724 1.10351 6.11412 1.03736 6.0874C0.971215 6.06068 0.911124 6.02091 0.860677 5.97047C0.810231 5.92002 0.770462 5.85993 0.743743 5.79378C0.717024 5.72763 0.703902 5.65677 0.705161 5.58544C0.706419 5.51411 0.722032 5.44377 0.751068 5.3786C0.780104 5.31343 0.821968 5.25478 0.874163 5.20615L5.12416 0.956147Z"
+                        fill="black"
+                      />
+                    </svg>
+                    {item}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        {csv && (
+          <button className="btn min-w-[79px] gap-1 text-gray">
+            <svg
+              width="14"
+              height="18"
+              viewBox="0 0 14 18"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M10.5423 10.0417L7.58992 12.9942C7.26448 13.3196 6.73685 13.3196 6.41141 12.9942L3.45898 10.0417M7.00067 1.29175V12.9584M13.0423 16.7084H0.958984"
+                stroke="currentColor"
+                strokeWidth="1.25"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            CSV
+          </button>
+        )}
+        {children}
+      </div>
+    );
+  }
+
   // Throttle resize updates for smoother performance
   const throttledResize = useRef(null);
 
@@ -66,6 +251,13 @@ export default function Tickets() {
 
   const [activeTab2, setActiveTab2] = useState("Customer Details");
   const [addCustomer, setAddCustomer] = useState(false);
+  const [editCustomerModalOpen, setEditCustomerModalOpen] = useState(false);
+  const [editCustomerData, setEditCustomerData] = useState({
+    name: "",
+    phone: "",
+    email: "",
+    note: "",
+  });
   const [chat, setChat] = useState(false);
   const [replyContent, setReplyContent] = useState("");
 
@@ -806,6 +998,15 @@ export default function Tickets() {
 
   const [more, setMore] = useState(false);
   const [summarise, setSummarise] = useState(false);
+  // Ticket fields (See More + validation)
+  const [showMoreFields, setShowMoreFields] = useState(false);
+  const [contactReason, setContactReason] = useState("");
+  const [productField, setProductField] = useState("");
+  const [resolution, setResolution] = useState("");
+  const [showRequiredToast, setShowRequiredToast] = useState(false);
+  const [requiredToastMsg, setRequiredToastMsg] = useState(
+    "Resolution is required."
+  );
 
   const moreList = [
     `Add tag`,
@@ -822,6 +1023,43 @@ export default function Tickets() {
     `Print Ticket`,
     `Mark as spam`,
   ];
+
+  // Options for ticket fields
+  const contactReasonOptions = [
+    { name: "Shipping delay" },
+    { name: "Damaged item" },
+    { name: "Wrong item received" },
+    { name: "General inquiry" },
+  ];
+  const productOptions = [
+    { name: "Product A" },
+    { name: "Product B" },
+    { name: "Product C" },
+  ];
+  const resolutionOptions = [
+    { name: "Refund" },
+    { name: "Replacement" },
+    { name: "Provided information" },
+  ];
+
+  // Validate required ticket fields on send
+  const handleSend = (closeAfterSend = false) => {
+    if (!resolution) {
+      setRequiredToastMsg("Resolution is required.");
+      setShowRequiredToast(true);
+      setTimeout(() => setShowRequiredToast(false), 2200);
+      return;
+    }
+    // Placeholder for actual send flow
+    // ... integrate with API/send action here when available
+    console.log("Sending reply", {
+      contactReason,
+      product: productField,
+      resolution,
+      closeAfterSend,
+      replyContent,
+    });
+  };
 
   // Resize handlers
   const handleMouseDownLeft = (e) => {
@@ -1080,6 +1318,144 @@ export default function Tickets() {
 
   return (
     <>
+      {editCustomerModalOpen && (
+        <Modal
+          innerClass="max-w-[985px]"
+          onClick={() => setEditCustomerModalOpen(false)}
+          closeIconHide={false}
+        >
+          <div className="mb-4 md:mb-5">
+            <h2 className="text-2xl text-black font-inter font-semibold leading-normal">
+              Edit Customer
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-5 mb-5">
+            <div className="col-span-2 md:col-span-1">
+              <div className={`w-full`}>
+                <label
+                  htmlFor="drop_inline"
+                  className={`relative z-[1] rounded-2xl border cursor-pointer border-primary bg-primary bg-opacity-[8%] min-h-[180px] lg:min-h-[291px]  mx-auto flex items-center flex-col justify-center`}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="51"
+                    height="51"
+                    viewBox="0 0 51 51"
+                    fill="none"
+                  >
+                    <path
+                      d="M25.5003 40.0827V25.4993M25.5003 25.4993L30.7087 30.7077M25.5003 25.4993L20.292 30.7077M17.167 40.0827H15.0837C9.33069 40.0827 4.66699 35.419 4.66699 29.666C4.66699 24.3895 8.59024 20.0293 13.6788 19.3433C15.368 14.4393 20.0227 10.916 25.5003 10.916C32.4039 10.916 38.0003 16.5125 38.0003 23.416C42.6027 23.416 46.3337 27.147 46.3337 31.7493C46.3337 36.3517 42.6027 40.0827 38.0003 40.0827H33.8337"
+                      stroke="#7856FF"
+                      strokeWidth="2.67"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <span
+                    className={`mb-3 font-semibold !leading-[150%] text-[#0A0D14] text-center text-xs`}
+                  >
+                    <span className={`block text-primary`}>Upload Image</span>
+                  </span>
+                  <input type="file" id="drop_inline" className="hidden" />
+                </label>
+              </div>
+            </div>
+            <div className="col-span-2">
+              <div className="lg:gap-5 mb-3 md:mb-4 lg:mb-5">
+                <Input
+                  className="mb-1"
+                  type="text"
+                  placeholder="Type here"
+                  label="Name"
+                  required={true}
+                  value={editCustomerData.name}
+                  onChange={(e) =>
+                    setEditCustomerData({
+                      ...editCustomerData,
+                      name: e.target.value,
+                    })
+                  }
+                />
+                <label
+                  htmlFor="note_inline"
+                  className="text-sm text-heading font-semibold leading-[150%] mb-1"
+                >
+                  Note <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  id="note_inline"
+                  className="min-h-[136px] w-full py-2.5 px-3 border border-solid border-[#E2E4E9] rounded-[10px]"
+                  placeholder="Type here"
+                  value={editCustomerData.note}
+                  onChange={(e) =>
+                    setEditCustomerData({
+                      ...editCustomerData,
+                      note: e.target.value,
+                    })
+                  }
+                />
+                <div className="flex gap-2 mb-5">
+                  <div className="w-full">
+                    <Input
+                      className="mb-1 w-full"
+                      type="text"
+                      placeholder="Type here"
+                      label="Phone"
+                      required={true}
+                      value={editCustomerData.phone}
+                      onChange={(e) =>
+                        setEditCustomerData({
+                          ...editCustomerData,
+                          phone: e.target.value,
+                        })
+                      }
+                    />
+                    <a
+                      href="#"
+                      className="text-xs text-primary font-medium !leading-[150%] !underline"
+                    >
+                      + Add new
+                    </a>
+                  </div>
+                </div>
+                <div className="flex gap-2 mb-5">
+                  <div className="w-full">
+                    <Input
+                      className="mb-1 w-full"
+                      type="text"
+                      placeholder="Type here"
+                      label="Email"
+                      required={true}
+                      value={editCustomerData.email}
+                      onChange={(e) =>
+                        setEditCustomerData({
+                          ...editCustomerData,
+                          email: e.target.value,
+                        })
+                      }
+                    />
+                    <a
+                      href="#"
+                      className="text-xs text-primary font-medium !leading-[150%] !underline"
+                    >
+                      + Add new
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <button
+              className="btn text-primary border-primary"
+              onClick={() => setEditCustomerModalOpen(false)}
+            >
+              Cancel
+            </button>
+            <button className="btn bg-primary text-white">Save Changes</button>
+          </div>
+        </Modal>
+      )}
       {/* Resize overlay for smoother interaction */}
       {(isResizingLeft || isResizingRight || isResizingTyping) && (
         <div
@@ -1473,13 +1849,35 @@ export default function Tickets() {
                   </svg>
                 </span>
               </button>
-              <Link
-                to="#"
+              <button
+                type="button"
+                onClick={() => setShowMoreFields(!showMoreFields)}
                 className="text-primary font-medium text-xs md:ml-auto"
               >
-                See More
-              </Link>
+                {showMoreFields ? "See Less" : "See More"}
+              </button>
             </div>
+            {showMoreFields && (
+              <button className="font-medium text-xs flex items-center gap-1 mt-3">
+                Resolution
+                <span className="bg-primary size-5 rounded-[5px] flex items-center justify-center">
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 10 10"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M5 1.5625V5M5 5V8.4375M5 5H1.5625M5 5H8.4375"
+                      stroke="white"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
+              </button>
+            )}
           </div>
 
           {/* Scrollable content area */}
@@ -1493,14 +1891,6 @@ export default function Tickets() {
                       jc
                     </span>
                     {/* Status dot */}
-                    <div
-                      style={{
-                        backgroundColor: isAvailable ? "#00FF00" : "#FF0000",
-                      }}
-                      className={`absolute bottom-0 left-0 size-2.5 rounded-full border border-white ${
-                        isAvailable ? "bg-green-500" : "bg-red-500"
-                      }`}
-                    />
                   </div>
                   <div className="w-full bg-[#F7F7F7] p-3 rounded-xl">
                     <div className="flex items-center justify-between">
@@ -1703,10 +2093,16 @@ export default function Tickets() {
                     ))}
                   </ul>
                   <div className="flex items-center gap-2">
-                    <button className="btn !border-primary !text-primary hover:!text-white !min-w-[unset] !px-4">
+                    <button
+                      onClick={() => handleSend(true)}
+                      className="btn !border-primary !text-primary hover:!text-white !min-w-[unset] !px-4"
+                    >
                       Send $ Close
                     </button>
-                    <button className="btn !min-w-[63px] !px-0 !bg-primary !text-white">
+                    <button
+                      onClick={() => handleSend(false)}
+                      className="btn !min-w-[63px] !px-0 !bg-primary !text-white"
+                    >
                       Send
                     </button>
                   </div>
@@ -1774,7 +2170,7 @@ export default function Tickets() {
                   </button>
                 ))}
               </div>
-              <TableFilter
+              <TableFilterCustom
                 hideSortDrop={true}
                 textHidden
                 BtnClass="!p-2"
@@ -1805,12 +2201,14 @@ export default function Tickets() {
                     }`}
                   />
                 </div>
-                <div className="flex items-center gap-2">
-                  <h4>Julien C</h4>
-                  <span className="text-xs text-white font-normal !leading-[1.5] px-[5px] py-px rounded-full font-inter bg-[linear-gradient(114deg,#FF6B5F_49.41%,#FFC563_110.43%)]">
-                    ВЕТА
-                  </span>
-                </div>
+                <Link to="/app/customer/1" className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
+                    <h4>Julien C</h4>
+                    <span className="text-xs text-white font-normal !leading-[1.5] px-[5px] py-px rounded-full font-inter bg-[linear-gradient(114deg,#FF6B5F_49.41%,#FFC563_110.43%)]">
+                      ВЕТА
+                    </span>
+                  </div>
+                </Link>
               </div>
               <div className="flex items-center justify-between ">
                 <div className="flex items-center gap-1 text-xs">
@@ -1841,28 +2239,67 @@ export default function Tickets() {
                     </button>
                   </div>
                   {addCustomer && (
-                    <div className="absolute top-full right-0 p-4 rounded-xl bg-white shadow-[0px_4px_16px_0px_rgba(0,0,0,0.12)] min-w-[240px] z-10">
-                      <Input
-                        type="search"
-                        inputClass="!h-9"
-                        leftIcon={search}
-                        name="search"
-                      />
-                      <div className="flex flex-col gap-6">
-                        {customerType.map((item, index) => (
+                    <div className="absolute top-full right-0 p-4 rounded-xl bg-white shadow-[0px_4px_16px_0px_rgba(0,0,0,0.12)] min-w-[320px] z-10">
+                      <div className="grid grid-cols-1 gap-3">
+                        <Input
+                          className="mb-0"
+                          label="Name"
+                          value={editCustomerData.name}
+                          onChange={(e) =>
+                            setEditCustomerData({
+                              ...editCustomerData,
+                              name: e.target.value,
+                            })
+                          }
+                        />
+                        <Input
+                          className="mb-0"
+                          label="Phone"
+                          value={editCustomerData.phone}
+                          onChange={(e) =>
+                            setEditCustomerData({
+                              ...editCustomerData,
+                              phone: e.target.value,
+                            })
+                          }
+                        />
+                        <Input
+                          className="mb-0"
+                          label="Email"
+                          value={editCustomerData.email}
+                          onChange={(e) =>
+                            setEditCustomerData({
+                              ...editCustomerData,
+                              email: e.target.value,
+                            })
+                          }
+                        />
+                        <Input
+                          className="mb-0"
+                          type="textarea"
+                          label="Note"
+                          value={editCustomerData.note}
+                          onChange={(e) =>
+                            setEditCustomerData({
+                              ...editCustomerData,
+                              note: e.target.value,
+                            })
+                          }
+                        />
+                        <div className="flex items-center justify-end gap-2 pt-1">
                           <button
-                            onClick={() => setAddCustomer(!addCustomer)}
-                            key={index}
-                            className="flex items-center gap-2"
+                            className="btn text-primary border-primary !h-8 !min-w-[72px]"
+                            onClick={() => setAddCustomer(false)}
                           >
-                            <div className="">
-                              <img src={item.icon} alt="" />
-                            </div>
-                            <span className="text-[#0A0D14] font-semibold !leading-[140%] ">
-                              {item.text}{" "}
-                            </span>
+                            Cancel
                           </button>
-                        ))}
+                          <button
+                            className="btn bg-primary text-white !h-8 !min-w-[92px]"
+                            onClick={() => setAddCustomer(false)}
+                          >
+                            Save Changes
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -2518,6 +2955,11 @@ export default function Tickets() {
         </Modal>
       )}
       <ResizeIndicator />
+      {showRequiredToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-4 py-2 rounded-md shadow-lg z-50">
+          {requiredToastMsg}
+        </div>
+      )}
     </>
   );
 }

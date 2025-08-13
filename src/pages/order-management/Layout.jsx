@@ -53,7 +53,7 @@ export default function Layout() {
       path: "/app/order/cancel",
     },
   ];
-  const getTop = pathname.pathname.split("/order/").join("");
+  const getTop = pathname.pathname.split("/app/order/").join("");
 
   // Determine which sidebar to show based on current route
   const renderSidebar = () => {
@@ -848,17 +848,46 @@ export default function Layout() {
     >
       {/* remove /app from title */}
       <Top
-        title={
-          `Order Mangemanget ${
-            getTop === "edit-scenario"
-              ? "> Report order issue > Edit scenario"
-              : ""
-          } ${
-            getTop === "management" || getTop === "edit-scenario"
-              ? ""
-              : `> ${getTop} order ${getTop.includes("report") ? "issue" : ""}`
-          }`.split("/app/")[1]
-        }
+        title={(() => {
+          const basePath = "/app/order/management";
+          const currentPath = getTop;
+
+          if (currentPath === "edit-scenario") {
+            return (
+              <>
+                <Link
+                  to={basePath}
+                  className="text-primary underline hover:no-underline"
+                >
+                  Order Management
+                </Link>
+                {" > "}
+                <Link
+                  to="/app/order/report"
+                  className="text-primary underline hover:no-underline"
+                >
+                  Report order issue
+                </Link>
+                {" > Edit scenario"}
+              </>
+            );
+          } else if (currentPath === "management") {
+            return "Order Management";
+          } else {
+            const actionText = currentPath.includes("report") ? "issue" : "";
+            return (
+              <>
+                <Link
+                  to={basePath}
+                  className="text-primary underline hover:no-underline"
+                >
+                  Order Management
+                </Link>
+                {` > ${currentPath} order ${actionText}`}
+              </>
+            );
+          }
+        })()}
       >
         <Dropdown
           btnClass="!h-10 !text-primary"

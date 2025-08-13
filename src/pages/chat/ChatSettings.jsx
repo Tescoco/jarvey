@@ -54,7 +54,7 @@ export default function ChatSettings() {
 
   return (
     <>
-      <Top title="Chat > Store 1">
+      <Top>
         <div className="flex items-center gap-2">
           {activeTab === "Languages" && (
             <button className="btn shadow !text-white">Add Language</button>

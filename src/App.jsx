@@ -125,6 +125,8 @@ import EditScenario from "./pages/order-management/EditScenario";
 import Customers from "./pages/customer/Index";
 import CustomerDetails from "./pages/customer/Details";
 import CreateField from "./pages/ticket/CreateField";
+import FieldConditions from "./pages/ticket/FieldConditions";
+import FieldConditionCreate from "./pages/ticket/FieldConditionCreate";
 
 // Super Admin
 
@@ -288,6 +290,10 @@ export default function App() {
           path: "chat-settings",
           element: <ChatSettings />,
         },
+        // {
+        //   path: "chat-settings",
+        //   element: <ChatSettings />,
+        // },
         // ticket pages
         {
           path: "tickets",
@@ -304,6 +310,14 @@ export default function App() {
         {
           path: "create-fields",
           element: <CreateField />,
+        },
+        {
+          path: "field-conditions",
+          element: <FieldConditions />,
+        },
+        {
+          path: "field-conditions/create",
+          element: <FieldConditionCreate />,
         },
         {
           path: "ticket/:tid",

@@ -5,6 +5,7 @@ import Dropdown from "../Dropdown";
 export default function InviteYourTeam() {
   // Replace single-role selection with multi-agent onboarding state
   const [agents, setAgents] = useState([{ name: "", email: "", roleId: null }]);
+  const [openPermissions, setOpenPermissions] = useState({});
 
   const Roles = [
     {
@@ -107,6 +108,13 @@ export default function InviteYourTeam() {
     );
   };
 
+  const togglePermissions = (indexToToggle) => {
+    setOpenPermissions((prev) => ({
+      ...prev,
+      [indexToToggle]: !prev[indexToToggle],
+    }));
+  };
+
   const handleInvite = () => {
     // Here you could submit the agents array to your API
     // Filtering out completely empty rows
@@ -167,6 +175,33 @@ export default function InviteYourTeam() {
                     onChange={(val) => handleRoleChange(idx, val)}
                   />
                 </div>
+                {agent.roleId && (
+                  <div className="mt-3">
+                    <button
+                      type="button"
+                      className="text-primary text-sm font-medium"
+                      onClick={() => togglePermissions(idx)}
+                    >
+                      {openPermissions[idx]
+                        ? "Hide permissions"
+                        : "View permissions"}
+                    </button>
+                    {openPermissions[idx] && (
+                      <div className="mt-2 border border-gray-100 rounded-xl p-3 bg-gray-50">
+                        <p className="text-sm text-gray-700 font-medium mb-2">
+                          Permissions for {selectedRoleName}:
+                        </p>
+                        <ul className="list-disc pl-5 grid grid-cols-1 md:grid-cols-2 gap-y-1 text-sm text-gray-600">
+                          {Roles.find(
+                            (r) => r.id === agent.roleId
+                          )?.permissions.map((perm, pIdx) => (
+                            <li key={pIdx}>{perm}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
                 {agents.length > 1 && (
                   <div className="flex justify-end mt-3">
                     <button

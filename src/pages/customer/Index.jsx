@@ -124,13 +124,36 @@ export default function Index() {
     },
   ];
   const [editArticle, setEditArticle] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState(null);
+  const [formName, setFormName] = useState("");
+  const [formPhone, setFormPhone] = useState("");
+  const [formEmail, setFormEmail] = useState("");
+  const [formNote, setFormNote] = useState("");
+
+  const openAddCustomer = () => {
+    setEditingCustomer(null);
+    setFormName("");
+    setFormPhone("");
+    setFormEmail("");
+    setFormNote("");
+    setEditArticle(true);
+  };
+
+  const openEditCustomer = (customer) => {
+    setEditingCustomer(customer || null);
+    setFormName(customer?.name || "");
+    setFormPhone(customer?.Phone || "");
+    setFormEmail(customer?.Email || "");
+    setFormNote("");
+    setEditArticle(true);
+  };
 
   return (
     <>
       <Top title="All Customer">
         <button
           className="btn flex items-center gap-1 !bg-primary !text-white text-nowrap p-2.5 !w-[151px]"
-          onClick={() => setEditArticle(true)}
+          onClick={openAddCustomer}
         >
           <svg
             width="20"
@@ -196,7 +219,10 @@ export default function Index() {
                   </td>
                   <td className="!text-[#0A0D14] !md:text-sm !font-medium">
                     <div className="flex items-center justify-end gap-3">
-                      <Link to="" className="hover:scale-105">
+                      <button
+                        onClick={() => openEditCustomer(item)}
+                        className="hover:scale-105"
+                      >
                         <svg
                           width="20"
                           height="20"
@@ -237,7 +263,7 @@ export default function Index() {
                             </linearGradient>
                           </defs>
                         </svg>
-                      </Link>
+                      </button>
                       <button className="hover:scale-105">
                         <svg
                           width="20"
@@ -269,7 +295,7 @@ export default function Index() {
         >
           <div className="mb-4 md:mb-5">
             <h2 className="text-2xl text-black font-inter font-semibold leading-normal">
-              Create Agent
+              {editingCustomer ? "Edit Customer" : "Add New Customer"}
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-5 mb-5">
@@ -317,6 +343,8 @@ export default function Index() {
                   placeholder="Type here"
                   label="Name"
                   required={true}
+                  value={formName}
+                  onChange={(e) => setFormName(e.target.value)}
                 />
                 <label
                   htmlFor=""
@@ -327,6 +355,8 @@ export default function Index() {
                 <textarea
                   className="min-h-[136px] w-full py-2.5 px-3 border border-solid border-[#E2E4E9] rounded-[10px]"
                   placeholder="Type here"
+                  value={formNote}
+                  onChange={(e) => setFormNote(e.target.value)}
                 />
                 <div className="flex gap-2 mb-5">
                   <div className="w-full">
@@ -336,6 +366,8 @@ export default function Index() {
                       placeholder="Type here"
                       label="Phone"
                       required={true}
+                      value={formPhone}
+                      onChange={(e) => setFormPhone(e.target.value)}
                     />
                     <a
                       href=""
@@ -367,6 +399,8 @@ export default function Index() {
                       placeholder="Type here"
                       label="Email"
                       required={true}
+                      value={formEmail}
+                      onChange={(e) => setFormEmail(e.target.value)}
                     />
                     <a
                       href=""
@@ -400,7 +434,9 @@ export default function Index() {
             >
               Cancel
             </button>
-            <button className="btn bg-primary text-white">Add Agent</button>
+            <button className="btn bg-primary text-white">
+              {editingCustomer ? "Save Changes" : "Add Customer"}
+            </button>
           </div>
         </Modal>
       )}

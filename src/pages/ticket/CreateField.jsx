@@ -263,12 +263,12 @@ export default function NewTicket() {
                 {item.des}
               </p>
               {idx === 2 && (
-                <a
-                  href="#"
+                <Link
+                  to="/app/field-conditions"
                   className="text-[#7856FF] text-[13px] font-medium !leading-[1.5]"
                 >
                   Go to field conditions
-                </a>
+                </Link>
               )}
             </label>
           ))}

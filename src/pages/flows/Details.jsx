@@ -200,13 +200,47 @@ export default function Details() {
                   {item}
                 </button>
               ))}
-              {/* Analysis dropdown removed - statistics now shown directly on flowchart nodes */}
-              {/* Editor dropdown also commented out for now */}
-              {/* {activeActionBtn === "editor" && (
-                <div className="flex flex-col gap-3 absolute top-full right-0 mt-2.5 p-3 bg-white  w-[310px] rounded-xl shadow-[0px_4px_16px_0px_rgba(0,0,0,0.12)]">
-                  editor
+              {activeActionBtn === "analysis" && (
+                <div className="absolute top-full right-0 mt-2.5 w-[360px] bg-white border border-solid border-stroke rounded-xl shadow-[0px_4px_16px_0px_rgba(0,0,0,0.12)]">
+                  <div className="p-3">
+                    <div className="bg-[#F7F7F7] rounded-lg p-4">
+                      <div className="grid grid-cols-2 gap-4 text-center">
+                        <div>
+                          <p className="text-sm text-heading font-medium">
+                            Total starts
+                          </p>
+                          <p className="text-xl leading-none mt-2">-</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-heading font-medium">
+                            Automation rate
+                          </p>
+                          <div className="flex items-center justify-center gap-2 mt-2">
+                            <span>-</span>
+                            <span className="text-heading font-medium">0%</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-6 text-center mt-4">
+                      <div>
+                        <p className="text-green-700 font-medium">Automated</p>
+                        <p className="mt-2">-</p>
+                      </div>
+                      <div>
+                        <p className="text-[#FE4234] font-medium">Drop off</p>
+                        <p className="mt-2">-</p>
+                      </div>
+                      <div>
+                        <p className="text-[#6B7280] font-medium">
+                          Tickets created
+                        </p>
+                        <p className="mt-2">-</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              )} */}
+              )}
             </div>
           </div>
           <div className="overflow-x-auto w-full">

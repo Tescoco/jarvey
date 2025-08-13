@@ -24,7 +24,19 @@ export default function HelpCenterSettings() {
   const [activeTab, setActiveTab] = useState(tabBtns[0]);
   return (
     <>
-      <Top title="Help Center > Store 1">
+      <Top
+        title={
+          <>
+            <Link
+              to="/app/help-center"
+              className="text-primary underline hover:no-underline"
+            >
+              Help Center
+            </Link>
+            {" > Store 1"}
+          </>
+        }
+      >
         {(activeTab === "Publish and track" || activeTab === "Automate") && (
           <Link
             to="/app/help-center"
