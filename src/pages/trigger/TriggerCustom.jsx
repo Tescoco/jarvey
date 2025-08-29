@@ -119,12 +119,194 @@ const RuleDropdown = ({
   );
 };
 
+// Multi-select dropdown component for trigger events
+const MultiSelectTriggerDropdown = ({
+  options,
+  selectedValues,
+  onAdd,
+  onRemove,
+  placeholder,
+  variant = "primary",
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const triggerRef = useRef(null);
+
+  // Register dropdown for global dismiss
+  useDismissibleDropdown(isOpen, () => setIsOpen(false), triggerRef);
+
+  // Filter out already selected options
+  const availableOptions = options.filter(
+    (option) => !selectedValues.includes(option)
+  );
+
+  return (
+    <div className="relative">
+      <Alert
+        ref={triggerRef}
+        text={placeholder}
+        variant={variant}
+        rightIcon="arrow"
+        onClick={() => setIsOpen(!isOpen)}
+      />
+      {isOpen && availableOptions.length > 0 && (
+        <div
+          data-dropdown-content
+          className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[200px] max-h-[200px] overflow-y-auto"
+        >
+          {availableOptions.map((option, index) => (
+            <button
+              key={index}
+              className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg"
+              onClick={() => {
+                onAdd(option);
+                setIsOpen(false);
+              }}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Nested dropdown component for IF statement conditions
+const NestedConditionDropdown = ({
+  conditionFields,
+  value,
+  onChange,
+  placeholder,
+  variant = "primary",
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [currentView, setCurrentView] = useState("parent"); // 'parent' or 'child'
+  const [selectedParent, setSelectedParent] = useState(null);
+  const triggerRef = useRef(null);
+
+  // Register dropdown for global dismiss
+  useDismissibleDropdown(
+    isOpen,
+    () => {
+      setIsOpen(false);
+      setCurrentView("parent");
+      setSelectedParent(null);
+    },
+    triggerRef
+  );
+
+  const parentOptions = Object.keys(conditionFields);
+
+  const handleParentClick = (parentOption) => {
+    setSelectedParent(parentOption);
+    setCurrentView("child");
+  };
+
+  const handleBackClick = () => {
+    setCurrentView("parent");
+    setSelectedParent(null);
+  };
+
+  const handleSubOptionClick = (subOption) => {
+    onChange(`${selectedParent} > ${subOption}`);
+    setIsOpen(false);
+    setCurrentView("parent");
+    setSelectedParent(null);
+  };
+
+  return (
+    <div className="relative">
+      <Alert
+        ref={triggerRef}
+        text={value || placeholder}
+        variant={variant}
+        rightIcon="arrow"
+        onClick={() => setIsOpen(!isOpen)}
+      />
+      {isOpen && (
+        <div
+          data-dropdown-content
+          className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[200px] max-h-[300px] overflow-y-auto"
+        >
+          {currentView === "parent" ? (
+            // Parent menu
+            parentOptions.map((parentOption, index) => (
+              <button
+                key={index}
+                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg flex items-center justify-between"
+                onClick={() => handleParentClick(parentOption)}
+              >
+                {parentOption}
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="ml-2"
+                >
+                  <path
+                    d="M4.5 3L7.5 6L4.5 9"
+                    stroke="#858585"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            ))
+          ) : (
+            // Child menu
+            <>
+              <div className="px-3 py-2 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-600 flex items-center">
+                <button
+                  onClick={handleBackClick}
+                  className="mr-2 p-1 hover:bg-gray-200 rounded"
+                >
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 12 12"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="rotate-180"
+                  >
+                    <path
+                      d="M4.5 3L7.5 6L4.5 9"
+                      stroke="#858585"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+                {selectedParent}
+              </div>
+              {Object.keys(conditionFields[selectedParent]).map(
+                (subOption, subIndex) => (
+                  <button
+                    key={subIndex}
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg"
+                    onClick={() => handleSubOptionClick(subOption)}
+                  >
+                    {subOption}
+                  </button>
+                )
+              )}
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function TriggerCustom() {
   const [ruleNodes, setRuleNodes] = useState([
     {
       id: 1,
       type: "when",
-      trigger: null,
+      triggers: [], // Changed from trigger: null to triggers: []
       children: [],
     },
   ]);
@@ -155,20 +337,70 @@ export default function TriggerCustom() {
     "Delete ticket",
   ];
 
-  const conditionFields = [
-    "message from agent",
-    "ticket status",
-    "ticket priority",
-    "customer email",
-    "agent name",
-    "ticket subject",
-    "message content",
-    "customer sentiment",
-    "ticket tags",
-    "message intents",
-    "last order tracking number",
-    "date of last order",
-  ];
+  const conditionFields = {
+    Message: {
+      Body: ["contains", "does not contain", "is empty", "is not empty"],
+      Channel: ["email", "chat", "phone", "social media"],
+      "Created date": [
+        "is today",
+        "is yesterday",
+        "is this week",
+        "is this month",
+      ],
+      "From agent": ["is", "is not", "contains", "does not contain"],
+      Integration: ["email", "chat", "phone", "social media"],
+    },
+    Ticket: {
+      Status: ["open", "pending", "resolved", "closed"],
+      Priority: ["low", "medium", "high", "urgent"],
+      Subject: ["contains", "does not contain", "is empty", "is not empty"],
+      Tags: ["contains", "does not contain", "is empty", "is not empty"],
+      "Created date": [
+        "is today",
+        "is yesterday",
+        "is this week",
+        "is this month",
+      ],
+    },
+    Customer: {
+      Email: ["is", "is not", "contains", "does not contain"],
+      Name: ["is", "is not", "contains", "does not contain"],
+      Company: ["is", "is not", "contains", "does not contain"],
+      Tags: ["contains", "does not contain", "is empty", "is not empty"],
+    },
+    "Shopify Last Order": {
+      "Order number": ["is", "is not", "contains", "does not contain"],
+      "Order status": ["pending", "fulfilled", "cancelled", "refunded"],
+      "Order date": [
+        "is today",
+        "is yesterday",
+        "is this week",
+        "is this month",
+      ],
+      "Order total": ["greater than", "less than", "equals", "is empty"],
+    },
+    "Shopify Customer": {
+      "Customer ID": ["is", "is not", "contains", "does not contain"],
+      "Total orders": ["greater than", "less than", "equals", "is empty"],
+      "Total spent": ["greater than", "less than", "equals", "is empty"],
+      "Customer tags": [
+        "contains",
+        "does not contain",
+        "is empty",
+        "is not empty",
+      ],
+    },
+    "Self Service": {
+      "Article viewed": ["is", "is not", "contains", "does not contain"],
+      "Search term": [
+        "contains",
+        "does not contain",
+        "is empty",
+        "is not empty",
+      ],
+      Category: ["is", "is not", "contains", "does not contain"],
+    },
+  };
 
   const operators = [
     "IS",
@@ -184,6 +416,21 @@ export default function TriggerCustom() {
   ];
 
   const logicalOperators = ["AND", "OR"];
+
+  // Helper function to get operators for a specific field
+  const getOperatorsForField = (field, conditionFields) => {
+    if (!field || !field.includes(" > ")) return operators;
+
+    const [parentCategory, subField] = field.split(" > ");
+    if (
+      conditionFields[parentCategory] &&
+      conditionFields[parentCategory][subField]
+    ) {
+      return conditionFields[parentCategory][subField];
+    }
+
+    return operators;
+  };
 
   const add =
     "text-primary font-medium text-sm font-inter underline cursor-pointer";
@@ -296,7 +543,7 @@ export default function TriggerCustom() {
     const newTrigger = {
       id: Date.now(),
       type: "when",
-      trigger: null,
+      triggers: [],
       children: [],
     };
     setRuleNodes([...ruleNodes, newTrigger]);
@@ -369,30 +616,52 @@ export default function TriggerCustom() {
         className={styling.container}
         style={{ marginLeft: `${marginLeft}px` }}
       >
-        {/* Delete button - shows on hover */}
-        <button
-          onClick={() => removeNode(node.id)}
-          className="absolute -right-2 -top-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-red-600 hover:scale-110 z-10 shadow-lg font-bold"
-          title="Delete this rule"
-        >
-          ×
-        </button>
+        {/* Delete button - shows on hover (but not for WHEN nodes) */}
+        {node.type !== "when" && (
+          <button
+            onClick={() => removeNode(node.id)}
+            className="absolute -right-2 -top-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-red-600 hover:scale-110 z-10 shadow-lg font-bold"
+            title="Delete this rule"
+          >
+            ×
+          </button>
+        )}
 
         {node.type === "when" && (
           <div className="flex items-center gap-4 flex-wrap">
             <div className={styling.badge}>🚀 WHEN</div>
-            <RuleDropdown
+            <MultiSelectTriggerDropdown
               options={triggerEvents}
-              value={node.trigger}
-              onChange={(trigger) => updateNode(node.id, { trigger })}
+              selectedValues={node.triggers || []}
+              onAdd={(option) =>
+                updateNode(node.id, {
+                  triggers: [...(node.triggers || []), option],
+                })
+              }
+              onRemove={(option) =>
+                updateNode(node.id, {
+                  triggers: (node.triggers || []).filter((t) => t !== option),
+                })
+              }
               placeholder="Select trigger event..."
               variant="primary"
             />
-            {node.trigger && (
-              <div className="ml-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                ✓ Trigger set
-              </div>
-            )}
+            {/* Display selected triggers as individual tags */}
+            {(node.triggers || []).map((trigger, index) => (
+              <Alert
+                key={index}
+                text={trigger}
+                variant="primary"
+                rightIcon="close"
+                onRemove={() =>
+                  updateNode(node.id, {
+                    triggers: (node.triggers || []).filter(
+                      (t) => t !== trigger
+                    ),
+                  })
+                }
+              />
+            ))}
           </div>
         )}
 
@@ -437,27 +706,31 @@ export default function TriggerCustom() {
         {node.type === "if" && (
           <div className="flex items-center gap-4 flex-wrap">
             <div className={styling.badge}>🔍 {node.logicalOp || "IF"}</div>
-            <RuleDropdown
-              options={conditionFields}
+            <NestedConditionDropdown
+              conditionFields={conditionFields}
               value={node.field}
               onChange={(field) => updateNode(node.id, { field })}
               placeholder="Select field to check..."
               variant="primary"
             />
-            <RuleDropdown
-              options={operators}
-              value={node.operator}
-              onChange={(operator) => updateNode(node.id, { operator })}
-              placeholder="IS"
-              variant="primary"
-            />
-            <input
-              type="text"
-              value={node.value || ""}
-              onChange={(e) => updateNode(node.id, { value: e.target.value })}
-              placeholder="Enter value..."
-              className="px-4 py-2 border-2 border-amber-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 min-w-[150px] bg-white shadow-sm"
-            />
+            {node.field && (
+              <RuleDropdown
+                options={getOperatorsForField(node.field, conditionFields)}
+                value={node.operator}
+                onChange={(operator) => updateNode(node.id, { operator })}
+                placeholder="Select operator..."
+                variant="primary"
+              />
+            )}
+            {node.field && node.operator && (
+              <input
+                type="text"
+                value={node.value || ""}
+                onChange={(e) => updateNode(node.id, { value: e.target.value })}
+                placeholder="Enter value..."
+                className="px-4 py-2 border-2 border-amber-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 min-w-[150px] bg-white shadow-sm"
+              />
+            )}
             {node.field && node.operator && node.value && (
               <div className="ml-2 px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-medium">
                 ✓ Condition set
@@ -482,7 +755,7 @@ export default function TriggerCustom() {
         )}
 
         {/* Add THEN button for WHEN nodes */}
-        {node.type === "when" && node.trigger && (
+        {node.type === "when" && node.triggers && node.triggers.length > 0 && (
           <div className="mt-6 pl-8 border-l-2 border-blue-200">
             <button
               className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
@@ -512,13 +785,13 @@ export default function TriggerCustom() {
                 <span>🔄</span>
                 Add OR
               </button>
-              {/* <button
+              <button
                 className="inline-flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
                 onClick={() => addChildNode(node.id, "then")}
               >
                 <span>⚡</span>
                 Add THEN
-              </button> */}
+              </button>
             </div>
           </div>
         )}
@@ -570,7 +843,7 @@ export default function TriggerCustom() {
           <div className="overflow-x-auto">
             <div className="border-2 border-indigo-200 rounded-xl lg:rounded-2xl xl:rounded-[20px] p-6 lg:p-8 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 shadow-lg">
               {ruleNodes.map((node) => renderNode(node))}
-
+              {/* 
               <div className="mt-8 pt-6 border-t-2 border-indigo-200">
                 <button
                   className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl hover:from-indigo-700 hover:to-blue-700 transition-all duration-200 font-medium text-sm shadow-lg hover:shadow-xl hover:scale-105"
@@ -582,7 +855,7 @@ export default function TriggerCustom() {
                 <p className="text-sm text-gray-600 mt-2 ml-1">
                   Create additional WHEN conditions for your trigger
                 </p>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

@@ -7,12 +7,16 @@ import { CardList } from "../../pages/flows/Create";
 import Modal from "../../components/Modal";
 import bg from "../../assets/img/flows-bg.png";
 
-export default function InstallFlows() {
+export default function InstallFlows({ install }) {
   const [modal, setModal] = useState(false);
   const [selectedFlow, setSelectedFlow] = useState(null);
   const [installed, setInstalled] = useState([]);
   const initialInstalled = [];
-  const [installedFlows, setInstalledFlows] = useState(initialInstalled);
+  const [installedFlows, setInstalledFlows] = useState(
+    install
+      ? [{ name: "Flow 1", date: new Date().toLocaleDateString(), img: flag }]
+      : initialInstalled
+  );
   const [query, setQuery] = useState("");
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
@@ -28,6 +32,15 @@ export default function InstallFlows() {
         f.name.toLowerCase() ===
         (template?.title || template?.name)?.toLowerCase()
     );
+  };
+
+  const handleEdit = () => {
+    // if the page is on onboarding page, redirect to /onboarding/predefined-install
+    if (window.location.pathname.includes("/onboarding")) {
+      window.location.href = "/onboarding/flows-details/1?install=true";
+    } else {
+      window.location.href = "/app/flows-details/1";
+    }
   };
 
   const handleInstallTemplate = () => {
@@ -735,6 +748,12 @@ export default function InstallFlows() {
               onClick={() => setTemplateModalOpen(false)}
             >
               Cancel
+            </button>
+            <button
+              className="btn bg-off min-w-[74px] px-0"
+              onClick={handleEdit}
+            >
+              Edit
             </button>
             <button className="btn bg-prim" onClick={handleInstallTemplate}>
               Install Template

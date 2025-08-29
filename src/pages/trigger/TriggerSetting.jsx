@@ -2,9 +2,8 @@ import React, { useState } from "react";
 import Switch from "../../components/Switch";
 import Top from "../../layouts/Top";
 import { arrow_left } from "../../utilities/Classes";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import Input from "../../components/Input";
-
 export default function TriggerSetting() {
   const [value, setValue] = useState(0);
   const Btns = ["Trigger Setting", "Affected Tickets"];
@@ -22,6 +21,20 @@ export default function TriggerSetting() {
       des: "Until Monday all of our products...",
     },
   ];
+
+  // has install in the url
+  const [searchParams] = useSearchParams();
+  const install = searchParams.get("install");
+
+  const handleInstall = () => {
+    // if the page is on onboarding page, redirect to /onboarding/predefined-install
+    if (window.location.pathname.includes("/onboarding")) {
+      window.location.href = "/onboarding/install-triggers?install=true";
+    } else {
+      window.location.href = "/app/triggers";
+    }
+  };
+
   return (
     <div>
       <Top title={" "}>
@@ -36,6 +49,11 @@ export default function TriggerSetting() {
             Triggers
           </span>
         </Link>
+        {install && (
+          <button onClick={handleInstall} className="btn bg-off">
+            Install
+          </button>
+        )}
       </Top>
       <div className="p-4 lg:p-5 xl:p-6">
         <div className="md:flex items-center justify-between mb-4 lg:mb-5 xl:mb-6">

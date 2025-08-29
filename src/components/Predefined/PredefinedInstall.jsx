@@ -14,6 +14,15 @@ export default function PredefinedInstall() {
     setEditorContent(content);
   };
 
+  const handleInstall = () => {
+    // if the page is on onboarding page, redirect to /onboarding/predefined-install
+    if (window.location.pathname.includes("/onboarding")) {
+      window.location.href = "/onboarding/predefined-responses?install=true";
+    } else {
+      window.location.href = "/app/predefined-update";
+    }
+  };
+
   return (
     <div>
       <Top title={" "} className="!justify-start">
@@ -35,7 +44,7 @@ export default function PredefinedInstall() {
             Edit Order Status: Not shipped- still in processing window
           </h6>
           <Link
-            to="/app/predefined-update"
+            onClick={() => handleInstall()}
             className="btn !bg-[#7E5EFF] !text-white hover:!text-white "
           >
             install

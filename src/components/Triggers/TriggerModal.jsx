@@ -16,6 +16,16 @@ export default function TriggerModal({ onClick, onInstall, title }) {
       des: "You can customize this rule after installing to fit your needs.",
     },
   ];
+
+  const onEdit = () => {
+    // if the page is on onboarding page, redirect to /onboarding/predefined-install
+    if (window.location.pathname.includes("/onboarding")) {
+      window.location.href = "/onboarding/trigger-setting?install=true";
+    } else {
+      window.location.href = "/app/trigger-setting";
+    }
+  };
+
   return (
     <div className="p-1">
       <div className="md:flex items-center gap-4 lg:gap-5 mb-4 lg:mb-5">
@@ -73,6 +83,12 @@ export default function TriggerModal({ onClick, onInstall, title }) {
           className="btn !border-[#7856FF] !text-[#7856FF] hover:!text-white"
         >
           Cancel
+        </button>
+        <button
+          onClick={onEdit}
+          className="btn !border-[#7856FF] !text-[#7856FF] hover:!text-white"
+        >
+          Edit
         </button>
         <button onClick={onInstall} className="btn !bg-[#7856FF] !text-white">
           Install Rule

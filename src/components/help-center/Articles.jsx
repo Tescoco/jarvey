@@ -270,7 +270,7 @@ export default function Articles() {
     "['Yes' answer]. Yes, we offer refunds and exchanges within [# of days] days of purchase. To be eligible for a refund or exchange, items must be returned in their original condition, with all tags and packaging intact. Please note that ["
   );
   const [searchPreviewText, setSearchPreviewText] = useState(
-    "https://jarvey.gorgias.help > do-you-offer-refunds-or-exchanges-1224851 Do you offer refunds or exchanges? ['Yes' answer]. Yes, we offer refunds and exchanges within [# of days] days of purchase. To be eligible for a refund or exchange, items must be returned in their original condition, with all tags and packaging intact. Please note that"
+    "https://jarvey.jarveyai.help > do-you-offer-refunds-or-exchanges-1224851 Do you offer refunds or exchanges? ['Yes' answer]. Yes, we offer refunds and exchanges within [# of days] days of purchase. To be eligible for a refund or exchange, items must be returned in their original condition, with all tags and packaging intact. Please note that"
   );
 
   const Icons = [
@@ -654,7 +654,7 @@ export default function Articles() {
             </div>
             <div className="md:flex items-center justify-between rounded-[10px] border border-[#E2E4E9] py-[14px] px-3 mb-1">
               <p className="text-xs font-medium !leading-[1.66] text-[#7856FF] mb-1 md:flex items-center gap-3">
-                https://jarvey.gorgias.help/en-US/{" "}
+                https://jarvey.jarveyai.help/en-US/{" "}
                 <span className="text-[#888888] border-l border-l-[#E2E4E9] md:pl-3">
                   do-you-offer-refunds-or-exchanges
                 </span>
@@ -818,7 +818,7 @@ export default function Articles() {
               </button>
             </div>
             <div className="rounded-[10px] border border-[#E2E4E9] py-[10px] px-3 text-xs text-[#888]">
-              https://jarvey.gorgias.help/en-US/articles/
+              https://jarvey.jarveyai.help/en-US/articles/
               <span className="text-[#888]">category-slug</span>
             </div>
           </div>
@@ -873,7 +873,7 @@ export default function Articles() {
             </div>
             <div className="rounded-[10px] border border-[#E2E4E9] py-[14px] px-3">
               <p className="text-xs font-medium !leading-[1.66] text-[#7856FF] mb-1 md:flex items-center gap-3">
-                https://jarvey.gorgias.help/en-US/articles/{" "}
+                https://jarvey.jarveyai.help/en-US/articles/{" "}
                 <span className="text-[#888888] border-l border-l-[#E2E4E9] md:pl-3">
                   category-slug
                 </span>

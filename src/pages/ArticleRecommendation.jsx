@@ -723,7 +723,7 @@ export default function ArticleRecommendation() {
                 <button className="text-[#7856FF] flex items-center gap-2 text-sm font-semibold !leading-[1.42]">{copyIcon2} Copy</button>
               </div>
               <div className="md:flex items-center justify-between rounded-[10px] border border-[#E2E4E9] py-[14px] px-3 mb-1">
-                <p className="text-xs font-medium !leading-[1.66] text-[#7856FF] mb-1 md:flex items-center gap-3">https://jarvey.gorgias.help/en-US/ <span className="text-[#888888] border-l border-l-[#E2E4E9] md:pl-3">do-you-offer-refunds-or-exchanges</span></p>
+                <p className="text-xs font-medium !leading-[1.66] text-[#7856FF] mb-1 md:flex items-center gap-3">https://jarvey.jarveyai.help/en-US/ <span className="text-[#888888] border-l border-l-[#E2E4E9] md:pl-3">do-you-offer-refunds-or-exchanges</span></p>
                 <p className="text-[#888888] text-xs font-medium !leading-[1.66]">#E2E4E9</p>
               </div>
               <p className="text-[#11111180]/50 text-sm !leading-[1.42]" >A short summary displayed below the title of your article.</p>
@@ -754,7 +754,7 @@ export default function ArticleRecommendation() {
             </div>
             <div className="mb-3 lg:mb-4">
               <label className="text-[#0A0D14] text-sm font-semibold !leading-[1.42] mb-1">Search Engine Preview</label>
-              <textarea name="" className="border border-[#E2E4E9] rounded-[10px] py-[10px] px-3 w-full resize-none" rows={4} value="https://jarvey.gorgias.help > do-you-offer-refunds-or-exchanges-1224851 Do you offer refunds or exchanges? ['Yes' answer]. Yes, we offer refunds and exchanges within [# of days] days of purchase. To be eligible for a refund or exchange, items must be returned in their original condition, with all tags and packaging intact. Please note that" id=""></textarea>
+              <textarea name="" className="border border-[#E2E4E9] rounded-[10px] py-[10px] px-3 w-full resize-none" rows={4} value="https://jarvey.jarveyai.help > do-you-offer-refunds-or-exchanges-1224851 Do you offer refunds or exchanges? ['Yes' answer]. Yes, we offer refunds and exchanges within [# of days] days of purchase. To be eligible for a refund or exchange, items must be returned in their original condition, with all tags and packaging intact. Please note that" id=""></textarea>
               <p className="text-[#858585] text-xs font-medium !leading-[1.66]">This is a preview of how your article is going to look like in search engines (e.g. Google, Duckduckgo, Bing...) </p>
             </div>
             <p className="text-[#858585] text-xs font-medium !leading-[1.66] mb-3 lg:mb-4">Article id: 1224851</p>

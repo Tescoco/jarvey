@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import Input from "../../components/Input";
 import Modal from "../../components/Modal";
 import { c_24, search as searchIcon } from "../../utilities/Classes";
+import { useEffect } from "react";
 
-export default function ReplyWithPredefined() {
+export default function ReplyWithPredefined({ install }) {
   const CardItems = [
     {
       title: "Predefined Response 1",
@@ -99,6 +100,19 @@ export default function ReplyWithPredefined() {
     );
   }, [installed, query]);
 
+  // if install is true, set the installed state to the selected item
+  useEffect(() => {
+    if (install) {
+      setInstalled([
+        {
+          title: "Predefined Response 1",
+          date: new Date().toLocaleDateString(),
+        },
+        ...installed,
+      ]);
+    }
+  }, [install]);
+
   const openPreview = (item) => {
     setSelected(item);
     setPreviewOpen(true);
@@ -111,6 +125,15 @@ export default function ReplyWithPredefined() {
       ...prev,
     ]);
     setPreviewOpen(false);
+  };
+
+  const handleEdit = () => {
+    // if the page is on onboarding page, redirect to /onboarding/predefined-install
+    if (window.location.pathname.includes("/onboarding")) {
+      window.location.href = "/onboarding/predefined-install";
+    } else {
+      window.location.href = "/app/predefined-install";
+    }
   };
 
   return (
@@ -247,7 +270,10 @@ export default function ReplyWithPredefined() {
             >
               Cancel
             </button>
-            <button className="btn bg-prim" onClick={handleInstall}>
+            <button className="btn bg-off" onClick={handleEdit}>
+              Edit
+            </button>
+            <button className="btn bg-primary" onClick={handleInstall}>
               Install
             </button>
           </div>

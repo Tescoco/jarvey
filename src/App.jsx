@@ -166,6 +166,18 @@ export default function App() {
           element: <PredefinedResponses />,
         },
         {
+          path: "predefined-install",
+          element: <PredefinedInstall />,
+        },
+        {
+          path: "trigger-setting",
+          element: <TriggerSetting />,
+        },
+        {
+          path: "flows-details/:fid",
+          element: <FlowsDetails />,
+        },
+        {
           path: "install-triggers",
           element: <InstallTriggers />,
         },

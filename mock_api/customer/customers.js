@@ -42,7 +42,7 @@ let customers = [
     tickets: [
       {
         id: 4399045,
-        title: "Extend your Gorgias trial before it ends",
+        title: "Extend your Jarvey AI trial before it ends",
         status: "Open",
         date: "2025-10-05",
         aiIntent: "Other",

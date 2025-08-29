@@ -140,18 +140,27 @@ export default function Message() {
             {
               status: "form",
               text: "Hoi Ik heb besloten dat ik de cadeaubon niet meer wil Kan je deze weghalen Hoi Ik heb besloten dat ik de cadeaubon niet meer wil Kan je deze weghalen",
+              time: "12:23",
             },
             {
               status: "form",
               text: "Hoi Ik heb besloten dat ik de cadeaubon niet meer wil Kan je deze weghalen",
+              time: "12:23",
             },
             {
               status: "to",
               text: "Hoi Ik heb besloten dat ik de cadeaubon niet meer wil Kan je deze weghalen",
+              time: "12:23",
             },
             {
               status: "form",
               text: "Hoi Ik heb besloten dat ik de cadeaubon niet meer wil Kan je deze weghalen",
+              time: "12:23",
+            },
+            {
+              status: "to",
+              text: "Hoi Ik heb besloten dat ik de cadeaubon niet meer wil Kan je deze weghalen",
+              time: "12:23",
             },
           ],
         },
@@ -167,22 +176,27 @@ export default function Message() {
             {
               status: "form",
               text: "Hoi Ik heb besloten dat ik de cadeaubon niet meer wil Kan je deze weghalen Hoi Ik heb besloten dat ik de cadeaubon niet meer wil Kan je deze weghalen",
+              time: "12:23",
             },
             {
               status: "form",
               text: "Hoi Ik heb besloten dat ik de cadeaubon niet meer wil Kan je deze weghalen",
+              time: "12:23",
             },
             {
               status: "to",
               text: "Hoi Ik heb besloten dat ik de cadeaubon niet meer wil Kan je deze weghalen",
+              time: "12:23",
             },
             {
               status: "form",
               text: "Hoi Ik heb besloten dat ik de cadeaubon niet meer wil Kan je deze weghalen",
+              time: "12:23",
             },
             {
               status: "to",
               text: "Hoi Ik heb besloten dat ik de cadeaubon niet meer wil Kan je deze weghalen",
+              time: "12:23",
             },
           ],
         },
@@ -192,22 +206,12 @@ export default function Message() {
             {
               status: "form",
               text: "Hoi Ik heb besloten dat ik de cadeaubon niet meer wil Kan je deze weghalen Hoi Ik heb besloten dat ik de cadeaubon niet meer wil Kan je deze weghalen",
+              time: "12:23",
             },
             {
               status: "form",
               text: "Hoi Ik heb besloten dat ik de cadeaubon niet meer wil Kan je deze weghalen",
-            },
-            {
-              status: "to",
-              text: "Hoi Ik heb besloten dat ik de cadeaubon niet meer wil Kan je deze weghalen",
-            },
-            {
-              status: "form",
-              text: "Hoi Ik heb besloten dat ik de cadeaubon niet meer wil Kan je deze weghalen",
-            },
-            {
-              status: "to",
-              text: "Hoi Ik heb besloten dat ik de cadeaubon niet meer wil Kan je deze weghalen",
+              time: "12:23",
             },
           ],
         },
@@ -422,7 +426,7 @@ export default function Message() {
                 <div className="" key={index}>
                   <p className="text-xs text-center pb-4">{item.data}</p>
                   {item.messages.map((mes, i) => {
-                    const timeLabel = item.data || "";
+                    const timeLabel = "12:30"; //mes.time || "";
                     return (
                       <div
                         className={`p-3 max-w-[456px] rounded-xl mb-3 ${

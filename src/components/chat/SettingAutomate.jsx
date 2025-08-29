@@ -397,8 +397,15 @@ export default function SettingAutomate() {
               </svg>
             </Link>
           ))}
+          <button
+            style={{
+              fontSize: "16px",
+            }}
+            className=" p-4 border border-solid border-[#E2E4E9] rounded-xl w-full text-primary  bg-white font-inter font-semibold"
+          >
+            Live chat
+          </button>
         </div>
-        <button className="btn w-full shadow text-white">Live chat</button>
       </div>
     </div>
   );

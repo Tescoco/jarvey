@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import Top from "../../layouts/Top";
 import MainInner from "../../components/MainInner";
@@ -8,8 +8,12 @@ import bg from "../../assets/img/flows-bg.png";
 import { arrow_left } from "../../utilities/Classes";
 import { Link } from "react-router-dom";
 import FlowChart from "../../components/FlowChart";
+import { useSearchParams } from "react-router-dom";
 
 export default function Details() {
+  const [searchParams] = useSearchParams();
+  const install = searchParams.get("install");
+
   const editBtn = [
     <svg
       width="16"
@@ -103,6 +107,14 @@ export default function Details() {
     }
   };
 
+  const handleInstall = () => {
+    if (window.location.pathname.includes("/onboarding")) {
+      window.location.href = "/onboarding/install-flows?install=true";
+    } else {
+      window.location.href = "/app/flows";
+    }
+  };
+
   return (
     <>
       <Top title=" " className="!justify-start !px-2">
@@ -115,6 +127,11 @@ export default function Details() {
         <h4 className="font-inter font-medium text-base lg:text-lg text-heading capitalize">
           Flows Templates
         </h4>
+        {install && (
+          <button className="btn bg-off" onClick={handleInstall}>
+            Install
+          </button>
+        )}
       </Top>
       <MainInner>
         <div className="flex items-center justify-between flex-wrap gap-4 mb-3">

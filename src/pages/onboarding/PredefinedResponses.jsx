@@ -4,9 +4,13 @@ import ReplyWithPredefinedComponent from "../../components/home/ReplyWithPredefi
 import OnboardingWrapper from "../../components/OnboardingWrapper";
 import { ONBOARDING_STEPS_CONFIG } from "../../utils/onboardingSteps";
 import { c_24 } from "../../utilities/Classes";
+import { useSearchParams } from "react-router-dom";
 
 export default function PredefinedResponses() {
   const stepConfig = ONBOARDING_STEPS_CONFIG["predefined-responses"];
+
+  const [searchParams] = useSearchParams();
+  const install = searchParams.get("install");
 
   return (
     <MainInner>
@@ -18,7 +22,7 @@ export default function PredefinedResponses() {
         timeEstimate={stepConfig.timeEstimate}
       >
         <div className={`${c_24}`}>
-          <ReplyWithPredefinedComponent />
+          <ReplyWithPredefinedComponent install={install} />
         </div>
       </OnboardingWrapper>
     </MainInner>

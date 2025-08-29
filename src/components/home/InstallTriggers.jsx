@@ -6,7 +6,7 @@ import { c_24, search as searchIcon } from "../../utilities/Classes";
 import Modal from "../../components/Modal";
 import TriggerModal from "../Triggers/TriggerModal";
 
-export default function InstallTriggers() {
+export default function InstallTriggers({ install }) {
   const CardItems = [
     {
       title: "Tag tickets by business hours",
@@ -310,7 +310,16 @@ export default function InstallTriggers() {
       target: "7",
     },
   ];
-  const [installedTriggers, setInstalledTriggers] = useState([]);
+  const [installedTriggers, setInstalledTriggers] = useState(
+    install
+      ? [
+          {
+            title: "Tag tickets by business hours",
+            date: new Date().toLocaleDateString(),
+          },
+        ]
+      : []
+  );
   const [query, setQuery] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
   const [selectedTrigger, setSelectedTrigger] = useState(null);

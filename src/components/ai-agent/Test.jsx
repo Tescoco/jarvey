@@ -229,49 +229,6 @@ export default function Test() {
   return (
     <div className="mt-3 lg:mt-4 flex justify-center">
       <div className="w-full md:w-[712px]">
-        <div className="mb-6 lg:mb-8 xl:mb-10 w-full">
-          <div className="mb-3 lg:mb-4 flex gap-3 lg:gap-4 w-full">
-            <img
-              src={img}
-              className="w-8 lg:w-10 h-8 lg:h-10 object-contain"
-              alt=""
-            />
-            <div className="bg-[#F8F7FF] rounded-lg lg:rounded-xl xl:rounded-2xl p-3 lg:p-4 w-full">
-              <p className="text-sm font-semibold !leading-[1.5] text-[#0A0D14] mb-2 lg:mb-3">
-                Jarvey AI
-              </p>
-              <p className="text-[#0A0D14] text-xs !leading-[1.6] mb-2 lg:mb-3">
-                Welcome to your Al Agent test area.
-              </p>
-              <p className="text-[#0A0D14] text-xs !leading-[1.6] mb-0">
-                Your test area lets you search for an existing customer to see
-                how your Al Agent would respond based on your resources and the
-                customer's order history.
-              </p>
-            </div>
-          </div>
-          {/* <div className="mb-3 lg:mb-4 flex gap-3 lg:gap-4 w-full">
-            <img
-              src={img}
-              className="w-8 lg:w-10 h-8 lg:h-10 object-contain"
-              alt=""
-            />
-            <div className="bg-[rgba(254,67,51,0.06)] rounded-lg lg:rounded-xl xl:rounded-2xl p-3 lg:p-4 w-full">
-              <p className="text-sm font-semibold !leading-[1.5] text-[#0A0D14] mb-2 lg:mb-3">
-                Jarvey AI
-              </p>
-              <p className="text-[#0A0D14] text-xs font-semibold !leading-[1.5] mb-2">
-                How did it do? 👍 Good 👎 Bad
-              </p>
-              <p className="text-[#0A0D14] text-xs  !leading-[1.6] mb-1">
-                The Al Agent used the following Guidance:
-              </p>
-              <p className="text-[#0A0D14] text-xs  !leading-[1.6] mb-0 pl-4 lg:pl-5">
-                When a customer asks for a discount or promotion
-              </p>
-            </div>
-          </div> */}
-        </div>
         <div className="bg-[#F7F7F7] rounded-lg lg:rounded-xl xl:rounded-2xl mb-3 lg:mb-4">
           <div className="md:flex items-center justify-between py-2 px-4">
             <div className="mb-2 lg:mb-0">
