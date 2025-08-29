@@ -7,6 +7,7 @@ import Input from "../../components/Input";
 import { search } from "../../utilities/Classes";
 import { c_16 } from "../../utilities/Classes";
 import bg from "../../assets/img/flows-bg.png";
+import StoreDropdown from "../../components/StoreDropdown";
 
 export const CardList = [
   {
@@ -137,6 +138,10 @@ export default function Create() {
     <>
       <Top title="Flows Templates">
         <div className="hidden md:flex items-center gap-4">
+          <StoreDropdown
+            includeAllStores={true}
+            className="mb-0 min-w-[120px]"
+          />
           <Link
             to={`/app/flows-details/1`}
             className="btn min-w-max border-primary !px-2.5 text-primary"

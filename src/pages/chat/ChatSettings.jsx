@@ -8,6 +8,7 @@ import Languages from "../../components/chat/Languages";
 import Campaigns from "../../components/chat/Campaigns";
 import Installation from "../../components/chat/Installation";
 import Automate from "../../components/chat/SettingAutomate";
+import StoreDropdown from "../../components/StoreDropdown";
 import { c_border } from "../../utilities/Classes";
 
 export default function ChatSettings() {
@@ -54,8 +55,9 @@ export default function ChatSettings() {
 
   return (
     <>
-      <Top>
+      <Top title="Chat Settings">
         <div className="flex items-center gap-2">
+          <StoreDropdown includeAllStores={false} className="min-w-[120px]" />
           {activeTab === "Languages" && (
             <button className="btn shadow !text-white">Add Language</button>
           )}

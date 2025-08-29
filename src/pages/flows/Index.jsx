@@ -7,7 +7,7 @@ import Input from "../../components/Input";
 import { search } from "../../utilities/Classes";
 
 import flag from "../../assets/img/flag.png";
-import Dropdown from "../../components/Dropdown";
+import StoreDropdown from "../../components/StoreDropdown";
 
 export default function Flows() {
   const navigate = useNavigate();
@@ -52,11 +52,9 @@ export default function Flows() {
     <>
       <Top>
         <div className="hidden md:flex items-center gap-4">
-          <Dropdown
-            className="mb-0"
-            btnClass="!text-primary !h-10"
-            placeholder="Stores"
-            items={[{ name: "Store 1" }, { name: "Store 2" }]}
+          <StoreDropdown
+            includeAllStores={true}
+            className="mb-0 min-w-[120px]"
           />
           <Link
             to="/app/flows-details/1"

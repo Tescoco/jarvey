@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import Trigger from "../../components/Triggers/Trigger";
 import Top from "../../layouts/Top";
-import Dropdown from "../../components/Dropdown";
+import StoreDropdown from "../../components/StoreDropdown";
 import { plus } from "../../utilities/Classes";
 
 export default function Triggers() {
@@ -10,16 +10,9 @@ export default function Triggers() {
     <div>
       <Top>
         <div className="flex items-center gap-2 md:gap-3 lg:gap-4">
-          <Dropdown
-            className="mb-0"
-            btnClass="!h-10 !text-primary"
-            dropDownClass="w-max !left-auto right-0"
-            placeholder={"All Stores"}
-            items={[
-              { name: "All Stores" },
-              { name: "Branch Stores" },
-              { name: "Sub Stores" },
-            ]}
+          <StoreDropdown
+            includeAllStores={true}
+            className="mb-0 min-w-[120px]"
           />
           <Link
             to="/app/create-trigger"

@@ -4,6 +4,7 @@ import Dropdown from "../../components/Dropdown";
 import Switch from "../../components/Switch";
 import Input from "../../components/Input";
 import Top from "../../layouts/Top";
+import StoreDropdown from "../../components/StoreDropdown";
 
 export default function Create() {
   const response_time = [
@@ -32,7 +33,9 @@ export default function Create() {
             {" > New SLA"}
           </>
         }
-      />
+      >
+        <StoreDropdown includeAllStores={true} className="mb-0 min-w-[120px]" />
+      </Top>
       <div className="grid grid-cols-1 gap-4 lg:gap-6 p-4 md:p-5 lg:p-6">
         <Input className="mb-0" type="text" label="SLA Name" required />
         <div className="-mb-2 lg:-mb-3">

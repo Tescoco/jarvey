@@ -17,6 +17,17 @@ export default function CreateHelpCenter() {
     `Automated`,
   ];
   const [stepProgress, setStepProgress] = useState(0);
+
+  const handleFinished = () => {
+    // if link is onboarding, redirect to onboarding
+    // if link is not onboarding, redirect to help-center-settings
+    if (window.location.pathname.includes("onboarding")) {
+      window.location.href = "/onboarding/ai-power";
+    } else {
+      window.location.href = "/app/help-center-settings";
+    }
+  };
+
   return (
     <div className="flex flex-col h-full">
       <Top />
@@ -69,7 +80,7 @@ export default function CreateHelpCenter() {
               </button>
               {stepProgress === 3 ? (
                 <Link
-                  to="/app/help-center-settings"
+                  onClick={() => handleFinished()}
                   className="btn shadow !text-white !min-w-max"
                 >
                   Finished

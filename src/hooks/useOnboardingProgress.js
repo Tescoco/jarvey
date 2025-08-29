@@ -7,7 +7,6 @@ const ONBOARDING_STEPS = [
   // Step Group 1
   "connect-store",
   "connect-support",
-  "answer-ticket",
   "add-support-channels",
   "invite-team",
   // Step Group 2

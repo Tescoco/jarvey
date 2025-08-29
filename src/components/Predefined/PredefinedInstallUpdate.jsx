@@ -126,11 +126,24 @@ export default function PredefinedInstallUpdate() {
               placeholder="Add Actions"
               isArrow={true}
               items={[
-                { name: "DropDown - 1" },
-                { name: "DropDown - 2" },
-                { name: "DropDown - 3" },
-                { name: "DropDown - 4" },
-                { name: "DropDown - 5" },
+                { name: "TICKET ACTIONS", isHeader: true },
+                { name: "Forward email" },
+                { name: "Add attachments" },
+                { name: "Add tags" },
+                { name: "Remove tags" },
+                { name: "Set status" },
+                { name: "Assign an agent" },
+                { name: "Assign a team" },
+                { name: "Set subject" },
+                { name: "Snooze for" },
+                { name: "Set priority" },
+                { name: "Send internal note" },
+                { name: "Exclude ticket from Auto-Merge" },
+                { name: "Exclude ticket from CSAT" },
+                { name: "Set ticket field" },
+                { name: "", isDivider: true },
+                { name: "EXTERNAL ACTIONS", isHeader: true },
+                { name: "HTTP hook" },
               ]}
             />
             <Dropdown
@@ -138,11 +151,14 @@ export default function PredefinedInstallUpdate() {
               placeholder="Add Shopify Actions"
               isArrow={true}
               items={[
-                { name: "DropDown - 1" },
-                { name: "DropDown - 2" },
-                { name: "DropDown - 3" },
-                { name: "DropDown - 4" },
-                { name: "DropDown - 5" },
+                { name: "Cancel last order" },
+                { name: "Cancel order" },
+                { name: "Duplicate last order" },
+                { name: "Edit last order's shipping address" },
+                { name: "Refund last order's shipping cost" },
+                { name: "Refund last order" },
+                { name: "Partially refund last order" },
+                { name: "Edit last order's note" },
               ]}
             />
           </div>

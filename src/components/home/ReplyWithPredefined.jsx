@@ -196,7 +196,8 @@ export default function ReplyWithPredefined({ install }) {
               {filtered.length === 0 && (
                 <tr>
                   <td className="py-3 px-3 text-sm text-[#858585]" colSpan={3}>
-                    No installed predefined responses yet.
+                    No installed Predefined responses yet. Add one by clicking
+                    on a Predefined Response
                   </td>
                 </tr>
               )}

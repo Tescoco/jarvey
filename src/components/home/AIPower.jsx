@@ -22,6 +22,16 @@ export default function AIPower() {
     },
   ];
 
+  const handleSetUpAI = () => {
+    // if link is onboarding, redirect to onboarding
+    // if link is not onboarding, redirect to setup-ai-agent
+    if (window.location.pathname.includes("onboarding")) {
+      window.location.href = "/onboarding/setup-ai-agent";
+    } else {
+      window.location.href = "/app/setup-ai-agent";
+    }
+  };
+
   return (
     <>
       <MainInner className="ai-agent">
@@ -102,7 +112,9 @@ export default function AIPower() {
             </div>
             <div className="flex justify-center">
               <Link
-                to="/app/setup-ai-agent"
+                onClick={() => {
+                  handleSetUpAI();
+                }}
                 className="btn !bg-[#7856FF] !text-white"
               >
                 Set up AI Agent

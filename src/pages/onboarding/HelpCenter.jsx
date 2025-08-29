@@ -83,6 +83,15 @@ export default function HelpCenter() {
                 </div>
               </div>
             </div>
+
+            <div className="flex justify-center">
+              <a
+                href="/onboarding/create-help-center"
+                className="btn shadow !text-white mb-[10px] !bg-[#8364FF] mt-4"
+              >
+                Create Help Center
+              </a>
+            </div>
           </div>
         </div>
       </OnboardingWrapper>

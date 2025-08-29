@@ -5,6 +5,7 @@ import TableFilter from "../../components/TableFilter";
 import Checkbox from "../../components/Checkbox";
 import Modal from "../../components/Modal";
 import Input from "../../components/Input";
+import Dropdown from "../../components/Dropdown";
 
 import sop11 from "../../assets/img/manager/table-img-17.png";
 import sop8 from "../../assets/img/manager/table-img-15.png";
@@ -29,6 +30,7 @@ export default function Index() {
       Email: "Wade Warren",
       Phone: "(+33)7 35 5 46 14",
       Date: "23 Apr 2022",
+      Store: "Store 1",
       img: sop1,
     },
     {
@@ -36,6 +38,7 @@ export default function Index() {
       Email: "Esther Howard",
       Phone: "(+33)7 35 5 46 14",
       Date: "23 Apr 2022",
+      Store: "Store 2",
       img: sop2,
     },
     {
@@ -43,6 +46,7 @@ export default function Index() {
       Email: "Bessie Cooper",
       Phone: "(+33)7 35 5 46 14",
       Date: "23 Apr 2022",
+      Store: "Store 1",
       img: sop3,
     },
     {
@@ -50,6 +54,7 @@ export default function Index() {
       Email: "Cameron Williamson",
       Phone: "(+33)7 35 5 46 14",
       Date: "23 Apr 2022",
+      Store: "Store 3",
       img: sop4,
     },
     {
@@ -57,6 +62,7 @@ export default function Index() {
       Email: "Kristin Watson",
       Phone: "(+33)7 35 5 46 14",
       Date: "23 Apr 2022",
+      Store: "Store 2",
       img: sop5,
     },
     {
@@ -64,6 +70,7 @@ export default function Index() {
       Email: "Devon Lane",
       Phone: "(+33)7 35 5 46 14",
       Date: "23 Apr 2022",
+      Store: "Store 1",
       img: sop6,
     },
     {
@@ -71,6 +78,7 @@ export default function Index() {
       Email: "Ralph Edwards",
       Phone: "(+33)7 35 5 46 14",
       Date: "23 Apr 2022",
+      Store: "Store 3",
       img: sop7,
     },
     {
@@ -78,6 +86,7 @@ export default function Index() {
       Email: "Dianne Russell",
       Phone: "(+33)7 35 5 46 14",
       Date: "23 Apr 2022",
+      Store: "Store 2",
       img: sop8,
     },
     {
@@ -85,6 +94,7 @@ export default function Index() {
       Email: "Theresa Webb",
       Phone: "(+33)7 35 5 46 14",
       Date: "23 Apr 2022",
+      Store: "Store 1",
       img: sop9,
     },
     {
@@ -92,6 +102,7 @@ export default function Index() {
       Email: "Annette Black",
       Phone: "(+33)7 35 5 46 14",
       Date: "23 Apr 2022",
+      Store: "Store 2",
       img: sop10,
     },
     {
@@ -99,6 +110,7 @@ export default function Index() {
       Email: "Jerome Bell",
       Phone: "(+33)7 35 5 46 14",
       Date: "23 Apr 2022",
+      Store: "Store 3",
       img: sop11,
     },
     {
@@ -106,6 +118,7 @@ export default function Index() {
       Email: "Albert Flores",
       Phone: "(+33)7 35 5 46 14",
       Date: "23 Apr 2022",
+      Store: "Store 1",
       img: sop12,
     },
     {
@@ -113,6 +126,7 @@ export default function Index() {
       Email: "Robert Fox",
       Phone: "(+33)7 35 5 46 14",
       Date: "23 Apr 2022",
+      Store: "Store 2",
       img: sop13,
     },
     {
@@ -120,6 +134,7 @@ export default function Index() {
       Email: "Savannah Nguyen",
       Phone: "(+33)7 35 5 46 14",
       Date: "23 Apr 2022",
+      Store: "Store 3",
       img: sop14,
     },
   ];
@@ -129,6 +144,15 @@ export default function Index() {
   const [formPhone, setFormPhone] = useState("");
   const [formEmail, setFormEmail] = useState("");
   const [formNote, setFormNote] = useState("");
+  const [formStore, setFormStore] = useState("");
+
+  const storeOptions = [
+    { name: "Store 1" },
+    { name: "Store 2" },
+    { name: "Store 3" },
+    { name: "Store 4" },
+    { name: "Store 5" },
+  ];
 
   const openAddCustomer = () => {
     setEditingCustomer(null);
@@ -136,6 +160,7 @@ export default function Index() {
     setFormPhone("");
     setFormEmail("");
     setFormNote("");
+    setFormStore("");
     setEditArticle(true);
   };
 
@@ -145,6 +170,7 @@ export default function Index() {
     setFormPhone(customer?.Phone || "");
     setFormEmail(customer?.Email || "");
     setFormNote("");
+    setFormStore(customer?.Store || "");
     setEditArticle(true);
   };
 
@@ -179,16 +205,21 @@ export default function Index() {
                 <th width={42}>
                   <Checkbox id="selectAll" />
                 </th>
-                {["Name", "Email ", "Phone", "Creation Date", "Actions"].map(
-                  (item, index) => (
-                    <th
-                      className="text-left text-sm text-[#525866] !font-normal py-2 px-3 last:text-right"
-                      key={index}
-                    >
-                      {item}{" "}
-                    </th>
-                  )
-                )}
+                {[
+                  "Name",
+                  "Email ",
+                  "Phone",
+                  "Store",
+                  "Creation Date",
+                  "Actions",
+                ].map((item, index) => (
+                  <th
+                    className="text-left text-sm text-[#525866] !font-normal py-2 px-3 last:text-right"
+                    key={index}
+                  >
+                    {item}{" "}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -213,6 +244,9 @@ export default function Index() {
                   </td>
                   <td className="!text-[#0A0D14] !md:text-sm !font-medium">
                     {item.Phone}
+                  </td>
+                  <td className="!text-[#0A0D14] !md:text-sm !font-medium">
+                    {item.Store}
                   </td>
                   <td className="!text-[#0A0D14] !md:text-sm !font-medium">
                     {item.Date}
@@ -345,6 +379,16 @@ export default function Index() {
                   required={true}
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
+                />
+                <Dropdown
+                  className="mb-3"
+                  label="Store"
+                  placeholder="Select store"
+                  required={true}
+                  isArrow={true}
+                  items={storeOptions}
+                  value={formStore}
+                  onChange={(value) => setFormStore(value)}
                 />
                 <label
                   htmlFor=""

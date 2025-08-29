@@ -10,6 +10,17 @@ import { bottom_border } from "../../utilities/Classes";
 export default function SetupAiAgent() {
   const [show, setShow] = useState(0);
   const progressTitle = [`Personalize AI Agent`, `Add your Knowledge`];
+
+  const handleSave = () => {
+    // if link is onboarding, redirect to onboarding
+    // if link is not onboarding, redirect to ai-agent-setting
+    if (window.location.pathname.includes("onboarding")) {
+      window.location.href = "/onboarding/ai-agent-setting";
+    } else {
+      window.location.href = "/app/ai-agent-setting";
+    }
+  };
+
   return (
     <div className="flex flex-col h-full">
       <Top></Top>
@@ -71,7 +82,9 @@ export default function SetupAiAgent() {
         )}
         {show === 1 && (
           <Link
-            to="/app/ai-agent-setting"
+            onClick={() => {
+              handleSave();
+            }}
             className="btn !px-3 !min-w-max shadow !text-white"
           >
             Save

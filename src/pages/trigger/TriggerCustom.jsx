@@ -523,6 +523,8 @@ export default function TriggerCustom() {
       newNode.logicalOp = logicalOperator || "IF"; // Set the logical operator
     } else if (childType === "action") {
       newNode.action = null;
+    } else if (childType === "else") {
+      newNode.action = null; // ELSE only has action, no conditions
     }
 
     const addToParent = (nodes) => {
@@ -564,8 +566,13 @@ export default function TriggerCustom() {
     setRuleNodes(removeNodeRecursive(ruleNodes));
   };
 
-  const renderNode = (node, depth = 0) => {
-    const marginLeft = depth * 30;
+  const renderNode = (node, depth = 0, parentType = null) => {
+    // Don't indent THEN and ELSE nodes that are direct children of IF nodes
+    const shouldIndent = !(
+      parentType === "if" &&
+      (node.type === "then" || node.type === "else")
+    );
+    const marginLeft = shouldIndent ? depth * 30 : 0;
 
     // Different styling for different node types
     const getNodeStyling = (nodeType) => {
@@ -598,6 +605,13 @@ export default function TriggerCustom() {
             badge:
               "bg-green-600 text-black px-3 py-1.5 rounded-full font-semibold text-sm",
           };
+        case "else":
+          return {
+            container:
+              "mb-4 group relative p-4 rounded-lg border border-red-200 bg-gradient-to-r from-red-50 to-pink-50 shadow-sm hover:shadow-md transition-all duration-200",
+            badge:
+              "bg-red-600 text-white px-3 py-1.5 rounded-full font-semibold text-sm",
+          };
         default:
           return {
             container:
@@ -611,191 +625,251 @@ export default function TriggerCustom() {
     const styling = getNodeStyling(node.type);
 
     return (
-      <div
-        key={node.id}
-        className={styling.container}
-        style={{ marginLeft: `${marginLeft}px` }}
-      >
-        {/* Delete button - shows on hover (but not for WHEN nodes) */}
-        {node.type !== "when" && (
-          <button
-            onClick={() => removeNode(node.id)}
-            className="absolute -right-2 -top-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-red-600 hover:scale-110 z-10 shadow-lg font-bold"
-            title="Delete this rule"
-          >
-            ×
-          </button>
-        )}
+      <>
+        <div
+          key={node.id}
+          className={styling.container}
+          style={{ marginLeft: `${marginLeft}px` }}
+        >
+          {/* Delete button - shows on hover (but not for WHEN nodes) */}
+          {node.type !== "when" && (
+            <button
+              onClick={() => removeNode(node.id)}
+              className="absolute -right-2 -top-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-red-600 hover:scale-110 z-10 shadow-lg font-bold"
+              title="Delete this rule"
+            >
+              ×
+            </button>
+          )}
 
-        {node.type === "when" && (
-          <div className="flex items-center gap-4 flex-wrap">
-            <div className={styling.badge}>🚀 WHEN</div>
-            <MultiSelectTriggerDropdown
-              options={triggerEvents}
-              selectedValues={node.triggers || []}
-              onAdd={(option) =>
-                updateNode(node.id, {
-                  triggers: [...(node.triggers || []), option],
-                })
-              }
-              onRemove={(option) =>
-                updateNode(node.id, {
-                  triggers: (node.triggers || []).filter((t) => t !== option),
-                })
-              }
-              placeholder="Select trigger event..."
-              variant="primary"
-            />
-            {/* Display selected triggers as individual tags */}
-            {(node.triggers || []).map((trigger, index) => (
-              <Alert
-                key={index}
-                text={trigger}
-                variant="primary"
-                rightIcon="close"
-                onRemove={() =>
+          {node.type === "when" && (
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className={styling.badge}>🚀 WHEN</div>
+              <MultiSelectTriggerDropdown
+                options={triggerEvents}
+                selectedValues={node.triggers || []}
+                onAdd={(option) =>
                   updateNode(node.id, {
-                    triggers: (node.triggers || []).filter(
-                      (t) => t !== trigger
-                    ),
+                    triggers: [...(node.triggers || []), option],
                   })
                 }
-              />
-            ))}
-          </div>
-        )}
-
-        {node.type === "then" && (
-          <div className="flex items-center gap-4 flex-wrap">
-            <div className={styling.badge}>⚡ THEN</div>
-            <RuleDropdown
-              options={["Action", "IF statement"]}
-              value={node.selectedType}
-              onChange={(selectedType) => {
-                updateNode(node.id, { selectedType });
-                if (selectedType === "Action") {
-                  addChildNode(node.id, "action");
-                } else if (selectedType === "IF statement") {
-                  addChildNode(node.id, "if");
+                onRemove={(option) =>
+                  updateNode(node.id, {
+                    triggers: (node.triggers || []).filter((t) => t !== option),
+                  })
                 }
-              }}
-              placeholder="Choose what happens next..."
-              variant="primary"
-            />
-          </div>
-        )}
-
-        {node.type === "action" && (
-          <div className="flex items-center gap-4 flex-wrap">
-            <div className={styling.badge}>🎯 ACTION</div>
-            <RuleDropdown
-              options={actionsList}
-              value={node.action}
-              onChange={(action) => updateNode(node.id, { action })}
-              placeholder="Choose action to perform..."
-              variant="success"
-            />
-            {node.action && (
-              <div className="ml-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
-                ✓ Action configured
-              </div>
-            )}
-          </div>
-        )}
-
-        {node.type === "if" && (
-          <div className="flex items-center gap-4 flex-wrap">
-            <div className={styling.badge}>🔍 {node.logicalOp || "IF"}</div>
-            <NestedConditionDropdown
-              conditionFields={conditionFields}
-              value={node.field}
-              onChange={(field) => updateNode(node.id, { field })}
-              placeholder="Select field to check..."
-              variant="primary"
-            />
-            {node.field && (
-              <RuleDropdown
-                options={getOperatorsForField(node.field, conditionFields)}
-                value={node.operator}
-                onChange={(operator) => updateNode(node.id, { operator })}
-                placeholder="Select operator..."
+                placeholder="Select trigger event..."
                 variant="primary"
               />
-            )}
-            {node.field && node.operator && (
-              <input
-                type="text"
-                value={node.value || ""}
-                onChange={(e) => updateNode(node.id, { value: e.target.value })}
-                placeholder="Enter value..."
-                className="px-4 py-2 border-2 border-amber-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 min-w-[150px] bg-white shadow-sm"
+              {/* Display selected triggers as individual tags */}
+              {(node.triggers || []).map((trigger, index) => (
+                <Alert
+                  key={index}
+                  text={trigger}
+                  variant="primary"
+                  rightIcon="close"
+                  onRemove={() =>
+                    updateNode(node.id, {
+                      triggers: (node.triggers || []).filter(
+                        (t) => t !== trigger
+                      ),
+                    })
+                  }
+                />
+              ))}
+            </div>
+          )}
+
+          {node.type === "then" && (
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className={styling.badge}>⚡ THEN</div>
+              <RuleDropdown
+                options={["Action", "IF statement"]}
+                value={node.selectedType}
+                onChange={(selectedType) => {
+                  updateNode(node.id, { selectedType });
+                  if (selectedType === "Action") {
+                    addChildNode(node.id, "action");
+                  } else if (selectedType === "IF statement") {
+                    addChildNode(node.id, "if");
+                  }
+                }}
+                placeholder="Choose what happens next..."
+                variant="primary"
               />
-            )}
-            {node.field && node.operator && node.value && (
-              <div className="ml-2 px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-medium">
-                ✓ Condition set
+            </div>
+          )}
+
+          {node.type === "action" && (
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className={styling.badge}>🎯 ACTION</div>
+              <RuleDropdown
+                options={actionsList}
+                value={node.action}
+                onChange={(action) => updateNode(node.id, { action })}
+                placeholder="Choose action to perform..."
+                variant="success"
+              />
+              {node.action && (
+                <div className="ml-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                  ✓ Action configured
+                </div>
+              )}
+            </div>
+          )}
+
+          {node.type === "if" && (
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className={styling.badge}>🔍 {node.logicalOp || "IF"}</div>
+              <NestedConditionDropdown
+                conditionFields={conditionFields}
+                value={node.field}
+                onChange={(field) => updateNode(node.id, { field })}
+                placeholder="Select field to check..."
+                variant="primary"
+              />
+              {node.field && (
+                <RuleDropdown
+                  options={getOperatorsForField(node.field, conditionFields)}
+                  value={node.operator}
+                  onChange={(operator) => updateNode(node.id, { operator })}
+                  placeholder="Select operator..."
+                  variant="primary"
+                />
+              )}
+              {node.field && node.operator && (
+                <input
+                  type="text"
+                  value={node.value || ""}
+                  onChange={(e) =>
+                    updateNode(node.id, { value: e.target.value })
+                  }
+                  placeholder="Enter value..."
+                  className="px-4 py-2 border-2 border-amber-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 min-w-[150px] bg-white shadow-sm"
+                />
+              )}
+              {node.field && node.operator && node.value && (
+                <div className="ml-2 px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-medium">
+                  ✓ Condition set
+                </div>
+              )}
+            </div>
+          )}
+
+          {node.type === "else" && (
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="bg-red-600 text-white px-3 py-1.5 rounded-full font-semibold text-sm">
+                ❌ ELSE
               </div>
-            )}
-          </div>
-        )}
+              <RuleDropdown
+                options={actionsList}
+                value={node.action}
+                onChange={(action) => updateNode(node.id, { action })}
+                placeholder="Choose action to perform..."
+                variant="warning"
+              />
+              {node.action && (
+                <div className="ml-2 px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
+                  ✓ ELSE action configured
+                </div>
+              )}
+            </div>
+          )}
 
-        {/* Render children with connecting lines */}
-        {node.children && node.children.length > 0 && (
-          <div className="mt-4 relative">
-            {/* Connecting line */}
-            <div className="absolute left-4 top-0 w-0.5 h-full bg-gradient-to-b from-gray-300 to-transparent"></div>
-            {node.children.map((child, index) => (
-              <div key={child.id} className="relative">
-                {/* Horizontal connector */}
-                <div className="absolute left-4 top-6 w-4 h-0.5 bg-gray-300"></div>
-                {renderNode(child, depth + 1)}
-              </div>
-            ))}
-          </div>
-        )}
+          {/* Render children with connecting lines */}
+          {node.children && node.children.length > 0 && (
+            <div className="mt-4 relative">
+              {/* Connecting line */}
+              <div className="absolute left-4 top-0 w-0.5 h-full bg-gradient-to-b from-gray-300 to-transparent"></div>
+              {node.children
+                .sort((a, b) => {
+                  // Sort order: THEN first, ELSE last, others in between
+                  if (a.type === "then" && b.type !== "then") return -1;
+                  if (b.type === "then" && a.type !== "then") return 1;
+                  if (a.type === "else" && b.type !== "else") return 1;
+                  if (b.type === "else" && a.type !== "else") return -1;
+                  return 0;
+                })
+                .map((child, index) => (
+                  <div key={child.id} className="relative">
+                    {/* Horizontal connector */}
+                    <div className="absolute left-4 top-6 w-4 h-0.5 bg-gray-300"></div>
+                    {renderNode(child, depth + 1, node.type)}
+                  </div>
+                ))}
+            </div>
+          )}
 
-        {/* Add THEN button for WHEN nodes */}
-        {node.type === "when" && node.triggers && node.triggers.length > 0 && (
-          <div className="mt-6 pl-8 border-l-2 border-blue-200">
-            <button
-              className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
-              onClick={() => addChildNode(node.id, "then")}
-            >
-              <span>⚡</span>
-              Add THEN condition
-            </button>
-          </div>
-        )}
-
-        {/* Add condition buttons for IF nodes */}
-        {node.type === "if" && (
-          <div className="mt-4 pl-8 border-l-2 border-amber-200">
-            <div className="flex gap-3 flex-wrap">
+          {/* Add THEN button for WHEN nodes */}
+          {/* {node.type === "when" && node.triggers && node.triggers.length > 0 && (
+            <div className="mt-6 pl-8 border-l-2 border-blue-200">
               <button
-                className="inline-flex items-center gap-2 px-3 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
-                onClick={() => addChildNode(node.id, "if", "AND")}
-              >
-                <span>➕</span>
-                Add AND
-              </button>
-              <button
-                className="inline-flex items-center gap-2 px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
-                onClick={() => addChildNode(node.id, "if", "OR")}
-              >
-                <span>🔄</span>
-                Add OR
-              </button>
-              <button
-                className="inline-flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
                 onClick={() => addChildNode(node.id, "then")}
               >
                 <span>⚡</span>
-                Add THEN
+                Add THEN condition
               </button>
             </div>
-          </div>
-        )}
-      </div>
+          )} */}
+          {node.type === "if" && (
+            <div
+              className="mt-4 pl-8 border-l-2 border-amber-200"
+              style={{ marginLeft: `${marginLeft}px` }}
+            >
+              <div className="flex gap-3 flex-wrap">
+                {/* Add AND button - only show if no AND child exists */}
+                {!node.children.some(
+                  (child) => child.type === "if" && child.logicalOp === "AND"
+                ) && (
+                  <button
+                    className="inline-flex items-center gap-2 px-3 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
+                    onClick={() => addChildNode(node.id, "if", "AND")}
+                  >
+                    <span>➕</span>
+                    Add AND
+                  </button>
+                )}
+                {/* Add OR button - only show if no OR child exists */}
+                {!node.children.some(
+                  (child) => child.type === "if" && child.logicalOp === "OR"
+                ) && (
+                  <button
+                    className="inline-flex items-center gap-2 px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
+                    onClick={() => addChildNode(node.id, "if", "OR")}
+                  >
+                    <span>🔄</span>
+                    Add OR
+                  </button>
+                )}
+                {/* Add THEN button - only show if no THEN child exists */}
+                {!node.children.some((child) => child.type === "then") && (
+                  <button
+                    className="inline-flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
+                    onClick={() => addChildNode(node.id, "then")}
+                  >
+                    <span>⚡</span>
+                    Add THEN
+                  </button>
+                )}
+                {/* Add ELSE button - only show for IF statements (not AND/OR) and if no ELSE child exists */}
+                {(node.logicalOp === "IF" || !node.logicalOp) &&
+                  !node.children.some((child) => child.type === "else") && (
+                    <button
+                      className="inline-flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
+                      onClick={() => addChildNode(node.id, "else")}
+                    >
+                      <span>❌</span>
+                      Add ELSE
+                    </button>
+                  )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Add condition buttons for IF nodes - positioned outside the main container */}
+      </>
     );
   };
 
@@ -842,7 +916,7 @@ export default function TriggerCustom() {
           </p>
           <div className="overflow-x-auto">
             <div className="border-2 border-indigo-200 rounded-xl lg:rounded-2xl xl:rounded-[20px] p-6 lg:p-8 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 shadow-lg">
-              {ruleNodes.map((node) => renderNode(node))}
+              {ruleNodes.map((node) => renderNode(node, 0, null))}
               {/* 
               <div className="mt-8 pt-6 border-t-2 border-indigo-200">
                 <button

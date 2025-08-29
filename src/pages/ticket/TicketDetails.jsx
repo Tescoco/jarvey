@@ -29,23 +29,29 @@ export default function Tickets() {
   const [quantity, setQuantity] = useState(3);
 
   // Resizable sections state
+  const [ticketsPanelWidth, setTicketsPanelWidth] = useState(280);
   const [leftWidth, setLeftWidth] = useState(280);
   const [rightWidth, setRightWidth] = useState(320);
   const [typingHeight, setTypingHeight] = useState(280);
+  const [isResizingTicketsPanel, setIsResizingTicketsPanel] = useState(false);
   const [isResizingLeft, setIsResizingLeft] = useState(false);
   const [isResizingRight, setIsResizingRight] = useState(false);
   const [isResizingTyping, setIsResizingTyping] = useState(false);
+  const ticketsPanelResizerRef = useRef(null);
   const leftResizerRef = useRef(null);
   const rightResizerRef = useRef(null);
   const typingResizerRef = useRef(null);
   const animationFrameRef = useRef(null);
   const initialMouseX = useRef(0);
   const initialMouseY = useRef(0);
+  const initialTicketsPanelWidth = useRef(280);
   const initialLeftWidth = useRef(280);
   const initialRightWidth = useRef(320);
   const initialTypingHeight = useRef(280);
 
   // Size constraints
+  const MIN_TICKETS_PANEL_WIDTH = 200;
+  const MAX_TICKETS_PANEL_WIDTH = 400;
   const MIN_LEFT_WIDTH = 200;
   const MAX_LEFT_WIDTH = 500;
   const MIN_RIGHT_WIDTH = 250;
@@ -372,6 +378,35 @@ export default function Tickets() {
     );
   };
   const isAllChecked = selected.length === tickets.length;
+
+  // Tickets panel data
+  const ticketsCategories = [
+    { name: "Inbox", count: 2, icon: "inbox", isSelected: true },
+    { name: "Unassigned", count: 16, icon: "person" },
+    { name: "All", count: 18, icon: "stack" },
+    { name: "Snoozed", count: 0, icon: "alarm" },
+  ];
+
+  const sharedViews = [
+    { name: "tiger.s.ai.2024@gmail.co", count: 14 },
+    { name: "Auto close spam", count: 82 },
+    { name: "Low CSAT", count: 0 },
+    { name: "Auto Close IG Mentions", count: 0 },
+    { name: "Auto Close Social Comm", count: 0 },
+    { name: "Order status", count: 1 },
+    { name: "Returns", count: 1 },
+    { name: "Product", count: 1 },
+    { name: "Order updates", count: 1 },
+    { name: "Urgent", count: 0 },
+    { name: "VIP", count: 1 },
+    { name: "Auto-close Instagram giv", count: 0 },
+    { name: "Potential customers", count: 0 },
+    { name: "Social leads", count: 0 },
+    { name: "Offline Capture", count: 1 },
+    { name: "Help Center survey", count: 1 },
+  ];
+
+  const [sharedViewsExpanded, setSharedViewsExpanded] = useState(true);
 
   const stores = [
     { name: "stores-1" },
@@ -1062,6 +1097,13 @@ export default function Tickets() {
   };
 
   // Resize handlers
+  const handleMouseDownTicketsPanel = (e) => {
+    e.preventDefault();
+    initialMouseX.current = e.clientX;
+    initialTicketsPanelWidth.current = ticketsPanelWidth;
+    setIsResizingTicketsPanel(true);
+  };
+
   const handleMouseDownLeft = (e) => {
     e.preventDefault();
     initialMouseX.current = e.clientX;
@@ -1081,6 +1123,14 @@ export default function Tickets() {
     initialMouseY.current = e.clientY;
     initialTypingHeight.current = typingHeight;
     setIsResizingTyping(true);
+  };
+
+  const handleDoubleClickTicketsPanel = () => {
+    if (ticketsPanelWidth > MIN_TICKETS_PANEL_WIDTH + 20) {
+      setTicketsPanelWidth(MIN_TICKETS_PANEL_WIDTH); // Collapse to minimum
+    } else {
+      setTicketsPanelWidth(280); // Expand to default
+    }
   };
 
   const handleDoubleClickLeft = () => {
@@ -1113,6 +1163,17 @@ export default function Tickets() {
     }
 
     animationFrameRef.current = requestAnimationFrame(() => {
+      if (isResizingTicketsPanel) {
+        const deltaX = e.clientX - initialMouseX.current;
+        const newWidth = Math.max(
+          MIN_TICKETS_PANEL_WIDTH,
+          Math.min(
+            MAX_TICKETS_PANEL_WIDTH,
+            initialTicketsPanelWidth.current + deltaX
+          )
+        );
+        setTicketsPanelWidth(newWidth);
+      }
       if (isResizingLeft) {
         const deltaX = e.clientX - initialMouseX.current;
         const newWidth = Math.max(
@@ -1141,6 +1202,7 @@ export default function Tickets() {
   };
 
   const handleMouseUp = () => {
+    setIsResizingTicketsPanel(false);
     setIsResizingLeft(false);
     setIsResizingRight(false);
     setIsResizingTyping(false);
@@ -1150,6 +1212,7 @@ export default function Tickets() {
   };
 
   const resetLayout = () => {
+    setTicketsPanelWidth(280);
     setLeftWidth(280);
     setRightWidth(320);
     setTypingHeight(280);
@@ -1157,7 +1220,13 @@ export default function Tickets() {
 
   // Resize indicator component
   const ResizeIndicator = () => {
-    if (!isResizingLeft && !isResizingRight && !isResizingTyping) return null;
+    if (
+      !isResizingTicketsPanel &&
+      !isResizingLeft &&
+      !isResizingRight &&
+      !isResizingTyping
+    )
+      return null;
 
     const getConstraintText = (value, min, max, label) => {
       if (value <= min) return `${label}: ${value}px (MIN)`;
@@ -1168,6 +1237,18 @@ export default function Tickets() {
     return (
       <div className="fixed top-4 right-4 bg-black/90 backdrop-blur-sm text-white px-4 py-3 rounded-lg text-sm z-50 pointer-events-none shadow-xl border border-white/20 animate-in fade-in slide-in-from-top-2 duration-200">
         <div className="flex gap-6 font-mono">
+          <span
+            className={`transition-colors duration-200 ${
+              isResizingTicketsPanel ? "text-blue-300" : "text-gray-300"
+            }`}
+          >
+            {getConstraintText(
+              ticketsPanelWidth,
+              MIN_TICKETS_PANEL_WIDTH,
+              MAX_TICKETS_PANEL_WIDTH,
+              "Tickets"
+            )}
+          </span>
           <span
             className={`transition-colors duration-200 ${
               isResizingLeft ? "text-blue-300" : "text-gray-300"
@@ -1212,18 +1293,33 @@ export default function Tickets() {
   // Event listeners for resize
   useEffect(() => {
     const handleGlobalMouseMove = (e) => {
-      if (isResizingLeft || isResizingRight || isResizingTyping) {
+      if (
+        isResizingTicketsPanel ||
+        isResizingLeft ||
+        isResizingRight ||
+        isResizingTyping
+      ) {
         handleMouseMove(e);
       }
     };
 
     const handleGlobalMouseUp = () => {
-      if (isResizingLeft || isResizingRight || isResizingTyping) {
+      if (
+        isResizingTicketsPanel ||
+        isResizingLeft ||
+        isResizingRight ||
+        isResizingTyping
+      ) {
         handleMouseUp();
       }
     };
 
-    if (isResizingLeft || isResizingRight || isResizingTyping) {
+    if (
+      isResizingTicketsPanel ||
+      isResizingLeft ||
+      isResizingRight ||
+      isResizingTyping
+    ) {
       document.addEventListener("mousemove", handleGlobalMouseMove);
       document.addEventListener("mouseup", handleGlobalMouseUp);
       document.body.style.cursor = isResizingTyping
@@ -1238,7 +1334,12 @@ export default function Tickets() {
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
     };
-  }, [isResizingLeft, isResizingRight, isResizingTyping]);
+  }, [
+    isResizingTicketsPanel,
+    isResizingLeft,
+    isResizingRight,
+    isResizingTyping,
+  ]);
 
   // Cleanup animation frame on unmount
   useEffect(() => {
@@ -1457,7 +1558,10 @@ export default function Tickets() {
         </Modal>
       )}
       {/* Resize overlay for smoother interaction */}
-      {(isResizingLeft || isResizingRight || isResizingTyping) && (
+      {(isResizingTicketsPanel ||
+        isResizingLeft ||
+        isResizingRight ||
+        isResizingTyping) && (
         <div
           className={`fixed inset-0 z-40 ${
             isResizingTyping ? "cursor-row-resize" : "cursor-col-resize"
@@ -1487,6 +1591,274 @@ export default function Tickets() {
         </div>
       </Top>
       <div className="flex h-[calc(100vh-88px)] overflow-hidden">
+        {/* Tickets Panel - Leftmost */}
+        <div
+          className={`h-full bg-[#F7F7F7] tickets-panel flex flex-col flex-shrink-0 ${
+            isResizingTicketsPanel
+              ? "transition-none"
+              : "transition-all duration-200 ease-out"
+          }`}
+          style={{
+            width: `${ticketsPanelWidth}px`,
+            minWidth: `${MIN_TICKETS_PANEL_WIDTH}px`,
+            maxWidth: `${MAX_TICKETS_PANEL_WIDTH}px`,
+            willChange: isResizingTicketsPanel ? "width" : "auto",
+          }}
+        >
+          {/* Tickets Panel Header */}
+          <div className="flex-shrink-0 p-4 border-b border-[#E2E4E9]">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-[#0A0D14]">Tickets</h2>
+            </div>
+            <button className="w-full flex items-center gap-2 px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 14 14"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M7 1V13M1 7H13"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Create ticket
+            </button>
+          </div>
+
+          {/* Tickets Panel Content */}
+          <div className="flex-1 overflow-y-auto">
+            {/* Main Navigation */}
+            <div className="p-2">
+              {ticketsCategories.map((category, index) => (
+                <div
+                  key={index}
+                  className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors ${
+                    category.isSelected
+                      ? "bg-[#F4F2FF] text-primary"
+                      : "hover:bg-gray-100 text-[#0A0D14]"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-5 h-5 flex items-center justify-center">
+                      {category.icon === "inbox" && (
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M2 4H14M2 4V12C2 12.5523 2.44772 13 3 13H13C13.5523 13 14 12.5523 14 12V4M2 4L8 9L14 4"
+                            stroke="currentColor"
+                            strokeWidth="1.25"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      )}
+                      {category.icon === "person" && (
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M8 8C10.2091 8 12 6.20914 12 4C12 1.79086 10.2091 0 8 0C5.79086 0 4 1.79086 4 4C4 6.20914 5.79086 8 8 8Z"
+                            stroke="currentColor"
+                            strokeWidth="1.25"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M2 14C2 11.7909 3.79086 10 6 10H10C12.2091 10 14 11.7909 14 14"
+                            stroke="currentColor"
+                            strokeWidth="1.25"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      )}
+                      {category.icon === "stack" && (
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M2 4H14M2 4V12C2 12.5523 2.44772 13 3 13H13C13.5523 13 14 12.5523 14 12V4M2 4L8 9L14 4"
+                            stroke="currentColor"
+                            strokeWidth="1.25"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M2 8H14M2 8V16C2 16.5523 2.44772 17 3 17H13C13.5523 17 14 16.5523 14 16V8M2 8L8 13L14 8"
+                            stroke="currentColor"
+                            strokeWidth="1.25"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      )}
+                      {category.icon === "alarm" && (
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M8 2V1M8 2C4.68629 2 2 4.68629 2 8C2 11.3137 4.68629 14 8 14C11.3137 14 14 11.3137 14 8C14 4.68629 11.3137 2 8 2ZM8 6V8L10 10"
+                            stroke="currentColor"
+                            strokeWidth="1.25"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M12 2L11 3M5 3L4 2"
+                            stroke="currentColor"
+                            strokeWidth="1.25"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                    <span className="text-sm font-medium">{category.name}</span>
+                  </div>
+                  <span className="text-xs text-gray-500">
+                    ({category.count})
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Shared Views Section */}
+            <div className="p-2 border-t border-[#E2E4E9]">
+              <div
+                className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors"
+                onClick={() => setSharedViewsExpanded(!sharedViewsExpanded)}
+              >
+                <div className="flex items-center gap-3">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M2 4H14M2 4V12C2 12.5523 2.44772 13 3 13H13C13.5523 13 14 12.5523 14 12V4M2 4L8 9L14 4"
+                      stroke="currentColor"
+                      strokeWidth="1.25"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <circle cx="12" cy="6" r="2" fill="currentColor" />
+                  </svg>
+                  <span className="text-sm font-medium text-[#0A0D14]">
+                    Shared views
+                  </span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button className="w-4 h-4 flex items-center justify-center text-gray-500 hover:text-gray-700">
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 12 12"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M6 2V10M2 6H10"
+                        stroke="currentColor"
+                        strokeWidth="1.25"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                  <button className="w-4 h-4 flex items-center justify-center text-gray-500 hover:text-gray-700">
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 12 12"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className={`transition-transform duration-200 ${
+                        sharedViewsExpanded ? "rotate-180" : ""
+                      }`}
+                    >
+                      <path
+                        d="M3 4.5L6 7.5L9 4.5"
+                        stroke="currentColor"
+                        strokeWidth="1.25"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {sharedViewsExpanded && (
+                <div className="mt-2">
+                  {sharedViews.map((view, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between px-3 py-2 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors"
+                    >
+                      <span className="text-sm text-[#0A0D14] truncate">
+                        {view.name}
+                      </span>
+                      <span className="text-xs text-gray-500 flex-shrink-0">
+                        ({view.count})
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Tickets Panel Resize Handle */}
+        <div
+          ref={ticketsPanelResizerRef}
+          className={`w-1 cursor-col-resize transition-all duration-200 relative group flex-shrink-0 ${
+            isResizingTicketsPanel
+              ? "bg-blue-500 shadow-lg"
+              : "bg-gray-200 hover:bg-blue-400"
+          }`}
+          onMouseDown={handleMouseDownTicketsPanel}
+          onDoubleClick={handleDoubleClickTicketsPanel}
+          style={{
+            height: "100%",
+            transform: isResizingTicketsPanel ? "scaleX(2)" : "scaleX(1)",
+            zIndex: isResizingTicketsPanel ? 50 : 10,
+          }}
+          title="Drag to resize tickets panel • Double-click to toggle"
+        >
+          <div
+            className={`absolute inset-y-0 left-1/2 transform -translate-x-1/2 w-0.5 bg-blue-400 transition-opacity duration-200 ${
+              isResizingTicketsPanel
+                ? "opacity-100"
+                : "opacity-0 group-hover:opacity-100"
+            }`}
+          />
+        </div>
+
         {/* Left sidebar */}
         <div
           className={`h-full bg-[#F7F7F7] left flex flex-col flex-shrink-0 ${

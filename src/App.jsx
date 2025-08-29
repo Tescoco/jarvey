@@ -6,6 +6,7 @@ import {
 } from "react-router-dom";
 import { AvailabilityProvider } from "./contexts/AvailabilityContext";
 import { GlobalDismissProvider } from "./contexts/GlobalDismissContext";
+import OnboardingRouteGuard from "./components/OnboardingRouteGuard";
 
 // all pages
 import Index from "./layouts/Index";
@@ -134,9 +135,17 @@ export default function App() {
   const router = createBrowserRouter([
     {
       path: "/onboarding",
-      element: <OnboardingLayout />,
+      element: (
+        <OnboardingRouteGuard>
+          <OnboardingLayout />
+        </OnboardingRouteGuard>
+      ),
       errorElement: <Error />,
       children: [
+        {
+          index: true,
+          element: <Home />,
+        },
         {
           path: "connect-store",
           element: <ConnectStore />,
@@ -148,6 +157,18 @@ export default function App() {
         {
           path: "answer-ticket",
           element: <AnswerTicket />,
+        },
+        {
+          path: "setup-ai-agent",
+          element: <SetupAiAgent />,
+        },
+        {
+          path: "ai-agent-setting",
+          element: <AiAgentSetting />,
+        },
+        {
+          path: "create-help-center",
+          element: <CreateHelpCenter />,
         },
         {
           path: "add-support-channels",
@@ -208,12 +229,16 @@ export default function App() {
       ],
     },
     {
-      path: "",
-      element: <OnboardingLayout />,
+      path: "/",
+      element: (
+        <OnboardingRouteGuard>
+          <OnboardingLayout />
+        </OnboardingRouteGuard>
+      ),
       errorElement: <Error />,
       children: [
         {
-          path: "/",
+          index: true,
           element: <Home />,
         },
       ],
@@ -223,10 +248,6 @@ export default function App() {
       element: <Index />,
       errorElement: <Error />,
       children: [
-        {
-          path: "search",
-          element: <Search />,
-        },
         {
           path: "notification",
           element: <Notification />,

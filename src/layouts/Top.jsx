@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { handleChange } from "../store/MenuSlice";
+import SearchModal from "../components/SearchModal";
 // import favicon from '../assets/img/favicon.svg'
 
 export default function Top({
@@ -10,6 +11,7 @@ export default function Top({
   titleClass = "capitalize",
   children,
 }) {
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const location = useLocation();
   const newTitle =
     title ||
@@ -23,6 +25,21 @@ export default function Top({
           .replace(/-/g, " ")
     ).replace(/^ ?> /, "");
   const dispatch = useDispatch();
+
+  // Add keyboard shortcut for search (Ctrl+K or Cmd+K)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        setIsSearchOpen(true);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   return (
     <div
@@ -57,7 +74,39 @@ export default function Top({
           </h4>
         )}
       </div>
-      {children}
+
+      <div className="flex items-center gap-3">
+        {/* Search Button */}
+        <button
+          onClick={() => setIsSearchOpen(true)}
+          className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+          title="Search (Ctrl+K)"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M16.6667 16.6667L13.375 13.375M15 9.16671C15 12.3884 12.3884 15 9.16671 15C5.94505 15 3.33337 12.3884 3.33337 9.16671C3.33337 5.94505 5.94505 3.33337 9.16671 3.33337C12.3884 3.33337 15 5.94505 15 9.16671Z"
+              stroke="#111111"
+              strokeOpacity="0.7"
+              strokeWidth="1.66667"
+              strokeLinecap="square"
+            />
+          </svg>
+        </button>
+
+        {children}
+      </div>
+
+      {/* Search Modal */}
+      <SearchModal
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+      />
     </div>
   );
 }

@@ -405,7 +405,7 @@ export default function InstallTriggers({ install }) {
               {filtered.length === 0 && (
                 <tr>
                   <td className="py-3 px-3 text-sm text-[#858585]" colSpan={3}>
-                    No installed triggers yet.
+                    No installed Triggers yet. Add one by clicking on a Trigger
                   </td>
                 </tr>
               )}

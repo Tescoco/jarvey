@@ -37,28 +37,7 @@ export default function Left({ className }) {
             path: "/app",
             count: null,
           },
-          {
-            icon: (
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M16.6667 16.6667L13.375 13.375M15 9.16671C15 12.3884 12.3884 15 9.16671 15C5.94505 15 3.33337 12.3884 3.33337 9.16671C3.33337 5.94505 5.94505 3.33337 9.16671 3.33337C12.3884 3.33337 15 5.94505 15 9.16671Z"
-                  stroke="#111111"
-                  strokeOpacity="0.7"
-                  strokeWidth="1.66667"
-                  strokeLinecap="square"
-                />
-              </svg>
-            ),
-            name: "Search",
-            path: "/app/search",
-            count: null,
-          },
+
           {
             icon: (
               <svg
@@ -173,6 +152,11 @@ export default function Left({ className }) {
             icon: null,
             name: "Predefined Response",
             path: "/app/predefined",
+          },
+          {
+            icon: null,
+            name: "Field Condition",
+            path: "/app/field-conditions",
           },
           {
             icon: null,
