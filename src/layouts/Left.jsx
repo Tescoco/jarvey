@@ -1,17 +1,93 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import Logo from "../components/Logo";
 import { useDispatch, useSelector } from "react-redux";
 import { handleChange } from "../store/MenuSlice";
 import LeftUser from "../components/LeftUser";
+import { useDismissibleDropdown } from "../hooks/useDismissible";
+import SearchModal from "../components/SearchModal";
 
 export default function Left({ className }) {
   const mobileMenu = useSelector((e) => e.menu.mobileMenu);
   const dispatch = useDispatch();
 
   const [menus, setMenus] = useState([""]);
+  const [sharedViewsExpanded, setSharedViewsExpanded] = useState(true);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
+  const notificationsRef = useRef(null);
   const location = useLocation();
   const pathname = location.pathname;
+
+  // Register notifications dropdown for global dismiss
+  useDismissibleDropdown(
+    notificationsOpen,
+    () => setNotificationsOpen(false),
+    notificationsRef
+  );
+
+  // Sample notification data
+  const notifications = [
+    {
+      id: 1,
+      title: "New ticket assigned",
+      message: "You have been assigned to ticket #1234",
+      time: "2 minutes ago",
+      type: "assignment",
+      unread: true,
+    },
+    {
+      id: 2,
+      title: "Customer response",
+      message: "Customer replied to ticket #1230",
+      time: "15 minutes ago",
+      type: "response",
+      unread: true,
+    },
+    {
+      id: 3,
+      title: "SLA breach warning",
+      message: "Ticket #1228 will breach SLA in 1 hour",
+      time: "30 minutes ago",
+      type: "warning",
+      unread: false,
+    },
+    {
+      id: 4,
+      title: "System maintenance",
+      message: "Scheduled maintenance tonight at 11 PM",
+      time: "1 hour ago",
+      type: "system",
+      unread: false,
+    },
+  ];
+
+  // Ticket navigation data
+  const ticketsCategories = [
+    { name: "Inbox", count: 2, icon: "inbox", isSelected: true },
+    { name: "Unassigned", count: 16, icon: "person" },
+    { name: "All", count: 18, icon: "stack" },
+    { name: "Snoozed", count: 0, icon: "alarm" },
+  ];
+
+  const sharedViews = [
+    { name: "tiger.s.ai.2024@gmail.co", count: 14 },
+    { name: "Auto close spam", count: 82 },
+    { name: "Low CSAT", count: 0 },
+    { name: "Auto Close IG Mentions", count: 0 },
+    { name: "Auto Close Social Comm", count: 0 },
+    { name: "Order status", count: 1 },
+    { name: "Returns", count: 1 },
+    { name: "Product", count: 1 },
+    { name: "Order updates", count: 1 },
+    { name: "Urgent", count: 0 },
+    { name: "VIP", count: 1 },
+    { name: "Auto-close Instagram giv", count: 0 },
+    { name: "Potential customers", count: 0 },
+    { name: "Social leads", count: 0 },
+    { name: "Offline Capture", count: 1 },
+    { name: "Help Center survey", count: 1 },
+  ];
   useEffect(() => {
     const baseMenu = [
       {
@@ -37,7 +113,29 @@ export default function Left({ className }) {
             path: "/app",
             count: null,
           },
-
+          {
+            icon: (
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M17.5 17.5L13.875 13.875M15.8333 9.16667C15.8333 12.8486 12.8486 15.8333 9.16667 15.8333C5.48477 15.8333 2.5 12.8486 2.5 9.16667C2.5 5.48477 5.48477 2.5 9.16667 2.5C12.8486 2.5 15.8333 5.48477 15.8333 9.16667Z"
+                  stroke="#111111"
+                  strokeOpacity="0.7"
+                  strokeWidth="1.66667"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            ),
+            name: "Search",
+            path: null, // Special case - will open search modal
+            isSearch: true,
+          },
           {
             icon: (
               <svg
@@ -57,7 +155,9 @@ export default function Left({ className }) {
               </svg>
             ),
             name: "Notifications",
-            path: "/app/notification",
+            path: null, // Special case - will render as dropdown
+            isNotification: true,
+            count: notifications.filter((n) => n.unread).length,
           },
           {
             icon: (
@@ -101,6 +201,40 @@ export default function Left({ className }) {
             ),
             name: "Message",
             path: "/app/message",
+          },
+        ],
+      },
+      {
+        label: {
+          name: "Email",
+          icon: (
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M2.66667 4H13.3333M2.66667 4V12C2.66667 12.5523 3.11438 13 3.66667 13H12.3333C12.8856 13 13.3333 12.5523 13.3333 12V4M2.66667 4L8 8.66667L13.3333 4"
+                stroke="#858585"
+                strokeWidth="1.1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          ),
+        },
+        items: [
+          {
+            icon: null,
+            name: "Email Configuration",
+            path: "/app/email-configuration",
+          },
+          {
+            icon: null,
+            name: "Email",
+            path: "/app/email",
           },
         ],
       },
@@ -282,18 +416,8 @@ export default function Left({ className }) {
           },
           {
             icon: null,
-            name: "Email Configuration",
-            path: "/app/email-configuration",
-          },
-          {
-            icon: null,
             name: "Ticket Configuration",
             path: "/app/ticket-configuration",
-          },
-          {
-            icon: null,
-            name: "Email",
-            path: "/app/email",
           },
         ],
       },
@@ -752,6 +876,7 @@ export default function Left({ className }) {
         ],
       },
     ];
+
     const ticketPage = [
       {
         label: null,
@@ -1413,7 +1538,10 @@ export default function Left({ className }) {
     } else if (pathname.includes("admin")) {
       setMenus([...baseMenu, ...adminPage]);
     } else if (pathname.includes("tickets") || pathname.includes("/ticket/")) {
-      setMenus([...baseMenu, ...ticketPage]);
+      // remve the last item of the baseMenu
+      const newMenu = [...baseMenu];
+      newMenu.pop();
+      setMenus([...newMenu]);
     } else if (pathname.includes("profile")) {
       setMenus([...baseMenu]);
     } else {
@@ -1438,73 +1566,592 @@ export default function Left({ className }) {
           <Logo />
         </div>
         <div className="layout-menu max--[calc(100vh-88px-98px)] h-full overflow-y-auto">
-          {menus.map((item, index) => (
-            <div
-              className={`${
-                index === menus.length - 1 ? "border-b-0" : "border-b"
-              } border-solid border-stroke p-4 md:p-5`}
-              key={index}
-            >
-              {item.label && (
+          {/* Special rendering for tickets pages */}
+          {pathname.includes("tickets") || pathname.includes("/ticket/") ? (
+            <>
+              {/* Regular menu items for tickets page */}
+              {menus.map((item, index) => (
                 <div
-                  className={`flex items-center gap-1 ${
-                    item.label.icon ? "mb-1.5" : "mb-2.5"
-                  }`}
+                  className={`${
+                    index === menus.length - 1 ? "border-b-0" : "border-b"
+                  } border-solid border-stroke p-4 md:p-5`}
+                  key={index}
                 >
-                  {item.label.icon}
-                  <strong className="block uppercase font-inter font-normal text-[#868C98] text-sm tracking-[0.48px]">
-                    {item.label.name}
-                  </strong>
-                </div>
-              )}
-              {item.items?.map((link, k) => (
-                <NavLink
-                  onClick={() =>
-                    window.innerWidth < 991 && dispatch(handleChange())
-                  }
-                  to={link.path || "#"}
-                  key={k}
-                  className={`${item.label?.icon ? "ml-5" : ""} ${
-                    k === item.items.length - 1 ? "mb-0" : "mb-1"
-                  } flex items-center justify-between gap-2 px-3 py-2 bg-transparent rounded-lg hover:bg-[#F1EEFF] text-[#111]/70 font-inter font-medium text-sm capitalize`}
-                >
-                  <span className="flex items-center justify-between gap-2">
-                    {link?.icon && link?.icon}
-                    {link.color && (
-                      <span className="flex-none size-5 flex items-center justify-center">
-                        <span className="size-3 block bg-white p-[2px] rounded-full shadow-[0px_2px_4px_0px_rgba(27,28,29,0.2)]">
-                          <span
-                            className="block size-full rounded-full bg-[var(--bg)]"
-                            style={{ "--bg": link.color }}
-                          />
-                        </span>
-                      </span>
-                    )}
-                    <span
-                      className={`text ${
-                        pathname.includes("help-center") ? "text-[#525866]" : ""
+                  {item.label && (
+                    <div
+                      className={`flex items-center gap-1 ${
+                        item.label.icon ? "mb-1.5" : "mb-2.5"
                       }`}
                     >
-                      <span className="line-clamp-1">{link?.name}</span>
-                      {link?.des && (
-                        <span className="block text-[10px] !leading-tight">
-                          {link?.des}
-                        </span>
-                      )}
-                    </span>
-                  </span>
-                  {link.count && (
-                    <strong className="flex-none h-6 px-[6px] flex items-center justify-center font-inter font-medium text-sm text-heading border border-solid border-stroke rounded-md">
-                      {link.count}
-                    </strong>
+                      {item.label.icon}
+                      <strong className="block uppercase font-inter font-normal text-[#868C98] text-sm tracking-[0.48px]">
+                        {item.label.name}
+                      </strong>
+                    </div>
                   )}
-                </NavLink>
+                  {item.items?.map((link, k) =>
+                    link.isSearch ? (
+                      <button
+                        key={k}
+                        onClick={() => setSearchModalOpen(true)}
+                        className={`${item.label?.icon ? "ml-5" : ""} ${
+                          k === item.items.length - 1 ? "mb-0" : "mb-1"
+                        } w-full flex items-center justify-between gap-2 px-3 py-2 bg-transparent rounded-lg hover:bg-[#F1EEFF] text-[#111]/70 font-inter font-medium text-sm capitalize`}
+                      >
+                        <span className="flex items-center justify-between gap-2">
+                          {link?.icon && link?.icon}
+                          <span className="text">
+                            <span className="line-clamp-1">{link?.name}</span>
+                          </span>
+                        </span>
+                      </button>
+                    ) : link.isNotification ? (
+                      <div key={k} className="relative">
+                        <button
+                          ref={notificationsRef}
+                          onClick={() =>
+                            setNotificationsOpen(!notificationsOpen)
+                          }
+                          className={`${item.label?.icon ? "ml-5" : ""} ${
+                            k === item.items.length - 1 ? "mb-0" : "mb-1"
+                          } w-full flex items-center justify-between gap-2 px-3 py-2 bg-transparent rounded-lg hover:bg-[#F1EEFF] text-[#111]/70 font-inter font-medium text-sm capitalize`}
+                        >
+                          <span className="flex items-center justify-between gap-2">
+                            {link?.icon && link?.icon}
+                            <span className="text">
+                              <span className="line-clamp-1">{link?.name}</span>
+                            </span>
+                          </span>
+                          {link.count > 0 && (
+                            <strong className="flex-none h-6 px-[6px] flex items-center justify-center font-inter font-medium text-sm text-white bg-primary rounded-md">
+                              {link.count}
+                            </strong>
+                          )}
+                        </button>
+
+                        {/* Notifications Dropdown */}
+                        {notificationsOpen && (
+                          <div
+                            data-dropdown-content
+                            className="fixed left-[275px] top-20 w-80 bg-white border border-stroke rounded-xl shadow-xl z-[100] max-h-96 overflow-y-auto"
+                          >
+                            <div className="p-4 border-b border-stroke">
+                              <div className="flex items-center justify-between">
+                                <h3 className="font-medium text-heading">
+                                  Notifications
+                                </h3>
+                                <button className="text-xs text-primary hover:underline">
+                                  Mark all as read
+                                </button>
+                              </div>
+                            </div>
+                            <div className="py-2">
+                              {notifications.length > 0 ? (
+                                notifications.map((notification) => (
+                                  <div
+                                    key={notification.id}
+                                    className={`px-4 py-3 hover:bg-gray-50 cursor-pointer border-l-4 ${
+                                      notification.unread
+                                        ? "border-l-primary bg-blue-50/30"
+                                        : "border-l-transparent"
+                                    }`}
+                                  >
+                                    <div className="flex items-start gap-3">
+                                      <div
+                                        className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
+                                          notification.unread
+                                            ? "bg-primary"
+                                            : "bg-gray-300"
+                                        }`}
+                                      ></div>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center justify-between">
+                                          <h4 className="text-sm font-medium text-heading truncate">
+                                            {notification.title}
+                                          </h4>
+                                          <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
+                                            {notification.time}
+                                          </span>
+                                        </div>
+                                        <p className="text-xs text-gray-600 mt-1 line-clamp-2">
+                                          {notification.message}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))
+                              ) : (
+                                <div className="px-4 py-8 text-center text-gray-500">
+                                  <svg
+                                    className="w-8 h-8 mx-auto mb-2 text-gray-400"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M15 17h5l-5 5-5-5h5v-12"
+                                    />
+                                  </svg>
+                                  <p className="text-sm">No notifications</p>
+                                </div>
+                              )}
+                            </div>
+                            <div className="p-3 border-t border-stroke">
+                              <button className="w-full text-center text-sm text-primary hover:underline">
+                                View all notifications
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <NavLink
+                        onClick={() =>
+                          window.innerWidth < 991 && dispatch(handleChange())
+                        }
+                        to={link.path || "#"}
+                        key={k}
+                        className={`${item.label?.icon ? "ml-5" : ""} ${
+                          k === item.items.length - 1 ? "mb-0" : "mb-1"
+                        } flex items-center justify-between gap-2 px-3 py-2 bg-transparent rounded-lg hover:bg-[#F1EEFF] text-[#111]/70 font-inter font-medium text-sm capitalize`}
+                      >
+                        <span className="flex items-center justify-between gap-2">
+                          {link?.icon && link?.icon}
+                          {link.color && (
+                            <span className="flex-none size-5 flex items-center justify-center">
+                              <span className="size-3 block bg-white p-[2px] rounded-full shadow-[0px_2px_4px_0px_rgba(27,28,29,0.2)]">
+                                <span
+                                  className="block size-full rounded-full bg-[var(--bg)]"
+                                  style={{ "--bg": link.color }}
+                                />
+                              </span>
+                            </span>
+                          )}
+                          <span
+                            className={`text ${
+                              pathname.includes("help-center")
+                                ? "text-[#525866]"
+                                : ""
+                            }`}
+                          >
+                            <span className="line-clamp-1">{link?.name}</span>
+                            {link?.des && (
+                              <span className="block text-[10px] !leading-tight">
+                                {link?.des}
+                              </span>
+                            )}
+                          </span>
+                        </span>
+                        {link.count && (
+                          <strong className="flex-none h-6 px-[6px] flex items-center justify-center font-inter font-medium text-sm text-heading border border-solid border-stroke rounded-md">
+                            {link.count}
+                          </strong>
+                        )}
+                      </NavLink>
+                    )
+                  )}
+                </div>
               ))}
-            </div>
-          ))}
+
+              {/* Main Navigation */}
+              <div className="border-b border-solid border-stroke p-4 md:p-5">
+                {ticketsCategories.map((category, index) => (
+                  <div
+                    key={index}
+                    className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors mb-1 ${
+                      category.isSelected
+                        ? "bg-[#F4F2FF] text-primary"
+                        : "hover:bg-[#F1EEFF] text-[#0A0D14]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-5 h-5 flex items-center justify-center">
+                        {category.icon === "inbox" && (
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 16 16"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M2 4H14M2 4V12C2 12.5523 2.44772 13 3 13H13C13.5523 13 14 12.5523 14 12V4M2 4L8 9L14 4"
+                              stroke="currentColor"
+                              strokeWidth="1.25"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        )}
+                        {category.icon === "person" && (
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 16 16"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M8 8C10.2091 8 12 6.20914 12 4C12 1.79086 10.2091 0 8 0C5.79086 0 4 1.79086 4 4C4 6.20914 5.79086 8 8 8Z"
+                              stroke="currentColor"
+                              strokeWidth="1.25"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M2 14C2 11.7909 3.79086 10 6 10H10C12.2091 10 14 11.7909 14 14"
+                              stroke="currentColor"
+                              strokeWidth="1.25"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        )}
+                        {category.icon === "stack" && (
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 16 16"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M2 4H14M2 4V12C2 12.5523 2.44772 13 3 13H13C13.5523 13 14 12.5523 14 12V4M2 4L8 9L14 4"
+                              stroke="currentColor"
+                              strokeWidth="1.25"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M2 8H14M2 8V16C2 16.5523 2.44772 17 3 17H13C13.5523 17 14 16.5523 14 16V8M2 8L8 13L14 8"
+                              stroke="currentColor"
+                              strokeWidth="1.25"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        )}
+                        {category.icon === "alarm" && (
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 16 16"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M8 2V1M8 2C4.68629 2 2 4.68629 2 8C2 11.3137 4.68629 14 8 14C11.3137 14 14 11.3137 14 8C14 4.68629 11.3137 2 8 2ZM8 6V8L10 10"
+                              stroke="currentColor"
+                              strokeWidth="1.25"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M12 2L11 3M5 3L4 2"
+                              stroke="currentColor"
+                              strokeWidth="1.25"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        )}
+                      </div>
+                      <span className="text-sm font-medium">
+                        {category.name}
+                      </span>
+                    </div>
+                    <span className="text-xs text-gray-500">
+                      ({category.count})
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Shared Views Section */}
+              <div className="border-b border-solid border-stroke p-4 md:p-5">
+                <div
+                  className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-[#F1EEFF] rounded-lg transition-colors"
+                  onClick={() => setSharedViewsExpanded(!sharedViewsExpanded)}
+                >
+                  <div className="flex items-center gap-3">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M2 4H14M2 4V12C2 12.5523 2.44772 13 3 13H13C13.5523 13 14 12.5523 14 12V4M2 4L8 9L14 4"
+                        stroke="currentColor"
+                        strokeWidth="1.25"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <circle cx="12" cy="6" r="2" fill="currentColor" />
+                    </svg>
+                    <span className="text-sm font-medium text-[#0A0D14]">
+                      Shared views
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button className="w-4 h-4 flex items-center justify-center text-gray-500 hover:text-gray-700">
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 12 12"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M6 2V10M2 6H10"
+                          stroke="currentColor"
+                          strokeWidth="1.25"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
+                    <button className="w-4 h-4 flex items-center justify-center text-gray-500 hover:text-gray-700">
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 12 12"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className={`transition-transform duration-200 ${
+                          sharedViewsExpanded ? "rotate-180" : ""
+                        }`}
+                      >
+                        <path
+                          d="M3 4.5L6 7.5L9 4.5"
+                          stroke="currentColor"
+                          strokeWidth="1.25"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                {sharedViewsExpanded && (
+                  <div className="mt-2">
+                    {sharedViews.map((view, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between px-3 py-2 hover:bg-[#F1EEFF] rounded-lg cursor-pointer transition-colors mb-1"
+                      >
+                        <span className="text-sm text-[#0A0D14] truncate">
+                          {view.name}
+                        </span>
+                        <span className="text-xs text-gray-500 flex-shrink-0">
+                          ({view.count})
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            /* Regular menu rendering for non-tickets pages */
+            menus.map((item, index) => (
+              <div
+                className={`${
+                  index === menus.length - 1 ? "border-b-0" : "border-b"
+                } border-solid border-stroke p-4 md:p-5`}
+                key={index}
+              >
+                {item.label && (
+                  <div
+                    className={`flex items-center gap-1 ${
+                      item.label.icon ? "mb-1.5" : "mb-2.5"
+                    }`}
+                  >
+                    {item.label.icon}
+                    <strong className="block uppercase font-inter font-normal text-[#868C98] text-sm tracking-[0.48px]">
+                      {item.label.name}
+                    </strong>
+                  </div>
+                )}
+                {item.items?.map((link, k) =>
+                  link.isSearch ? (
+                    <button
+                      key={k}
+                      onClick={() => setSearchModalOpen(true)}
+                      className={`${item.label?.icon ? "ml-5" : ""} ${
+                        k === item.items.length - 1 ? "mb-0" : "mb-1"
+                      } w-full flex items-center justify-between gap-2 px-3 py-2 bg-transparent rounded-lg hover:bg-[#F1EEFF] text-[#111]/70 font-inter font-medium text-sm capitalize`}
+                    >
+                      <span className="flex items-center justify-between gap-2">
+                        {link?.icon && link?.icon}
+                        <span className="text">
+                          <span className="line-clamp-1">{link?.name}</span>
+                        </span>
+                      </span>
+                    </button>
+                  ) : link.isNotification ? (
+                    <div key={k} className="relative">
+                      <button
+                        ref={notificationsRef}
+                        onClick={() => setNotificationsOpen(!notificationsOpen)}
+                        className={`${item.label?.icon ? "ml-5" : ""} ${
+                          k === item.items.length - 1 ? "mb-0" : "mb-1"
+                        } w-full flex items-center justify-between gap-2 px-3 py-2 bg-transparent rounded-lg hover:bg-[#F1EEFF] text-[#111]/70 font-inter font-medium text-sm capitalize`}
+                      >
+                        <span className="flex items-center justify-between gap-2">
+                          {link?.icon && link?.icon}
+                          <span className="text">
+                            <span className="line-clamp-1">{link?.name}</span>
+                          </span>
+                        </span>
+                        {link.count > 0 && (
+                          <strong className="flex-none h-6 px-[6px] flex items-center justify-center font-inter font-medium text-sm text-white bg-primary rounded-md">
+                            {link.count}
+                          </strong>
+                        )}
+                      </button>
+
+                      {/* Notifications Dropdown */}
+                      {notificationsOpen && (
+                        <div
+                          data-dropdown-content
+                          className="fixed left-[275px] top-20 w-80 bg-white border border-stroke rounded-xl shadow-xl z-[100] max-h-96 overflow-y-auto"
+                        >
+                          <div className="p-4 border-b border-stroke">
+                            <div className="flex items-center justify-between">
+                              <h3 className="font-medium text-heading">
+                                Notifications
+                              </h3>
+                              <button className="text-xs text-primary hover:underline">
+                                Mark all as read
+                              </button>
+                            </div>
+                          </div>
+                          <div className="py-2">
+                            {notifications.length > 0 ? (
+                              notifications.map((notification) => (
+                                <div
+                                  key={notification.id}
+                                  className={`px-4 py-3 hover:bg-gray-50 cursor-pointer border-l-4 ${
+                                    notification.unread
+                                      ? "border-l-primary bg-blue-50/30"
+                                      : "border-l-transparent"
+                                  }`}
+                                >
+                                  <div className="flex items-start gap-3">
+                                    <div
+                                      className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
+                                        notification.unread
+                                          ? "bg-primary"
+                                          : "bg-gray-300"
+                                      }`}
+                                    ></div>
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center justify-between">
+                                        <h4 className="text-sm font-medium text-heading truncate">
+                                          {notification.title}
+                                        </h4>
+                                        <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
+                                          {notification.time}
+                                        </span>
+                                      </div>
+                                      <p className="text-xs text-gray-600 mt-1 line-clamp-2">
+                                        {notification.message}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="px-4 py-8 text-center text-gray-500">
+                                <svg
+                                  className="w-8 h-8 mx-auto mb-2 text-gray-400"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M15 17h5l-5 5-5-5h5v-12"
+                                  />
+                                </svg>
+                                <p className="text-sm">No notifications</p>
+                              </div>
+                            )}
+                          </div>
+                          <div className="p-3 border-t border-stroke">
+                            <button className="w-full text-center text-sm text-primary hover:underline">
+                              View all notifications
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <NavLink
+                      onClick={() =>
+                        window.innerWidth < 991 && dispatch(handleChange())
+                      }
+                      to={link.path || "#"}
+                      key={k}
+                      className={`${item.label?.icon ? "ml-5" : ""} ${
+                        k === item.items.length - 1 ? "mb-0" : "mb-1"
+                      } flex items-center justify-between gap-2 px-3 py-2 bg-transparent rounded-lg hover:bg-[#F1EEFF] text-[#111]/70 font-inter font-medium text-sm capitalize`}
+                    >
+                      <span className="flex items-center justify-between gap-2">
+                        {link?.icon && link?.icon}
+                        {link.color && (
+                          <span className="flex-none size-5 flex items-center justify-center">
+                            <span className="size-3 block bg-white p-[2px] rounded-full shadow-[0px_2px_4px_0px_rgba(27,28,29,0.2)]">
+                              <span
+                                className="block size-full rounded-full bg-[var(--bg)]"
+                                style={{ "--bg": link.color }}
+                              />
+                            </span>
+                          </span>
+                        )}
+                        <span
+                          className={`text ${
+                            pathname.includes("help-center")
+                              ? "text-[#525866]"
+                              : ""
+                          }`}
+                        >
+                          <span className="line-clamp-1">{link?.name}</span>
+                          {link?.des && (
+                            <span className="block text-[10px] !leading-tight">
+                              {link?.des}
+                            </span>
+                          )}
+                        </span>
+                      </span>
+                      {link.count && (
+                        <strong className="flex-none h-6 px-[6px] flex items-center justify-center font-inter font-medium text-sm text-heading border border-solid border-stroke rounded-md">
+                          {link.count}
+                        </strong>
+                      )}
+                    </NavLink>
+                  )
+                )}
+              </div>
+            ))
+          )}
         </div>
         <LeftUser className="mt-auto" />
       </div>
+
+      {/* Search Modal */}
+      <SearchModal
+        isOpen={searchModalOpen}
+        onClose={() => setSearchModalOpen(false)}
+      />
     </>
   );
 }

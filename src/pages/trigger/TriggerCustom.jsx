@@ -801,17 +801,20 @@ export default function TriggerCustom() {
           )}
 
           {/* Add THEN button for WHEN nodes */}
-          {/* {node.type === "when" && node.triggers && node.triggers.length > 0 && (
-            <div className="mt-6 pl-8 border-l-2 border-blue-200">
-              <button
-                className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
-                onClick={() => addChildNode(node.id, "then")}
-              >
-                <span>⚡</span>
-                Add THEN condition
-              </button>
-            </div>
-          )} */}
+          {node.type === "when" &&
+            node.triggers &&
+            node.triggers.length > 0 &&
+            !node.children.some((child) => child.type === "then") && (
+              <div className="mt-6 pl-8 border-l-2 border-blue-200">
+                <button
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
+                  onClick={() => addChildNode(node.id, "then")}
+                >
+                  <span>⚡</span>
+                  Add THEN condition
+                </button>
+              </div>
+            )}
           {node.type === "if" && (
             <div
               className="mt-4 pl-8 border-l-2 border-amber-200"
@@ -917,19 +920,6 @@ export default function TriggerCustom() {
           <div className="overflow-x-auto">
             <div className="border-2 border-indigo-200 rounded-xl lg:rounded-2xl xl:rounded-[20px] p-6 lg:p-8 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 shadow-lg">
               {ruleNodes.map((node) => renderNode(node, 0, null))}
-              {/* 
-              <div className="mt-8 pt-6 border-t-2 border-indigo-200">
-                <button
-                  className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl hover:from-indigo-700 hover:to-blue-700 transition-all duration-200 font-medium text-sm shadow-lg hover:shadow-xl hover:scale-105"
-                  onClick={addTriggerEvent}
-                >
-                  <span className="text-lg">🚀</span>
-                  Add new trigger event
-                </button>
-                <p className="text-sm text-gray-600 mt-2 ml-1">
-                  Create additional WHEN conditions for your trigger
-                </p>
-              </div> */}
             </div>
           </div>
         </div>

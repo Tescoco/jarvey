@@ -18,9 +18,10 @@ export default function Overview() {
     "Thursday",
     "Friday",
     "Saturday",
+    "Sunday",
   ];
   const hours = [
-    "06:00",
+    "08:00",
     "07:00",
     "08:00",
     "09:00",
@@ -31,10 +32,6 @@ export default function Overview() {
     "14:00",
     "15:00",
     "16:00",
-    "17:00",
-    "18:00",
-    "19:00",
-    "20:00",
   ];
   const getColor = (count) => {
     if (!count) return "bg-white";
@@ -147,54 +144,61 @@ export default function Overview() {
             </div>
           </div>
           <div className="overflow-x-auto -mx-6">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th className="!px-6">Hour</th>
-                  {days.map((day) => (
-                    <th key={day} className="!text-center !font-light">
-                      {day}
+            <div className="max-h-[500px] overflow-y-auto">
+              <table className="table w-full">
+                <thead className="sticky top-0 z-10 bg-white shadow-sm">
+                  <tr>
+                    <th className="!px-6 sticky left-0 bg-white z-200 border-r border-stroke">
+                      Hour
                     </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {hours.map((hour) => (
-                  <tr key={hour}>
-                    <td className="!text-heading !px-6 !font-medium h-[40px]">
-                      {hour}
-                    </td>
-                    {days.map((day) => {
-                      const cell = scheduleData.find(
-                        (entry) => entry.day === day && entry.hour === hour
-                      );
-                      return (
-                        <td
-                          key={day + hour}
-                          data-kay={day + hour}
-                          style={{
-                            borderLeft: cell?.count && "4px dashed #FE4234",
-                          }}
-                          className={`h-[40px] !p-0 border-l-2 border-dashed ${
-                            cell?.count ? "border-[#FE4234]" : "border-stroke"
-                          }`}
-                        >
-                          <div
-                            className={`text-xl ${getColor(
-                              cell?.count
-                            )} h-full w-full flex items-center justify-center ${
-                              cell?.count ? "text-white" : "text-heading"
+                    {days.map((day) => (
+                      <th
+                        key={day}
+                        className="!text-center !font-light bg-white"
+                      >
+                        {day}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {hours.map((hour) => (
+                    <tr key={hour}>
+                      <td className="!text-heading !px-6 !font-medium h-[40px] sticky left-0 bg-white z-1 border-r border-stroke">
+                        {hour}
+                      </td>
+                      {days.map((day) => {
+                        const cell = scheduleData.find(
+                          (entry) => entry.day === day && entry.hour === hour
+                        );
+                        return (
+                          <td
+                            key={day + hour}
+                            data-kay={day + hour}
+                            style={{
+                              borderLeft: cell?.count && "4px dashed #FE4234",
+                            }}
+                            className={`h-[40px] !p-0 border-l-2 border-dashed ${
+                              cell?.count ? "border-[#FE4234]" : "border-stroke"
                             }`}
                           >
-                            {cell?.count || "-"}
-                          </div>
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                            <div
+                              className={`text-xl ${getColor(
+                                cell?.count
+                              )} h-full w-full flex items-center justify-center ${
+                                cell?.count ? "text-white" : "text-heading"
+                              }`}
+                            >
+                              {cell?.count || "-"}
+                            </div>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </MainInner>

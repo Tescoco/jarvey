@@ -6,6 +6,7 @@ import Dropdown from "../Dropdown";
 import MultiSelectTags from "../MultiSelectTags";
 import Input from "../Input";
 import RichTextEditor from "../RichTextEditor";
+import AddActions from "../AddActions";
 
 export default function PredefinedInstall() {
   const [editorContent, setEditorContent] = useState("");
@@ -149,32 +150,7 @@ export default function PredefinedInstall() {
               minHeight="250px"
             />
           </div>
-          <div className="md:flex items-center gap-5 lg:gap-6">
-            <Dropdown
-              className="w-full mb-3 md:mb-0"
-              placeholder="Add Actions"
-              isArrow={true}
-              items={[
-                { name: "DropDown - 1" },
-                { name: "DropDown - 2" },
-                { name: "DropDown - 3" },
-                { name: "DropDown - 4" },
-                { name: "DropDown - 5" },
-              ]}
-            />{" "}
-            <Dropdown
-              className="mb-0 w-full"
-              placeholder="Add Shopify Actions"
-              isArrow={true}
-              items={[
-                { name: "DropDown - 1" },
-                { name: "DropDown - 2" },
-                { name: "DropDown - 3" },
-                { name: "DropDown - 4" },
-                { name: "DropDown - 5" },
-              ]}
-            />
-          </div>
+          <AddActions />
         </div>
       </div>
     </div>

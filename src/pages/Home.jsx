@@ -97,7 +97,7 @@ export default function Home() {
       heading: "Step Group 4: Unlock AI Power",
       list: [
         {
-          title: "Set up your AI Agent guidance and actions (5 min)",
+          title: "Set up your AI Agent settings and knowledg base (5 min)",
           des: "Tell your AI how to handle common questions and actions.",
           path: "/onboarding/ai-power",
           stepId: "ai-power",

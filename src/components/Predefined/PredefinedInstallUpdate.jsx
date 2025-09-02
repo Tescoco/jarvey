@@ -6,6 +6,7 @@ import Dropdown from "../Dropdown";
 import MultiSelectTags from "../MultiSelectTags";
 import Input from "../Input";
 import RichTextEditor from "../RichTextEditor";
+import AddActions from "../AddActions";
 
 export default function PredefinedInstallUpdate() {
   const [editorContent, setEditorContent] = useState(
@@ -120,48 +121,7 @@ export default function PredefinedInstallUpdate() {
               minHeight="250px"
             />
           </div>
-          <div className="md:flex items-center gap-5 lg:gap-6">
-            <Dropdown
-              className="w-full mb-3 md:mb-0"
-              placeholder="Add Actions"
-              isArrow={true}
-              items={[
-                { name: "TICKET ACTIONS", isHeader: true },
-                { name: "Forward email" },
-                { name: "Add attachments" },
-                { name: "Add tags" },
-                { name: "Remove tags" },
-                { name: "Set status" },
-                { name: "Assign an agent" },
-                { name: "Assign a team" },
-                { name: "Set subject" },
-                { name: "Snooze for" },
-                { name: "Set priority" },
-                { name: "Send internal note" },
-                { name: "Exclude ticket from Auto-Merge" },
-                { name: "Exclude ticket from CSAT" },
-                { name: "Set ticket field" },
-                { name: "", isDivider: true },
-                { name: "EXTERNAL ACTIONS", isHeader: true },
-                { name: "HTTP hook" },
-              ]}
-            />
-            <Dropdown
-              className="mb-0 w-full"
-              placeholder="Add Shopify Actions"
-              isArrow={true}
-              items={[
-                { name: "Cancel last order" },
-                { name: "Cancel order" },
-                { name: "Duplicate last order" },
-                { name: "Edit last order's shipping address" },
-                { name: "Refund last order's shipping cost" },
-                { name: "Refund last order" },
-                { name: "Partially refund last order" },
-                { name: "Edit last order's note" },
-              ]}
-            />
-          </div>
+          <AddActions />
           <div className="flex items-center justify-end gap-3 lg:gap-4 mt-5 lg:mt-6">
             <Link
               to="/app/predefined"

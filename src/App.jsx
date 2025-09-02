@@ -128,6 +128,7 @@ import CustomerDetails from "./pages/customer/Details";
 import CreateField from "./pages/ticket/CreateField";
 import FieldConditions from "./pages/ticket/FieldConditions";
 import FieldConditionCreate from "./pages/ticket/FieldConditionCreate";
+import HomePage from "./pages/home/HomePage";
 
 // Super Admin
 
@@ -161,10 +162,6 @@ export default function App() {
         {
           path: "setup-ai-agent",
           element: <SetupAiAgent />,
-        },
-        {
-          path: "ai-agent-setting",
-          element: <AiAgentSetting />,
         },
         {
           path: "create-help-center",
@@ -248,6 +245,10 @@ export default function App() {
       element: <Index />,
       errorElement: <Error />,
       children: [
+        {
+          index: true,
+          element: <HomePage />,
+        },
         {
           path: "notification",
           element: <Notification />,

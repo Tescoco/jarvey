@@ -15,7 +15,7 @@ export default function SetupAiAgent() {
     // if link is onboarding, redirect to onboarding
     // if link is not onboarding, redirect to ai-agent-setting
     if (window.location.pathname.includes("onboarding")) {
-      window.location.href = "/onboarding/ai-agent-setting";
+      window.location.href = "/onboarding/ai-guidance";
     } else {
       window.location.href = "/app/ai-agent-setting";
     }
