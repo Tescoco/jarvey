@@ -75,6 +75,8 @@ export default function Top({
         )}
       </div>
 
+      {children}
+
       {/* Search Modal */}
       <SearchModal
         isOpen={isSearchOpen}

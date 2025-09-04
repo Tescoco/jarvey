@@ -3,6 +3,7 @@ import Dropdown from "../Dropdown";
 import Switch from "../Switch";
 import Input from "../Input";
 import Checkbox from "../Checkbox";
+import ColorPicker from "../ColorPicker";
 import { common_card } from "../../utilities/Classes";
 import message from "../../assets/img/chat/message.png";
 import chat from "../../assets/img/chat/chat-us.png";
@@ -125,31 +126,19 @@ export default function Appearances({ chatConfig, updateChatConfig }) {
           </div>
           <div className={`grid grid-cols-1 lg:grid-cols-2 gap-3 ${single}`}>
             <h4 className="text-lg !leading-normal lg:col-span-2">Colors</h4>
-            <Dropdown
+            <ColorPicker
               className="mb-0"
               label="Main Color"
-              search={false}
-              placeholder={{
-                name: "Select Color",
-                color: chatConfig?.mainColor || "#7856FF",
-              }}
-              items={colorOptions}
-              required={true}
-              value={chatConfig?.mainColor}
+              value={chatConfig?.mainColor || "#7856FF"}
               onChange={(value) => handleInputChange("mainColor", value)}
+              required={true}
             />
-            <Dropdown
+            <ColorPicker
               className="mb-0"
               label="Conversion Color"
-              search={false}
-              placeholder={{
-                name: "Select Color",
-                color: chatConfig?.conversionColor || "#FE4234",
-              }}
-              items={colorOptions}
-              required={true}
-              value={chatConfig?.conversionColor}
+              value={chatConfig?.conversionColor || "#FE4234"}
               onChange={(value) => handleInputChange("conversionColor", value)}
+              required={true}
             />
             <div className="flex items-start gap-2 col-span-1 lg:col-span-2">
               <Checkbox

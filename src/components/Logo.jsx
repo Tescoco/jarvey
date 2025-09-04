@@ -234,7 +234,10 @@ export default function Logo() {
       </button>
 
       {dropDown && (
-        <div className="layout-menu max-h-[300px] overflow-y-auto absolute w-full min-w-[240px] top-full left-11 mt-2 bg-white rounded-2xl shadow-[0px_4px_20px_0px_rgba(0,0,0,0.16)] p-2 md:p-3 flex flex-col gap-2">
+        <div
+          style={{ zIndex: 1 }}
+          className="layout-menu max-h-[300px] overflow-y-auto absolute w-full min-w-[240px] top-full left-11 mt-2 bg-white rounded-2xl shadow-[0px_4px_20px_0px_rgba(0,0,0,0.16)] p-2 md:p-3 flex flex-col gap-2"
+        >
           {dropDownList.map((item, index) => (
             <NavLink
               onClick={() => {

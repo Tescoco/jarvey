@@ -2,6 +2,7 @@ import React from "react";
 import Checkbox from "../Checkbox";
 import Input from "../Input";
 import Dropdown from "../Dropdown";
+import ColorPicker from "../ColorPicker";
 import { common_card } from "../../utilities/Classes";
 
 export default function Customize({ chatConfig, updateChatConfig }) {
@@ -34,31 +35,19 @@ export default function Customize({ chatConfig, updateChatConfig }) {
       <h4 className="text-lg !leading-normal mb-3 md:mb-4">Colors</h4>
       <div className="flex flex-col gap-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-3">
-          <Dropdown
+          <ColorPicker
             className="mb-0"
             label="Main Color"
-            search={false}
-            placeholder={{
-              name: "Select Color",
-              color: chatConfig?.mainColor || "#7856FF",
-            }}
-            items={colorOptions}
-            required={true}
-            value={chatConfig?.mainColor}
+            value={chatConfig?.mainColor || "#7856FF"}
             onChange={(value) => handleInputChange("mainColor", value)}
+            required={true}
           />
-          <Dropdown
+          <ColorPicker
             className="mb-0"
             label="Conversion Color"
-            search={false}
-            placeholder={{
-              name: "Select Color",
-              color: chatConfig?.conversionColor || "#FE4234",
-            }}
-            items={colorOptions}
-            required={true}
-            value={chatConfig?.conversionColor}
+            value={chatConfig?.conversionColor || "#FE4234"}
             onChange={(value) => handleInputChange("conversionColor", value)}
+            required={true}
           />
         </div>
         <p className="text-sm font-semibold text-[#0A0D14]">Launcher</p>

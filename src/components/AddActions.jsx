@@ -1,65 +1,45 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, createContext, useContext } from "react";
 import { useDismissibleDropdown } from "../hooks/useDismissible";
 import Input from "./Input";
 import Dropdown from "./Dropdown";
 import RichTextEditor from "./RichTextEditor";
 
-const AddActions = () => {
-  const [selectedAction, setSelectedAction] = useState(null);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const triggerRef = useRef(null);
+// Create context for sharing Actions state
+const ActionsContext = createContext();
 
-  // Register dropdown for global dismiss
-  useDismissibleDropdown(
-    showDropdown,
-    () => setShowDropdown(false),
-    triggerRef
-  );
+export const useActions = () => {
+  const context = useContext(ActionsContext);
+  if (!context) {
+    throw new Error("useActions must be used within an ActionsProvider");
+  }
+  return context;
+};
 
-  const actionItems = [
-    { name: "TICKET ACTIONS", isHeader: true },
-    { name: "Forward email", type: "forward-email" },
-    { name: "Add attachments", type: "add-attachments" },
-    { name: "Add tags", type: "add-tags" },
-    { name: "Remove tags", type: "remove-tags" },
-    { name: "Set status", type: "set-status" },
-    { name: "Assign an agent", type: "assign-agent" },
-    { name: "Assign a team", type: "assign-team" },
-    { name: "Set subject", type: "set-subject" },
-    { name: "Snooze for", type: "snooze-for" },
-    { name: "Set priority", type: "set-priority" },
-    { name: "Send internal note", type: "send-internal-note" },
-    { name: "Exclude ticket from Auto-Merge", type: "exclude-auto-merge" },
-    { name: "Exclude ticket from CSAT", type: "exclude-csat" },
-    { name: "Set ticket field", type: "set-ticket-field" },
-    { name: "", isDivider: true },
-    { name: "EXTERNAL ACTIONS", isHeader: true },
-    { name: "HTTP hook", type: "http-hook" },
-  ];
+export const ActionsProvider = ({ children }) => {
+  const [selectedActions, setSelectedActions] = useState([]);
 
-  const handleActionClick = (action) => {
-    if (action.isHeader || action.isDivider) return;
+  const removeAction = (actionId) => {
+    setSelectedActions((prev) =>
+      prev.filter((action) => action.id !== actionId)
+    );
+  };
 
-    console.log("Action clicked:", action);
+  const updateConfig = (actionId, newConfig) => {
+    setSelectedActions((prev) =>
+      prev.map((action) =>
+        action.id === actionId ? { ...action, config: newConfig } : action
+      )
+    );
+  };
+
+  const addAction = (action) => {
     const newAction = {
+      id: Date.now() + Math.random(),
       name: action.name,
       type: action.type,
       config: getDefaultConfig(action.type),
     };
-    console.log("Setting selected action:", newAction);
-    setSelectedAction(newAction);
-    setShowDropdown(false);
-  };
-
-  const removeAction = () => {
-    setSelectedAction(null);
-  };
-
-  const updateConfig = (newConfig) => {
-    setSelectedAction((prev) => ({
-      ...prev,
-      config: newConfig,
-    }));
+    setSelectedActions((prev) => [...prev, newAction]);
   };
 
   const getDefaultConfig = (type) => {
@@ -94,47 +74,138 @@ const AddActions = () => {
     }
   };
 
-  const renderSelectedAction = () => {
-    console.log("renderSelectedAction called, selectedAction:", selectedAction);
-    if (!selectedAction) return null;
+  return (
+    <ActionsContext.Provider
+      value={{
+        selectedActions,
+        removeAction,
+        updateConfig,
+        addAction,
+      }}
+    >
+      {children}
+    </ActionsContext.Provider>
+  );
+};
 
-    return (
-      <div className="mb-4 p-4 border border-gray-200 rounded-lg">
-        <div className="flex items-center justify-between mb-4">
-          <h4 className="text-lg font-semibold text-gray-900">
-            {selectedAction.name}
-          </h4>
-          <button
-            onClick={removeAction}
-            className="flex items-center justify-center w-6 h-6 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 14 14"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-        </div>
+const AddActions = () => {
+  const [showDropdown, setShowDropdown] = useState(false);
+  const triggerRef = useRef(null);
+  const { addAction } = useActions();
 
-        {renderActionForm()}
-      </div>
-    );
+  // Register dropdown for global dismiss
+  useDismissibleDropdown(
+    showDropdown,
+    () => setShowDropdown(false),
+    triggerRef
+  );
+
+  const actionItems = [
+    { name: "TICKET ACTIONS", isHeader: true },
+    { name: "Forward email", type: "forward-email" },
+    { name: "Add attachments", type: "add-attachments" },
+    { name: "Add tags", type: "add-tags" },
+    { name: "Remove tags", type: "remove-tags" },
+    { name: "Set status", type: "set-status" },
+    { name: "Assign an agent", type: "assign-agent" },
+    { name: "Assign a team", type: "assign-team" },
+    { name: "Set subject", type: "set-subject" },
+    { name: "Snooze for", type: "snooze-for" },
+    { name: "Set priority", type: "set-priority" },
+    { name: "Send internal note", type: "send-internal-note" },
+    { name: "Exclude ticket from Auto-Merge", type: "exclude-auto-merge" },
+    { name: "Exclude ticket from CSAT", type: "exclude-csat" },
+    { name: "Set ticket field", type: "set-ticket-field" },
+    { name: "", isDivider: true },
+    { name: "EXTERNAL ACTIONS", isHeader: true },
+    { name: "HTTP hook", type: "http-hook" },
+  ];
+
+  const handleActionClick = (action) => {
+    if (action.isHeader || action.isDivider) return;
+
+    addAction(action);
+    setShowDropdown(false);
   };
 
-  const renderActionForm = () => {
-    if (!selectedAction) return null;
+  return (
+    <div className="relative">
+      <button
+        ref={triggerRef}
+        onClick={() => setShowDropdown(!showDropdown)}
+        className="flex items-center justify-between font-inter font-normal text-sm text-[#111111]/70 h-11 md:h-12 px-3 w-full bg-white border border-solid border-stroke focus:border-primary/50 shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)] rounded-[10px]"
+      >
+        <span>Add Actions</span>
+        <span className={`${showDropdown ? "-scale-y-100" : "scale-y-100"}`}>
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M10.0001 10.879L13.7126 7.1665L14.7731 8.227L10.0001 13L5.22705 8.227L6.28755 7.1665L10.0001 10.879Z"
+              fill="currentColor"
+            />
+          </svg>
+        </span>
+      </button>
 
-    switch (selectedAction.type) {
+      {showDropdown && (
+        <div
+          className="p-2 absolute z-[1] top-full mt-1 left-0 w-full bg-white border border-solid border-stroke rounded-lg max-h-[250px] overflow-y-auto flex flex-col items-start"
+          data-dropdown-content
+          data-no-dismiss
+        >
+          {actionItems.map((item, index) => {
+            if (item.isHeader) {
+              return (
+                <div
+                  key={index}
+                  className="w-full px-2 py-2 text-xs font-semibold text-blue-600 uppercase tracking-wider"
+                >
+                  {item.name}
+                </div>
+              );
+            }
+
+            if (item.isDivider) {
+              return (
+                <div
+                  key={index}
+                  className="w-full border-t border-gray-200 my-1"
+                />
+              );
+            }
+
+            return (
+              <button
+                key={index}
+                className="hover:text-primary flex items-center gap-2 text-sm font-inter px-2 py-2 rounded-md hover:bg-gray-100 w-full text-start text-[#111]/80"
+                onClick={() => handleActionClick(item)}
+                data-dismiss="dropdown"
+              >
+                {item.name}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Component for rendering selected Actions inline in the main pages
+export const ActionsRenderer = () => {
+  const { selectedActions, removeAction, updateConfig } = useActions();
+
+  if (selectedActions.length === 0) return null;
+
+  const renderActionForm = (action) => {
+    if (!action) return null;
+
+    switch (action.type) {
       case "forward-email":
         return (
           <div className="space-y-4">
@@ -184,10 +255,10 @@ const AddActions = () => {
                 <Input
                   placeholder="Search customers..."
                   className="flex-1 mb-0"
-                  value={selectedAction.config.to}
+                  value={action.config.to}
                   onChange={(e) =>
-                    updateConfig({
-                      ...selectedAction.config,
+                    updateConfig(action.id, {
+                      ...action.config,
                       to: e.target.value,
                     })
                   }
@@ -200,9 +271,12 @@ const AddActions = () => {
                 </p>
               </div>
               <RichTextEditor
-                value={selectedAction.config.message}
+                value={action.config.message}
                 onChange={(content) =>
-                  updateConfig({ ...selectedAction.config, message: content })
+                  updateConfig(action.id, {
+                    ...action.config,
+                    message: content,
+                  })
                 }
                 placeholder="Type your message here..."
                 className="bg-white rounded-lg"
@@ -308,7 +382,7 @@ const AddActions = () => {
       case "set-status":
         return (
           <Dropdown
-            placeholder={selectedAction.config.status}
+            placeholder={action.config.status}
             className="mb-0"
             items={[
               { name: "Open" },
@@ -317,7 +391,7 @@ const AddActions = () => {
               { name: "Closed" },
             ]}
             onChange={(value) =>
-              updateConfig({ ...selectedAction.config, status: value })
+              updateConfig(action.id, { ...action.config, status: value })
             }
           />
         );
@@ -325,7 +399,7 @@ const AddActions = () => {
       case "assign-agent":
         return (
           <Dropdown
-            placeholder={selectedAction.config.agent}
+            placeholder={action.config.agent}
             className="mb-0"
             items={[
               { name: "Unassigned" },
@@ -333,7 +407,7 @@ const AddActions = () => {
               { name: "Admin" },
             ]}
             onChange={(value) =>
-              updateConfig({ ...selectedAction.config, agent: value })
+              updateConfig(action.id, { ...action.config, agent: value })
             }
           />
         );
@@ -341,7 +415,7 @@ const AddActions = () => {
       case "assign-team":
         return (
           <Dropdown
-            placeholder={selectedAction.config.team}
+            placeholder={action.config.team}
             className="mb-0"
             items={[
               { name: "Unassigned" },
@@ -349,7 +423,7 @@ const AddActions = () => {
               { name: "Technical Team" },
             ]}
             onChange={(value) =>
-              updateConfig({ ...selectedAction.config, team: value })
+              updateConfig(action.id, { ...action.config, team: value })
             }
           />
         );
@@ -359,10 +433,10 @@ const AddActions = () => {
           <Input
             placeholder="Enter ticket subject"
             className="mb-0"
-            value={selectedAction.config.subject}
+            value={action.config.subject}
             onChange={(e) =>
-              updateConfig({
-                ...selectedAction.config,
+              updateConfig(action.id, {
+                ...action.config,
                 subject: e.target.value,
               })
             }
@@ -376,16 +450,16 @@ const AddActions = () => {
               type="number"
               placeholder="1"
               className="mb-0 w-20"
-              value={selectedAction.config.duration}
+              value={action.config.duration}
               onChange={(e) =>
-                updateConfig({
-                  ...selectedAction.config,
+                updateConfig(action.id, {
+                  ...action.config,
                   duration: parseInt(e.target.value) || 1,
                 })
               }
             />
             <Dropdown
-              placeholder={selectedAction.config.unit}
+              placeholder={action.config.unit}
               className="mb-0 flex-1"
               items={[
                 { name: "day(s)" },
@@ -393,7 +467,7 @@ const AddActions = () => {
                 { name: "week(s)" },
               ]}
               onChange={(value) =>
-                updateConfig({ ...selectedAction.config, unit: value })
+                updateConfig(action.id, { ...action.config, unit: value })
               }
             />
           </div>
@@ -402,7 +476,7 @@ const AddActions = () => {
       case "set-priority":
         return (
           <Dropdown
-            placeholder={selectedAction.config.priority}
+            placeholder={action.config.priority}
             className="mb-0"
             items={[
               { name: "Normal" },
@@ -411,7 +485,7 @@ const AddActions = () => {
               { name: "Low" },
             ]}
             onChange={(value) =>
-              updateConfig({ ...selectedAction.config, priority: value })
+              updateConfig(action.id, { ...action.config, priority: value })
             }
           />
         );
@@ -443,9 +517,9 @@ const AddActions = () => {
               </p>
             </div>
             <RichTextEditor
-              value={selectedAction.config.note}
+              value={action.config.note}
               onChange={(content) =>
-                updateConfig({ ...selectedAction.config, note: content })
+                updateConfig(action.id, { ...action.config, note: content })
               }
               placeholder="Type your internal note here..."
               className="bg-white rounded-lg"
@@ -493,7 +567,7 @@ const AddActions = () => {
         return (
           <div className="flex items-center gap-3">
             <Dropdown
-              placeholder={selectedAction.config.field}
+              placeholder={action.config.field}
               className="mb-0 flex-1"
               items={[
                 { name: "Contact reason" },
@@ -501,7 +575,7 @@ const AddActions = () => {
                 { name: "Status" },
               ]}
               onChange={(value) =>
-                updateConfig({ ...selectedAction.config, field: value })
+                updateConfig(action.id, { ...action.config, field: value })
               }
             />
             <Dropdown
@@ -513,7 +587,7 @@ const AddActions = () => {
                 { name: "Option 3" },
               ]}
               onChange={(value) =>
-                updateConfig({ ...selectedAction.config, value })
+                updateConfig(action.id, { ...action.config, value })
               }
             />
           </div>
@@ -534,10 +608,10 @@ const AddActions = () => {
                   <Input
                     placeholder="HTTP hook"
                     className="mb-0"
-                    value={selectedAction.config.title}
+                    value={action.config.title}
                     onChange={(e) =>
-                      updateConfig({
-                        ...selectedAction.config,
+                      updateConfig(action.id, {
+                        ...action.config,
                         title: e.target.value,
                       })
                     }
@@ -549,7 +623,7 @@ const AddActions = () => {
                       Method <span className="text-red-500">*</span>
                     </label>
                     <Dropdown
-                      placeholder={selectedAction.config.method}
+                      placeholder={action.config.method}
                       className="mb-0"
                       items={[
                         { name: "GET" },
@@ -558,8 +632,8 @@ const AddActions = () => {
                         { name: "DELETE" },
                       ]}
                       onChange={(value) =>
-                        updateConfig({
-                          ...selectedAction.config,
+                        updateConfig(action.id, {
+                          ...action.config,
                           method: value,
                         })
                       }
@@ -572,10 +646,10 @@ const AddActions = () => {
                     <Input
                       placeholder="Example: https://company.com/api"
                       className="mb-0"
-                      value={selectedAction.config.url}
+                      value={action.config.url}
                       onChange={(e) =>
-                        updateConfig({
-                          ...selectedAction.config,
+                        updateConfig(action.id, {
+                          ...action.config,
                           url: e.target.value,
                         })
                       }
@@ -595,90 +669,41 @@ const AddActions = () => {
   };
 
   return (
-    <div>
-      {/* DEBUG BUTTON - Remove this after testing */}
-      <button
-        onClick={() =>
-          setSelectedAction({
-            name: "Test Action",
-            type: "set-status",
-            config: { status: "Open" },
-          })
-        }
-        style={{
-          backgroundColor: "red",
-          color: "white",
-          padding: "10px",
-          margin: "10px",
-        }}
-      >
-        DEBUG: Set Test Action
-      </button>
-
-      {/* Show selected action first */}
-      {renderSelectedAction()}
-
-      {/* Add Actions Dropdown */}
-      <div className="relative">
-        <button
-          ref={triggerRef}
-          onClick={() => setShowDropdown(!showDropdown)}
-          className="flex items-center justify-between font-inter font-normal text-sm text-[#111111]/70 h-11 md:h-12 px-3 w-full bg-white border border-solid border-stroke focus:border-primary/50 shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)] rounded-[10px]"
-        >
-          <span>Add Actions</span>
-          <span className={`${showDropdown ? "-scale-y-100" : "scale-y-100"}`}>
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+    <>
+      {selectedActions.map((action) => (
+        <div key={action.id} className="mb-4">
+          {/* Action Header - No border, starts from left */}
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-lg font-semibold text-gray-900">
+              {action.name}
+            </h4>
+            <button
+              onClick={() => removeAction(action.id)}
+              className="flex items-center justify-center w-6 h-6 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
             >
-              <path
-                d="M10.0001 10.879L13.7126 7.1665L14.7731 8.227L10.0001 13L5.22705 8.227L6.28755 7.1665L10.0001 10.879Z"
-                fill="currentColor"
-              />
-            </svg>
-          </span>
-        </button>
-
-        {showDropdown && (
-          <div className="p-2 absolute z-[1] top-full mt-1 left-0 w-full bg-white border border-solid border-stroke rounded-lg max-h-[250px] overflow-y-auto flex flex-col items-start">
-            {actionItems.map((item, index) => {
-              if (item.isHeader) {
-                return (
-                  <div
-                    key={index}
-                    className="w-full px-2 py-2 text-xs font-semibold text-blue-600 uppercase tracking-wider"
-                  >
-                    {item.name}
-                  </div>
-                );
-              }
-
-              if (item.isDivider) {
-                return (
-                  <div
-                    key={index}
-                    className="w-full border-t border-gray-200 my-1"
-                  />
-                );
-              }
-
-              return (
-                <button
-                  key={index}
-                  className="hover:text-primary flex items-center gap-2 text-sm font-inter px-2 py-2 rounded-md hover:bg-gray-100 w-full text-start text-[#111]/80"
-                  onClick={() => handleActionClick(item)}
-                >
-                  {item.name}
-                </button>
-              );
-            })}
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 14 14"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
           </div>
-        )}
-      </div>
-    </div>
+
+          {/* Action Form - No border, inline with page */}
+          {renderActionForm(action)}
+        </div>
+      ))}
+    </>
   );
 };
 
