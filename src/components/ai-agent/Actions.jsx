@@ -298,7 +298,21 @@ export default function actions() {
     { name: "Cancellation date", type: "date", category: "Other" },
   ];
 
-  const getOperatorsByType = (type) => {
+  const getOperatorsByType = (type, fieldName = "") => {
+    // If field name contains "ID", use number operators regardless of type
+    if (fieldName.toLowerCase().includes("id")) {
+      return [
+        "(=) equals",
+        "(≠) does not equal",
+        "(>) is greater than",
+        "(≥) is greater than or equal to",
+        "(<) is less than",
+        "(≤) is less than or equal to",
+        "Exists",
+        "Does not exist",
+      ];
+    }
+
     switch (type) {
       case "string":
         return [
@@ -571,7 +585,10 @@ export default function actions() {
                         <Alert text={condition.field} variant="success" />
 
                         <RuleDropdown
-                          options={getOperatorsByType(condition.fieldType)}
+                          options={getOperatorsByType(
+                            condition.fieldType,
+                            condition.field
+                          )}
                           value={condition.operator}
                           onChange={(value) =>
                             updateCondition(condition.id, { operator: value })
