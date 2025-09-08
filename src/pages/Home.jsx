@@ -16,6 +16,20 @@ export default function Home() {
 
   const [progressValue, setProgressValue] = useState(0);
 
+  // Permissions selector state
+  const [selectedRole, setSelectedRole] = useState("Admin");
+  const [selectedPermissions, setSelectedPermissions] = useState([]);
+  const availablePermissions = [
+    "View Tickets",
+    "Create Tickets",
+    "Edit Tickets",
+    "Delete Tickets",
+    "Manage Users",
+    "Manage Settings",
+    "View Reports",
+    "Manage Integrations",
+  ];
+
   // Update progress when component mounts or progress changes
   useEffect(() => {
     setProgressValue(getProgressPercentage());
@@ -176,6 +190,8 @@ export default function Home() {
                 </p>
               </div>
             </div>
+
+            {/* Custom Permissions Selector */}
 
             {/* Onboarding Steps */}
             <div className="flex flex-col gap-6">

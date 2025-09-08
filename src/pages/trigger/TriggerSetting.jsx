@@ -35,11 +35,16 @@ export default function TriggerSetting() {
     }
   };
 
+  const handleBack = () => {
+    window.history.back();
+  };
+
   return (
     <div>
       <Top title={" "}>
         <Link
-          to="/app/triggers"
+          // to="/app/triggers"
+          onClick={handleBack}
           className="mr-auto flex items-center gap-2.5 group"
         >
           <span className="size-6 md:size-8 rounded-full border border-solid border-stroke text-[#858585] transition-all duration-300 group-hover:bg-primary group-hover:border-primary group-hover:text-white flex items-center justify-center">

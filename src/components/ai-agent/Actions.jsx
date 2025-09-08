@@ -300,7 +300,12 @@ export default function actions() {
 
   const getOperatorsByType = (type, fieldName = "") => {
     // If field name contains "ID", use number operators regardless of type
-    if (fieldName.toLowerCase().includes("id")) {
+    if (
+      // fieldName.toLowerCase().includes("id") ||
+      fieldName.toLowerCase().includes("customer id") ||
+      fieldName.toLowerCase().includes("total") ||
+      fieldName.toLowerCase().includes("price")
+    ) {
       return [
         "(=) equals",
         "(≠) does not equal",
@@ -311,6 +316,15 @@ export default function actions() {
         "Exists",
         "Does not exist",
       ];
+    }
+
+    if (
+      fieldName.toLowerCase().includes("fulfillment status") ||
+      fieldName.toLowerCase().includes("shipment status") ||
+      fieldName.toLowerCase().includes("payment status") ||
+      fieldName.toLowerCase().includes("order status")
+    ) {
+      return ["Is", "Is not"];
     }
 
     switch (type) {
@@ -325,6 +339,8 @@ export default function actions() {
           "Does not exist",
           "Exists",
         ];
+      case "special string":
+        return ["Is", "Is not"];
       case "number":
         return [
           "(=) equals",

@@ -267,10 +267,12 @@ export default function Articles() {
 
   // Editable textarea states for Article Settings modal
   const [excerptText, setExcerptText] = useState(
-    "['Yes' answer]. Yes, we offer refunds and exchanges within [# of days] days of purchase. To be eligible for a refund or exchange, items must be returned in their original condition, with all tags and packaging intact. Please note that ["
+    ""
+    // "['Yes' answer]. Yes, we offer refunds and exchanges within [# of days] days of purchase. To be eligible for a refund or exchange, items must be returned in their original condition, with all tags and packaging intact. Please note that ["
   );
   const [searchPreviewText, setSearchPreviewText] = useState(
-    "https://jarvey.jarveyai.help > do-you-offer-refunds-or-exchanges-1224851 Do you offer refunds or exchanges? ['Yes' answer]. Yes, we offer refunds and exchanges within [# of days] days of purchase. To be eligible for a refund or exchange, items must be returned in their original condition, with all tags and packaging intact. Please note that"
+    ""
+    // "https://jarvey.jarveyai.help > do-you-offer-refunds-or-exchanges-1224851 Do you offer refunds or exchanges? ['Yes' answer]. Yes, we offer refunds and exchanges within [# of days] days of purchase. To be eligible for a refund or exchange, items must be returned in their original condition, with all tags and packaging intact. Please note that"
   );
 
   const Icons = [

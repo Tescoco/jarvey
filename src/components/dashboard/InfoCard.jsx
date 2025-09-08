@@ -2,21 +2,41 @@ import React, { useState, useRef } from "react";
 import Alert from "../Alert";
 import { c_16 } from "../../utilities/Classes";
 import { useDismissibleDropdown } from "../../hooks/useDismissible";
+import Modal from "../Modal";
+import Input from "../Input";
+import { useLocation } from "react-router-dom";
 
 export default function InfoCard({ className = "", item = null }) {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef(null);
+  const submenuRef = useRef(null);
+  const [showAddSubmenu, setShowAddSubmenu] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [dashboardName, setDashboardName] = useState("");
 
   // Register dropdown for global dismiss
   useDismissibleDropdown(showMenu, () => setShowMenu(false), menuRef);
+  useDismissibleDropdown(
+    showAddSubmenu,
+    () => setShowAddSubmenu(false),
+    submenuRef
+  );
 
   const handleAddToDashboard = () => {
-    // Handle add to dashboard logic here
-    console.log("Add to Dashboard clicked for:", item.title);
+    // open the submenu and hide the parent dropdown
+    setShowAddSubmenu(true);
     setShowMenu(false);
   };
 
-  return (
+  const handleCreateNewDashboard = () => {
+    setShowCreateModal(true);
+    setShowAddSubmenu(false);
+    setShowMenu(false);
+  };
+
+  const isDashboard = useLocation().pathname.includes("dashboard");
+
+  return isDashboard ? (
     <div className={`${c_16} ${className} relative`}>
       <div className="flex items-center gap-1 flex-wrap justify-between mb-3 md:mb-4 lg:mb-5">
         <span className="font-inter font-medium text-xs text-[#858585]">
@@ -106,6 +126,96 @@ export default function InfoCard({ className = "", item = null }) {
           </button>
         </div>
       )}
+
+      {/* Add To Dashboard Submenu */}
+      {showAddSubmenu && (
+        <div
+          className="absolute top-8 right-0 z-10 bg-white border border-gray-200 rounded-lg shadow-lg py-2 w-[260px]"
+          ref={submenuRef}
+          data-dropdown-content
+          data-no-dismiss
+        >
+          <div className="px-4 py-3 text-sm text-gray-400">
+            No existing dashboards
+          </div>
+          <div className="border-t border-gray-200 my-1"></div>
+          <button
+            onClick={handleCreateNewDashboard}
+            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-blue-600 hover:bg-gray-50 transition-colors"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M8 2V14M2 8H14"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            Create New Dashboard
+          </button>
+        </div>
+      )}
+
+      {/* Create New Dashboard Modal */}
+      {showCreateModal && (
+        <Modal
+          onClick={() => setShowCreateModal(false)}
+          closeOnClick
+          className=""
+        >
+          <h3 className="text-xl font-semibold mb-4">
+            Add {item?.label} to new Dashboard
+          </h3>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-900 mb-2">
+              Dashboard Name <span className="text-red-500">*</span>
+            </label>
+            <Input
+              className="mb-0"
+              type="text"
+              placeholder="Add dashboard name"
+              value={dashboardName}
+              onChange={(e) => setDashboardName(e.target.value)}
+            />
+          </div>
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => setShowCreateModal(false)}
+              className="px-4 py-2 rounded-md border border-gray-300 text-gray-700"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => setShowCreateModal(false)}
+              className="px-4 py-2 rounded-md bg-blue-600 text-white"
+            >
+              Create Dashboard
+            </button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  ) : (
+    <div className={`${c_16} ${className}`}>
+      <div className="flex items-center gap-1 flex-wrap justify-between mb-3 md:mb-4 lg:mb-5">
+        <span className="font-inter font-medium text-xs text-[#858585]">
+          {item.label}
+        </span>
+        <Alert
+          className="!min-h-5"
+          variant={item.marketVariant}
+          text={`${item.marketValue}%`}
+          plus
+        />
+      </div>
+      <h4 className="text-lg !leading-normal text-[#0A0D14]">{item.title}</h4>
     </div>
   );
 }

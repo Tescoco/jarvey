@@ -115,11 +115,16 @@ export default function Details() {
     }
   };
 
+  const handleBack = () => {
+    window.history.back();
+  };
+
   return (
     <>
       <Top title=" " className="!justify-start !px-2">
         <Link
-          to="/app/create-flows"
+          // to="/app/create-flows"
+          onClick={handleBack}
           className="size-7 flex items-center justify-center rounded-full border border-solid border-stroke"
         >
           {arrow_left}

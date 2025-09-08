@@ -19,13 +19,26 @@ export default function Create() {
     { name: "9 Day (s)" },
     { name: "10 Day (s)" },
   ];
+  const handleBack = () => {
+    window.history.back();
+  };
+
+  // save changes
+  const handleSave = () => {
+    if (window.location.pathname.includes("/onboarding")) {
+      window.location.href = "/onboarding/slas?install=true";
+    } else {
+      window.location.href = "/app/slas";
+    }
+  };
   return (
     <>
       <Top
         title={
           <>
             <Link
-              to="/app/slas"
+              // to="/app/slas"
+              onClick={handleBack}
               className="text-primary underline hover:no-underline"
             >
               SLAs
@@ -168,10 +181,16 @@ export default function Create() {
           </span>
         </label>
         <div className="mt-2 flex items-center justify-end gap-2.5">
-          <button className="btn border-primary text-primary min-w-max md:min-w-[100px]">
+          <button
+            className="btn border-primary text-primary min-w-max md:min-w-[100px]"
+            onClick={handleBack}
+          >
             Cancel
           </button>
-          <button className="btn shadow text-white md:min-w-[170px]">
+          <button
+            className="btn shadow text-white md:min-w-[170px]"
+            onClick={handleSave}
+          >
             Save Changes
           </button>
         </div>

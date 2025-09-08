@@ -209,7 +209,7 @@ export default function Dropdown({
                   item.name === defaultItem.name
                     ? "bg-gray-100 text-heading"
                     : "bg-white text-[#111]/80"
-                } hover:text-primary flex items-center gap-2 text-sm font-inter px-2 py-2 rounded-md hover:bg-gray-100 w-full text-start`}
+                } hover:text-primary flex items-start gap-2 text-sm font-inter px-2 py-2 rounded-md hover:bg-gray-100 w-full text-start`}
                 onClick={() => handleChange(item)}
                 key={index}
               >
@@ -220,7 +220,14 @@ export default function Dropdown({
                   />
                 )}
                 {item.icon && <div>{item.icon}</div>}
-                {item.name}
+                <span className="flex flex-col">
+                  <span>{item.name}</span>
+                  {item.des && (
+                    <span className="text-[11px] text-[#858585] -mt-0.5">
+                      {item.des}
+                    </span>
+                  )}
+                </span>
               </button>
             ))}
           </div>

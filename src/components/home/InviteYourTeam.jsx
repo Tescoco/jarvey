@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import Input from "../Input";
 import Dropdown from "../Dropdown";
 
 export default function InviteYourTeam() {
   // Replace single-role selection with multi-agent onboarding state
-  const [agents, setAgents] = useState([{ name: "", email: "", roleId: null }]);
+  const [agents, setAgents] = useState([
+    { name: "", email: "", roleId: null, selectedPermissions: [] },
+  ]);
   const [openPermissions, setOpenPermissions] = useState({});
 
   const Roles = [
@@ -80,11 +82,27 @@ export default function InviteYourTeam() {
       description: "Read-only access to dashboard and basic information",
       permissions: ["View dashboard", "Manage contact"],
     },
+    {
+      id: "custom",
+      name: "Custom",
+      description: "Select exactly which permissions this agent will have",
+      permissions: [],
+    },
   ];
+
+  // Build a master list of available permissions from predefined roles
+  const allAvailablePermissions = useMemo(() => {
+    const set = new Set();
+    Roles.forEach((r) => r.permissions?.forEach((p) => set.add(p)));
+    return Array.from(set).sort();
+  }, []);
 
   // Handlers for dynamic agents list
   const addAgentRow = () => {
-    setAgents((prev) => [...prev, { name: "", email: "", roleId: null }]);
+    setAgents((prev) => [
+      ...prev,
+      { name: "", email: "", roleId: null, selectedPermissions: [] },
+    ]);
   };
 
   const removeAgentRow = (indexToRemove) => {
@@ -106,6 +124,14 @@ export default function InviteYourTeam() {
       "roleId",
       matchedRole ? matchedRole.id : null
     );
+    // Reset custom permissions when switching roles
+    if (matchedRole?.id !== "custom") {
+      setAgents((prev) =>
+        prev.map((agent, i) =>
+          i === indexToUpdate ? { ...agent, selectedPermissions: [] } : agent
+        )
+      );
+    }
   };
 
   const togglePermissions = (indexToToggle) => {
@@ -188,16 +214,63 @@ export default function InviteYourTeam() {
                     </button>
                     {openPermissions[idx] && (
                       <div className="mt-2 border border-gray-100 rounded-xl p-3 bg-gray-50">
-                        <p className="text-sm text-gray-700 font-medium mb-2">
-                          Permissions for {selectedRoleName}:
-                        </p>
-                        <ul className="list-disc pl-5 grid grid-cols-1 md:grid-cols-2 gap-y-1 text-sm text-gray-600">
-                          {Roles.find(
-                            (r) => r.id === agent.roleId
-                          )?.permissions.map((perm, pIdx) => (
-                            <li key={pIdx}>{perm}</li>
-                          ))}
-                        </ul>
+                        {agent.roleId === "custom" ? (
+                          <>
+                            <p className="text-sm text-gray-700 font-medium mb-2">
+                              Select permissions:
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                              {allAvailablePermissions.map((perm) => {
+                                const checked =
+                                  agent.selectedPermissions.includes(perm);
+                                return (
+                                  <label
+                                    key={perm}
+                                    className="flex items-center gap-2 text-sm text-gray-700"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      className="h-4 w-4"
+                                      checked={checked}
+                                      onChange={(e) => {
+                                        const { checked } = e.target;
+                                        setAgents((prev) =>
+                                          prev.map((a, i) => {
+                                            if (i !== idx) return a;
+                                            const next = new Set(
+                                              a.selectedPermissions || []
+                                            );
+                                            if (checked) next.add(perm);
+                                            else next.delete(perm);
+                                            return {
+                                              ...a,
+                                              selectedPermissions:
+                                                Array.from(next),
+                                            };
+                                          })
+                                        );
+                                      }}
+                                    />
+                                    <span>{perm}</span>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <p className="text-sm text-gray-700 font-medium mb-2">
+                              Permissions for {selectedRoleName}:
+                            </p>
+                            <ul className="list-disc pl-5 grid grid-cols-1 md:grid-cols-2 gap-y-1 text-sm text-gray-600">
+                              {Roles.find(
+                                (r) => r.id === agent.roleId
+                              )?.permissions.map((perm, pIdx) => (
+                                <li key={pIdx}>{perm}</li>
+                              ))}
+                            </ul>
+                          </>
+                        )}
                       </div>
                     )}
                   </div>

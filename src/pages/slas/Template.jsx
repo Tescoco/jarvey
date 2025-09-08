@@ -42,7 +42,7 @@ export default function Template() {
         </svg>
       ),
       title: "Create SLA",
-      des: "Create an SLA plicy from scratch.",
+      des: "Create an SLA policy from scratch.",
       btn: {
         text: "Create",
         url: "/app/new-slas",

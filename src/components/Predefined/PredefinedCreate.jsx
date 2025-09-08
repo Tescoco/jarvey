@@ -87,10 +87,18 @@ export default function PredefinedCreate() {
       value: "2",
     },
   ];
+  // handle back button
+  const handleBack = () => {
+    window.history.back();
+  };
   return (
     <div>
       <Top title={" "} className="!justify-start">
-        <Link to="/app/predefined" className="flex items-center gap-2.5 group">
+        <Link
+          to="/app/predefined"
+          // onClick={handleBack}
+          className="flex items-center gap-2.5 group"
+        >
           <span className="size-6 md:size-8 rounded-full border border-solid border-stroke text-[#858585] transition-all duration-300 group-hover:bg-primary group-hover:border-primary group-hover:text-white flex items-center justify-center">
             {arrow_left}
           </span>

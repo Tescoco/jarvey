@@ -168,6 +168,10 @@ export default function App() {
           element: <CreateHelpCenter />,
         },
         {
+          path: "new-slas",
+          element: <SlasCreate />,
+        },
+        {
           path: "add-support-channels",
           element: <AddSupportChannels />,
         },

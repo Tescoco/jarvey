@@ -4,13 +4,27 @@ import MainInner from "../../components/MainInner";
 import { c_16, c_24 } from "../../utilities/Classes";
 import Input from "../../components/Input";
 import Dropdown from "../../components/Dropdown";
+import ColorPicker from "../../components/ColorPicker";
 
 export default function GlobalTemplate() {
   // Interactive color config (Chat Settings style)
   const [templateConfig, setTemplateConfig] = useState({
     mainColor: "#3B82F6", // header color
     conversionColor: "#7856FF", // accent/link color
+    logo: null, // uploaded logo
   });
+
+  // Logo upload handler
+  const handleLogoUpload = (event) => {
+    const file = event.target.files[0];
+    if (file && file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        updateTemplateConfig({ logo: e.target.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const colorOptions = [
     // Core brand
@@ -497,40 +511,65 @@ export default function GlobalTemplate() {
               placeholder="Ascension Island"
               label="Send From Email"
             />
-            {/* Colors - Chat Settings UI style */}
+            {/* Colors - Using ColorPicker components */}
             <div className="mt-4">
               <h4 className="text-lg !leading-normal mb-3">Colors</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-3">
-                <Dropdown
-                  className="mb-0"
+                <ColorPicker
                   label="Header Color"
-                  search={false}
-                  placeholder={{
-                    name: "Select Color",
-                    color: templateConfig.mainColor,
-                  }}
-                  items={colorOptions}
-                  required={true}
                   value={templateConfig.mainColor}
                   onChange={(value) =>
                     updateTemplateConfig({ mainColor: value })
                   }
-                />
-                <Dropdown
-                  className="mb-0"
-                  label="Accent/Link Color"
-                  search={false}
-                  placeholder={{
-                    name: "Select Color",
-                    color: templateConfig.conversionColor,
-                  }}
-                  items={colorOptions}
                   required={true}
+                  className="mb-0"
+                />
+                <ColorPicker
+                  label="Accent/Link Color"
                   value={templateConfig.conversionColor}
                   onChange={(value) =>
                     updateTemplateConfig({ conversionColor: value })
                   }
+                  required={true}
+                  className="mb-0"
                 />
+              </div>
+            </div>
+
+            {/* Logo Upload */}
+            <div className="mt-4">
+              <h4 className="text-lg !leading-normal mb-3">Logo</h4>
+              <div className="grid grid-cols-1 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Company Logo <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex items-center gap-4">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoUpload}
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                    />
+                    {templateConfig.logo && (
+                      <button
+                        onClick={() => updateTemplateConfig({ logo: null })}
+                        className="text-red-600 text-sm hover:text-red-800"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                  {templateConfig.logo && (
+                    <div className="mt-2">
+                      <img
+                        src={templateConfig.logo}
+                        alt="Logo preview"
+                        className="w-16 h-16 object-contain border border-gray-200 rounded-lg"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             <label className="text-sm block font-semibold !leading-[1.42] text-[#0A0D14] tracking-[-0.084px] mb-4">
@@ -559,7 +598,15 @@ export default function GlobalTemplate() {
                     className="h-[120px] flex items-center justify-center"
                     style={{ background: templateConfig.mainColor }}
                   >
-                    <div className="w-10 h-10 rounded bg-white" />
+                    {templateConfig.logo ? (
+                      <img
+                        src={templateConfig.logo}
+                        alt="Company Logo"
+                        className="w-10 h-10 object-contain rounded bg-white p-1"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded bg-white" />
+                    )}
                   </div>
                   {/* Body */}
                   <div className="px-6 md:px-10 py-8 text-center">

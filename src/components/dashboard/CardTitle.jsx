@@ -1,10 +1,13 @@
 import React, { useState, useRef } from "react";
+import Modal from "../Modal";
+import Input from "../Input";
 import { three_dots } from "../../utilities/Classes";
 import { useDismissibleDropdown } from "../../hooks/useDismissible";
 
 export default function CardTitle({
   className,
   title,
+  label,
   dropdown = true,
   titleClass,
 }) {
@@ -14,6 +17,9 @@ export default function CardTitle({
   const [showDrop, setShowDrop] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef(null);
+  const [showAddSubmenu, setShowAddSubmenu] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [dashboardName, setDashboardName] = useState("");
 
   // Register dropdown for global dismiss
   useDismissibleDropdown(showMenu, () => setShowMenu(false), menuRef);
@@ -24,7 +30,12 @@ export default function CardTitle({
   };
 
   const handleAddToDashboard = () => {
-    console.log("Add to Dashboard clicked for:", title);
+    setShowAddSubmenu((prev) => !prev);
+  };
+
+  const handleCreateNewDashboard = () => {
+    setShowCreateModal(true);
+    setShowAddSubmenu(false);
     setShowMenu(false);
   };
   return (
@@ -135,6 +146,76 @@ export default function CardTitle({
                 </svg>
               </button>
             </div>
+          )}
+
+          {/* Add To Dashboard Submenu */}
+          {showMenu && showAddSubmenu && (
+            <div
+              className="absolute top-8 right-[170px] z-10 bg-white border border-gray-200 rounded-lg shadow-lg py-2 w-[260px]"
+              data-dropdown-content
+              data-no-dismiss
+            >
+              <div className="px-4 py-3 text-sm text-gray-400">
+                No existing dashboards
+              </div>
+              <div className="border-t border-gray-200 my-1"></div>
+              <button
+                onClick={handleCreateNewDashboard}
+                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-blue-600 hover:bg-gray-50 transition-colors"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M8 2V14M2 8H14"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                Create New Dashboard
+              </button>
+            </div>
+          )}
+
+          {/* Create New Dashboard Modal */}
+          {showCreateModal && (
+            <Modal onClick={() => setShowCreateModal(false)} closeOnClick>
+              <h3 className="text-xl font-semibold mb-4">
+                Add {label || "Average CSAT"} to new Dashboard
+              </h3>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Dashboard Name <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  className="mb-0"
+                  type="text"
+                  placeholder="Add dashboard name"
+                  value={dashboardName}
+                  onChange={(e) => setDashboardName(e.target.value)}
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => setShowCreateModal(false)}
+                  className="px-4 py-2 rounded-md border border-gray-300 text-gray-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => setShowCreateModal(false)}
+                  className="px-4 py-2 rounded-md bg-blue-600 text-white"
+                >
+                  Create Dashboard
+                </button>
+              </div>
+            </Modal>
           )}
         </div>
       )}

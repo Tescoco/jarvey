@@ -16,21 +16,27 @@ export default function FieldConditionCreate() {
   // Ticket fields and values (mock data)
   const ticketFields = useMemo(
     () => [
-      { name: "Contact Reason" },
-      { name: "Product" },
-      { name: "Resolution" },
-      { name: "Priority" },
-      { name: "Channel" },
+      { name: "AI Intent", des: "Dropdown", type: "dropdown" },
+      { name: "Contact reason", des: "Dropdown", type: "dropdown" },
+      { name: "Product", des: "Dropdown", type: "dropdown" },
+      { name: "Resolution", des: "Dropdown", type: "dropdown" },
+      { name: "AI Agent Outcome", des: "Dropdown", type: "dropdown" },
+      { name: "AI Agent Sales Opportunity", des: "Yes/No", type: "boolean" },
+      { name: "AI Agent Sales Discount", des: "Yes/No", type: "boolean" },
+      { name: "Managed sentiment", des: "Dropdown", type: "dropdown" },
+      { name: "Call status", des: "Dropdown", type: "dropdown" },
     ],
     []
   );
-  const operators = useMemo(
-    () => [
-      { name: "is" },
-      { name: "is not" },
-      { name: "contains" },
-      { name: "is one of" },
-    ],
+  const operatorsByType = useMemo(
+    () => ({
+      dropdown: [
+        { name: "is one of" },
+        { name: "is not one of" },
+        { name: "is not empty" },
+      ],
+      boolean: [{ name: "is" }],
+    }),
     []
   );
   const allValues = useMemo(
@@ -48,7 +54,7 @@ export default function FieldConditionCreate() {
 
   // Multiple criteria rows (first row default)
   const [criteriaList, setCriteriaList] = useState([
-    { field: "", operator: "is", value: "" },
+    { field: "", operator: "", value: "" },
   ]);
 
   // Display fields (the fields to show conditionally)
@@ -149,7 +155,7 @@ export default function FieldConditionCreate() {
                     <button className="btn !h-10 !min-w-[60px] bg-[#F7F7F7] text-[#0A0D14]">
                       And
                     </button>
-                    <button className="btn !h-10 !min-w-[unset]">
+                    <button className="btn !h-10 !min-w-[unset] whitespace-nowrap">
                       Ticket Field
                     </button>
                   </div>
@@ -161,19 +167,31 @@ export default function FieldConditionCreate() {
                   placeholder="Select ticket field"
                   items={ticketFields}
                   showDropdown
-                  onChange={(v) =>
+                  onChange={(v) => {
+                    const selected = ticketFields.find((f) => f.name === v);
+                    const type = selected?.type || "dropdown";
+                    const defaultOp = operatorsByType[type][0]?.name || "";
                     setCriteriaList((list) =>
-                      list.map((c, i) => (i === idx ? { ...c, field: v } : c))
-                    )
-                  }
+                      list.map((c, i) =>
+                        i === idx
+                          ? { ...c, field: v, operator: defaultOp, value: "" }
+                          : c
+                      )
+                    );
+                  }}
                   value={crit.field}
                 />
               </div>
               <div className="col-span-12 md:col-span-2">
                 <Dropdown
                   className="mb-0"
-                  placeholder="is"
-                  items={operators}
+                  placeholder="Select operator"
+                  items={
+                    (ticketFields.find((f) => f.name === crit.field)?.type ||
+                      "dropdown") === "boolean"
+                      ? operatorsByType.boolean
+                      : operatorsByType.dropdown
+                  }
                   showDropdown
                   onChange={(v) =>
                     setCriteriaList((list) =>
@@ -186,18 +204,34 @@ export default function FieldConditionCreate() {
                 />
               </div>
               <div className="col-span-12 md:col-span-4">
-                <Dropdown
-                  className="mb-0"
-                  placeholder="Select field value(s)"
-                  items={allValues}
-                  showDropdown
-                  onChange={(v) =>
-                    setCriteriaList((list) =>
-                      list.map((c, i) => (i === idx ? { ...c, value: v } : c))
-                    )
-                  }
-                  value={crit.value}
-                />
+                {(ticketFields.find((f) => f.name === crit.field)?.type ||
+                  "dropdown") === "boolean" ? (
+                  <Dropdown
+                    className="mb-0"
+                    placeholder="Select field value"
+                    items={[{ name: "Yes" }, { name: "No" }]}
+                    showDropdown
+                    onChange={(v) =>
+                      setCriteriaList((list) =>
+                        list.map((c, i) => (i === idx ? { ...c, value: v } : c))
+                      )
+                    }
+                    value={crit.value}
+                  />
+                ) : (
+                  <Input
+                    className="mb-0"
+                    placeholder="Select field value"
+                    value={crit.value}
+                    onChange={(e) =>
+                      setCriteriaList((list) =>
+                        list.map((c, i) =>
+                          i === idx ? { ...c, value: e.target.value } : c
+                        )
+                      )
+                    }
+                  />
+                )}
               </div>
               <div className="col-span-12 md:col-span-1 flex justify-end">
                 <button

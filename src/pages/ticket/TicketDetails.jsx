@@ -66,6 +66,23 @@ export default function Tickets() {
     const btnClass =
       "flex items-center gap-1 py-2 px-[10px] font-inter font-medium text-sm text-[#111]/60 bg-white border border-solid border-[#E2E4E9] rounded-lg shadow-[0px_1px_2px_0px_rgba(82,88,102,0.06)]";
     const [sortDrop, setSortDrop] = useState(false);
+    const sortRef = useRef(null);
+
+    // Close sort dropdown on outside click
+    useEffect(() => {
+      if (!sortDrop) return;
+      const handleClick = (e) => {
+        if (sortRef.current && !sortRef.current.contains(e.target)) {
+          setSortDrop(false);
+        }
+      };
+      document.addEventListener("mousedown", handleClick);
+      document.addEventListener("touchstart", handleClick);
+      return () => {
+        document.removeEventListener("mousedown", handleClick);
+        document.removeEventListener("touchstart", handleClick);
+      };
+    }, [sortDrop]);
     const sorts = [
       `Last message`,
       `Last message`,
@@ -138,7 +155,7 @@ export default function Tickets() {
         {/* language */}
 
         {hideSortDrop && (
-          <div className="relative z-[2]">
+          <div className="relative z-[2]" ref={sortRef}>
             <button
               className={`${btnClass} ${BtnClass} ${
                 sortDrop === true && "!bg-black !text-white"
