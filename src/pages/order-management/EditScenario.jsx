@@ -1,6 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import Input from "../../components/Input";
 import Dropdown from "../../components/Dropdown";
+import Switch from "../../components/Switch";
 import { arrow_down, deleteIcon, search } from "../../utilities/Classes";
 import TableFilter from "../../components/TableFilter";
 import { OrderContext } from "./Layout";
@@ -13,19 +14,9 @@ export default function EditScenario() {
     setSelectedIssue,
     responseText,
     setResponseText,
+    issueList,
+    setIssueList,
   } = useContext(OrderContext);
-
-  const issueList = [
-    {
-      message: "I didn't get my refund",
-    },
-    {
-      message: "I'd like to reorder some items",
-    },
-    {
-      message: "Other",
-    },
-  ];
 
   const [activeKey, setActiveKey] = useState(null);
   const [issueResponses, setIssueResponses] = useState({
@@ -50,6 +41,19 @@ export default function EditScenario() {
     if (selectedIssue === issueText) {
       setResponseText(newText);
     }
+  };
+
+  const toggleItemSelection = (categoryIndex, itemIndex) => {
+    setIssueOptions((prev) => {
+      const newOptions = [...prev];
+      newOptions[categoryIndex] = {
+        ...newOptions[categoryIndex],
+        items: newOptions[categoryIndex].items.map((item, idx) =>
+          idx === itemIndex ? { ...item, selected: !item.selected } : item
+        ),
+      };
+      return newOptions;
+    });
   };
 
   const Shopify = (
@@ -311,26 +315,26 @@ export default function EditScenario() {
 
   const [addOption, setAddOption] = useState(false);
 
-  const issueOptions = [
+  const [issueOptions, setIssueOptions] = useState([
     {
       category: "FEEDBACK",
       items: [
         {
-          text: "I'm very happy with the product I received",
+          text: "I'm very happy with the product I received 👍",
           selected: true,
         },
         {
-          text: "I'm not happy with the product I received",
+          text: "I'm not happy with the product I received 👎",
           selected: false,
         },
       ],
     },
     {
-      category: "RETUEN",
+      category: "RETURN",
       items: [
         {
           text: "I'd like to return a product",
-          selected: true,
+          selected: false,
         },
       ],
     },
@@ -339,11 +343,11 @@ export default function EditScenario() {
       items: [
         {
           text: "I'd like to get a refund for this order",
-          selected: false,
+          selected: true,
         },
         {
-          text: "I didn’t get my refund",
-          selected: true,
+          text: "I didn't get my refund",
+          selected: false,
         },
       ],
     },
@@ -356,7 +360,11 @@ export default function EditScenario() {
         },
         {
           text: "I'd like to edit my order",
-          selected: true,
+          selected: false,
+        },
+        {
+          text: "I'd like to reorder some items",
+          selected: false,
         },
       ],
     },
@@ -369,7 +377,7 @@ export default function EditScenario() {
         },
         {
           text: "The items in my order are defective",
-          selected: true,
+          selected: false,
         },
       ],
     },
@@ -382,11 +390,105 @@ export default function EditScenario() {
         },
         {
           text: "Some items are missing from my order",
-          selected: true,
+          selected: false,
         },
       ],
     },
-  ];
+    {
+      category: "DISCOUNT",
+      items: [
+        {
+          text: "My discount code is not working",
+          selected: true,
+        },
+        {
+          text: "I'd like a discount code",
+          selected: false,
+        },
+        {
+          text: "I forgot to apply my discount code",
+          selected: false,
+        },
+      ],
+    },
+    {
+      category: "EXCHANGE",
+      items: [
+        {
+          text: "I'd like to exchange items in my order",
+          selected: false,
+        },
+        {
+          text: "I'd like to replace items in my order",
+          selected: false,
+        },
+      ],
+    },
+    {
+      category: "SHIPPING",
+      items: [
+        {
+          text: "My order should have shipped by now",
+          selected: false,
+        },
+        {
+          text: "Where is my order?",
+          selected: false,
+        },
+        {
+          text: "I'd like to change my shipping address",
+          selected: false,
+        },
+        {
+          text: "I'd like to change the delivery date",
+          selected: false,
+        },
+        {
+          text: "My order has been stuck in transit",
+          selected: false,
+        },
+        {
+          text: "I'm past my expected delivery date",
+          selected: false,
+        },
+      ],
+    },
+    {
+      category: "SUBSCRIPTION",
+      items: [
+        {
+          text: "I'd like to cancel my subscription",
+          selected: false,
+        },
+        {
+          text: "I'd like to edit my subscription",
+          selected: false,
+        },
+      ],
+    },
+    {
+      category: "OTHER",
+      items: [
+        {
+          text: "Other",
+          selected: false,
+        },
+      ],
+    },
+  ]);
+
+  // Update issueList whenever issueOptions change
+  useEffect(() => {
+    const selectedItems = [];
+    issueOptions.forEach((category) => {
+      category.items.forEach((item) => {
+        if (item.selected) {
+          selectedItems.push({ message: item.text });
+        }
+      });
+    });
+    setIssueList(selectedItems);
+  }, [issueOptions]);
 
   const close = (
     <svg
@@ -476,6 +578,8 @@ export default function EditScenario() {
   const [inputs, setInputs] = useState({}); // key => input text
   const [openSuggestKey, setOpenSuggestKey] = useState(null);
   const conditionsContainerRef = useRef(null);
+  const addOptionBtnRef = useRef(null);
+  const addOptionPanelRef = useRef(null);
 
   // Close suggestions on outside click; also ensures only one is open at a time
   useEffect(() => {
@@ -492,6 +596,21 @@ export default function EditScenario() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [openSuggestKey]);
+
+  // Close Add options dropdown when clicking outside
+  useEffect(() => {
+    if (!addOption) return;
+    const onDocMouseDown = (e) => {
+      const panel = addOptionPanelRef.current;
+      const btn = addOptionBtnRef.current;
+      const target = e.target;
+      if (!panel || panel.contains(target)) return;
+      if (btn && btn.contains(target)) return;
+      setAddOption(false);
+    };
+    document.addEventListener("mousedown", onDocMouseDown);
+    return () => document.removeEventListener("mousedown", onDocMouseDown);
+  }, [addOption]);
 
   const keyFor = (type, index) => `${type}-${index}`;
 
@@ -962,6 +1081,27 @@ export default function EditScenario() {
                         </button>
                       </div>
                     </div>
+
+                    {/* Ask customers if response was helpful section */}
+                    <div className="mt-4 p-4 bg-white border border-stroke rounded-xl">
+                      <div className="flex items-start gap-3">
+                        <Switch
+                          id={`helpful-feedback-${activeKey}`}
+                          className="mt-1"
+                        />
+                        <div className="flex-1">
+                          <label
+                            htmlFor={`helpful-feedback-${activeKey}`}
+                            className="text-sm font-semibold text-heading cursor-pointer"
+                          >
+                            Ask customers if your response was helpful
+                          </label>
+                          <p className="text-xs font-medium text-gray-600 mt-1">
+                            A ticket is created only if customers need more help
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -971,6 +1111,7 @@ export default function EditScenario() {
       </div>
       <div className="relative z-[1] h-max w-max">
         <button
+          ref={addOptionBtnRef}
           onClick={() => setAddOption(!addOption)}
           className={`min-w-[152px] h-12 flex items-center justify-center gap-2 rounded-[10px] border border-stroke text-heading font-semibold !bg-[#F7F7F7] shadow-[0px_1px_2px_0px_rgba(228,229,231,0.24)] ${
             addOption === true && "!bg-primary text-white"
@@ -994,33 +1135,32 @@ export default function EditScenario() {
           </svg>
         </button>
         {addOption && (
-          <div className="p-4 rounded-xl bg-white shadow-[0px_4px_20px_0px_rgba(0,0,0,0.25)] absolute bottom-full left-0 min-w-[300px] md:min-w-[395px] mb-3.5">
+          <div
+            ref={addOptionPanelRef}
+            className="p-4 rounded-xl bg-white shadow-[0px_4px_20px_0px_rgba(0,0,0,0.25)] absolute bottom-full left-0 min-w-[300px] md:min-w-[395px] mb-3.5"
+          >
             <Input
               className="mb-2"
               inputClass="border-0 !bg-[#F7F7F7]"
               placeholder="Search"
               leftIcon={search}
             />
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 max-h-[60vh] overflow-y-auto pr-2">
               {issueOptions.map((item, index) => (
                 <div key={index} className="border-b border-stroke pb-3">
                   <h4 className="text-sm !leading-[1.42] text-primary font-bold uppercase">
                     {item.category}
                   </h4>
                   <div className="mt-2 space-y-2">
-                    {item.items.map((item, index) => {
-                      const text = typeof item === "string" ? item : item.text;
+                    {item.items.map((subItem, itemIndex) => {
+                      const text =
+                        typeof subItem === "string" ? subItem : subItem.text;
                       const isSelected =
-                        selectedItem?.text === text ||
-                        (typeof item !== "string" && item.selected);
+                        typeof subItem !== "string" && subItem.selected;
                       return (
                         <div
-                          key={index}
-                          onClick={() =>
-                            setSelectedItem(
-                              typeof item === "string" ? { text: item } : item
-                            )
-                          }
+                          key={itemIndex}
+                          onClick={() => toggleItemSelection(index, itemIndex)}
                           className={`flex items-center justify-between gap-2 text-heading font-semibold cursor-pointer`}
                         >
                           <span className="text-sm">{text}</span>

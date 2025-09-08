@@ -24,6 +24,7 @@ export default function Layout() {
   );
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [responseText, setResponseText] = useState("");
+  const [issueList, setIssueList] = useState([]);
 
   const helpList = [
     {
@@ -218,13 +219,6 @@ export default function Layout() {
 
   // Scenario Selection Sidebar (What is wrong with your order?)
   const renderScenarioSelectionSidebar = () => {
-    const issueOptions = [
-      "I didn't get my refund",
-      "I'd like to reorder some items",
-      "Other",
-      "I'm very happy with the product I received 👍",
-    ];
-
     const handleIssueClick = (issue) => {
       setSelectedIssue(issue);
     };
@@ -277,14 +271,14 @@ export default function Layout() {
 
           {/* Issue Options */}
           <div className="space-y-1">
-            {issueOptions.map((option, index) => (
+            {issueList.map((option, index) => (
               <button
                 key={index}
-                onClick={() => handleIssueClick(option)}
+                onClick={() => handleIssueClick(option.message)}
                 className="w-full flex items-center justify-between py-4 px-3 text-left hover:bg-blue-50 hover:border-blue-100 border border-transparent transition-all duration-200 ease-in-out rounded-lg group hover:shadow-sm"
               >
                 <span className="text-base font-normal text-heading group-hover:text-primary transition-colors duration-200">
-                  {option}
+                  {option.message}
                 </span>
                 <svg
                   width="16"
@@ -844,6 +838,8 @@ export default function Layout() {
         setSelectedIssue,
         responseText,
         setResponseText,
+        issueList,
+        setIssueList,
       }}
     >
       {/* remove /app from title */}
