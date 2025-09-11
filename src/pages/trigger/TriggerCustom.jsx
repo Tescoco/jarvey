@@ -521,7 +521,7 @@ export default function TriggerCustom() {
       id: 1,
       type: "when",
       triggers: [], // Changed from trigger: null to triggers: []
-      children: [],
+      children: [], // Start with no children - THEN will be added when triggers are selected
     },
   ]);
 
@@ -1685,6 +1685,14 @@ export default function TriggerCustom() {
       newNode.operator = null;
       newNode.value = null;
       newNode.logicalOp = logicalOperator || "IF"; // Set the logical operator
+
+      // Automatically add a THEN statement underneath any IF statement
+      const thenNode = {
+        id: Date.now() + 1,
+        type: "then",
+        children: [],
+      };
+      newNode.children = [thenNode];
     } else if (childType === "action") {
       newNode.action = null;
       newNode.actionConfig = {};
@@ -1711,7 +1719,7 @@ export default function TriggerCustom() {
       id: Date.now(),
       type: "when",
       triggers: [],
-      children: [],
+      children: [], // Start with no children - THEN will be added when triggers are selected
     };
     setRuleNodes([...ruleNodes, newTrigger]);
   };
@@ -1731,11 +1739,20 @@ export default function TriggerCustom() {
     setRuleNodes(removeNodeRecursive(ruleNodes));
   };
 
-  const renderNode = (node, depth = 0, parentType = null) => {
+  const renderNode = (
+    node,
+    depth = 0,
+    parentType = null,
+    parentNode = null
+  ) => {
     // Don't indent THEN and ELSE nodes that are direct children of IF nodes
+    // Also don't indent AND/OR nodes - they should be parallel to their parent IF
     const shouldIndent = !(
       parentType === "if" &&
-      (node.type === "then" || node.type === "else")
+      (node.type === "then" ||
+        node.type === "else" ||
+        (node.type === "if" &&
+          (node.logicalOp === "AND" || node.logicalOp === "OR")))
     );
     const marginLeft = shouldIndent ? depth * 30 : 0;
 
@@ -1796,15 +1813,32 @@ export default function TriggerCustom() {
           className={styling.container}
           style={{ marginLeft: `${marginLeft}px` }}
         >
-          {/* Delete button - shows on hover (but not for WHEN nodes) */}
+          {/* Delete button - shows on hover (but not for WHEN nodes and not for THEN nodes when there's only one) */}
           {node.type !== "when" && (
-            <button
-              onClick={() => removeNode(node.id)}
-              className="absolute -right-2 -top-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-red-600 hover:scale-110 z-10 shadow-lg font-bold"
-              title="Delete this rule"
-            >
-              ×
-            </button>
+            <>
+              {node.type === "then" && parentType === "when" && parentNode ? (
+                // Check if there are multiple THEN conditions under this WHEN node
+                parentNode.children.filter((child) => child.type === "then")
+                  .length > 1 && (
+                  <button
+                    onClick={() => removeNode(node.id)}
+                    className="absolute -right-2 -top-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-red-600 hover:scale-110 z-10 shadow-lg font-bold"
+                    title="Delete this rule"
+                  >
+                    ×
+                  </button>
+                )
+              ) : (
+                // For all other node types, show delete button
+                <button
+                  onClick={() => removeNode(node.id)}
+                  className="absolute -right-2 -top-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-red-600 hover:scale-110 z-10 shadow-lg font-bold"
+                  title="Delete this rule"
+                >
+                  ×
+                </button>
+              )}
+            </>
           )}
 
           {node.type === "when" && (
@@ -1813,16 +1847,35 @@ export default function TriggerCustom() {
               <MultiSelectTriggerDropdown
                 options={triggerEvents}
                 selectedValues={node.triggers || []}
-                onAdd={(option) =>
+                onAdd={(option) => {
+                  const updatedTriggers = [...(node.triggers || []), option];
                   updateNode(node.id, {
-                    triggers: [...(node.triggers || []), option],
-                  })
-                }
-                onRemove={(option) =>
+                    triggers: updatedTriggers,
+                  });
+                  // Automatically add THEN node if it doesn't exist
+                  if (!node.children.some((child) => child.type === "then")) {
+                    addChildNode(node.id, "then");
+                  }
+                }}
+                onRemove={(option) => {
+                  const updatedTriggers = (node.triggers || []).filter(
+                    (t) => t !== option
+                  );
                   updateNode(node.id, {
-                    triggers: (node.triggers || []).filter((t) => t !== option),
-                  })
-                }
+                    triggers: updatedTriggers,
+                  });
+                  // If no triggers left, remove THEN node
+                  if (updatedTriggers.length === 0) {
+                    setRuleNodes((prevNodes) =>
+                      prevNodes.map((n) => ({
+                        ...n,
+                        children: n.children.filter(
+                          (child) => child.type !== "then"
+                        ),
+                      }))
+                    );
+                  }
+                }}
                 placeholder="Select trigger event..."
                 variant="primary"
               />
@@ -1833,13 +1886,25 @@ export default function TriggerCustom() {
                   text={trigger}
                   variant="primary"
                   rightIcon="close"
-                  onRemove={() =>
+                  onRemove={() => {
+                    const updatedTriggers = (node.triggers || []).filter(
+                      (t) => t !== trigger
+                    );
                     updateNode(node.id, {
-                      triggers: (node.triggers || []).filter(
-                        (t) => t !== trigger
-                      ),
-                    })
-                  }
+                      triggers: updatedTriggers,
+                    });
+                    // If no triggers left, remove THEN node
+                    if (updatedTriggers.length === 0) {
+                      setRuleNodes((prevNodes) =>
+                        prevNodes.map((n) => ({
+                          ...n,
+                          children: n.children.filter(
+                            (child) => child.type !== "then"
+                          ),
+                        }))
+                      );
+                    }
+                  }}
                 />
               ))}
             </div>
@@ -2324,9 +2389,35 @@ export default function TriggerCustom() {
               <div className="absolute left-4 top-0 w-0.5 h-full bg-gradient-to-b from-gray-300 to-transparent"></div>
               {node.children
                 .sort((a, b) => {
-                  // Sort order: THEN first, ELSE last, others in between
-                  if (a.type === "then" && b.type !== "then") return -1;
-                  if (b.type === "then" && a.type !== "then") return 1;
+                  // Sort order: AND/OR conditions first, then THEN, then ELSE last
+                  if (
+                    a.type === "if" &&
+                    a.logicalOp === "AND" &&
+                    b.type !== "if"
+                  )
+                    return -1;
+                  if (
+                    b.type === "if" &&
+                    b.logicalOp === "AND" &&
+                    a.type !== "if"
+                  )
+                    return 1;
+                  if (
+                    a.type === "if" &&
+                    a.logicalOp === "OR" &&
+                    b.type !== "if"
+                  )
+                    return -1;
+                  if (
+                    b.type === "if" &&
+                    b.logicalOp === "OR" &&
+                    a.type !== "if"
+                  )
+                    return 1;
+                  if (a.type === "then" && b.type !== "then" && b.type !== "if")
+                    return -1;
+                  if (b.type === "then" && a.type !== "then" && a.type !== "if")
+                    return 1;
                   if (a.type === "else" && b.type !== "else") return 1;
                   if (b.type === "else" && a.type !== "else") return -1;
                   return 0;
@@ -2335,67 +2426,68 @@ export default function TriggerCustom() {
                   <div key={child.id} className="relative">
                     {/* Horizontal connector */}
                     <div className="absolute left-4 top-6 w-4 h-0.5 bg-gray-300"></div>
-                    {renderNode(child, depth + 1, node.type)}
+                    {renderNode(child, depth + 1, node.type, node)}
                   </div>
                 ))}
             </div>
           )}
 
-          {/* Add THEN button for WHEN nodes */}
-          {node.type === "when" &&
-            node.triggers &&
-            node.triggers.length > 0 &&
-            !node.children.some((child) => child.type === "then") && (
-              <div className="mt-6 pl-8 border-l-2 border-blue-200">
-                <button
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
-                  onClick={() => addChildNode(node.id, "then")}
-                >
-                  <span>⚡</span>
-                  Add THEN condition
-                </button>
-              </div>
-            )}
           {node.type === "if" && (
             <div
               className="mt-4 pl-8 border-l-2 border-amber-200"
               style={{ marginLeft: `${marginLeft}px` }}
             >
               <div className="flex gap-3 flex-wrap">
-                {/* Add AND button - only show if no AND child exists */}
-                {!node.children.some(
-                  (child) => child.type === "if" && child.logicalOp === "AND"
-                ) && (
-                  <button
-                    className="inline-flex items-center gap-2 px-3 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
-                    onClick={() => addChildNode(node.id, "if", "AND")}
-                  >
-                    <span>➕</span>
-                    Add AND
-                  </button>
-                )}
-                {/* Add OR button - only show if no OR child exists */}
-                {!node.children.some(
-                  (child) => child.type === "if" && child.logicalOp === "OR"
-                ) && (
-                  <button
-                    className="inline-flex items-center gap-2 px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
-                    onClick={() => addChildNode(node.id, "if", "OR")}
-                  >
-                    <span>🔄</span>
-                    Add OR
-                  </button>
-                )}
-                {/* Add THEN button - only show if no THEN child exists */}
-                {!node.children.some((child) => child.type === "then") && (
-                  <button
-                    className="inline-flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
-                    onClick={() => addChildNode(node.id, "then")}
-                  >
-                    <span>⚡</span>
-                    Add THEN
-                  </button>
-                )}
+                {(() => {
+                  // Only show logical operator buttons for the main IF condition (not for AND/OR sub-conditions)
+                  if (node.logicalOp && node.logicalOp !== "IF") {
+                    return null; // Don't show buttons for AND/OR sub-conditions
+                  }
+
+                  // Determine what logical operators are already present among IF children
+                  const logicalChildren = node.children.filter(
+                    (child) => child.type === "if"
+                  );
+                  const hasAnd = logicalChildren.some(
+                    (child) => child.logicalOp === "AND"
+                  );
+                  const hasOr = logicalChildren.some(
+                    (child) => child.logicalOp === "OR"
+                  );
+
+                  // Build available buttons based on what's not yet selected
+                  const buttons = [];
+
+                  if (!hasAnd) {
+                    buttons.push(
+                      <button
+                        key="add-and"
+                        className="inline-flex items-center gap-2 px-3 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
+                        onClick={() => addChildNode(node.id, "if", "AND")}
+                      >
+                        <span>➕</span>
+                        Add AND
+                      </button>
+                    );
+                  }
+
+                  if (!hasOr) {
+                    buttons.push(
+                      <button
+                        key="add-or"
+                        className="inline-flex items-center gap-2 px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
+                        onClick={() => addChildNode(node.id, "if", "OR")}
+                      >
+                        <span>🔄</span>
+                        Add OR
+                      </button>
+                    );
+                  }
+
+                  // Return buttons if any are available, otherwise return null
+                  return buttons.length > 0 ? <>{buttons}</> : null;
+                })()}
+
                 {/* Add ELSE button - only show for IF statements (not AND/OR) and if no ELSE child exists */}
                 {(node.logicalOp === "IF" || !node.logicalOp) &&
                   !node.children.some((child) => child.type === "else") && (
@@ -2460,7 +2552,7 @@ export default function TriggerCustom() {
           </p>
           <div className="overflow-x-auto">
             <div className="border-2 border-indigo-200 rounded-xl lg:rounded-2xl xl:rounded-[20px] p-6 lg:p-8 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 shadow-lg">
-              {ruleNodes.map((node) => renderNode(node, 0, null))}
+              {ruleNodes.map((node) => renderNode(node, 0, null, null))}
             </div>
           </div>
         </div>
