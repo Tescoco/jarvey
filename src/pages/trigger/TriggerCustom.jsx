@@ -101,18 +101,19 @@ const RuleDropdown = ({
           data-dropdown-content
           className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[200px] max-h-[200px] overflow-y-auto"
         >
-          {options.map((option, index) => (
-            <button
-              key={index}
-              className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg"
-              onClick={() => {
-                onChange(option);
-                setIsOpen(false);
-              }}
-            >
-              {option}
-            </button>
-          ))}
+          {Array.isArray(options) &&
+            options.map((option, index) => (
+              <button
+                key={index}
+                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg"
+                onClick={() => {
+                  onChange(option);
+                  setIsOpen(false);
+                }}
+              >
+                {option}
+              </button>
+            ))}
         </div>
       )}
     </div>
@@ -153,35 +154,40 @@ const MultiSelectTriggerDropdown = ({
           data-dropdown-content
           className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[200px] max-h-[200px] overflow-y-auto"
         >
-          {availableOptions.map((option, index) => (
-            <button
-              key={index}
-              className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg"
-              onClick={() => {
-                onAdd(option);
-                setIsOpen(false);
-              }}
-            >
-              {option}
-            </button>
-          ))}
+          {Array.isArray(availableOptions) &&
+            availableOptions.map((option, index) => (
+              <button
+                key={index}
+                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg"
+                onClick={() => {
+                  onAdd(option);
+                  setIsOpen(false);
+                }}
+              >
+                {option}
+              </button>
+            ))}
         </div>
       )}
     </div>
   );
 };
 
-// Nested dropdown component for IF statement conditions
+// Nested dropdown component for IF statement conditions and ticket field actions
 const NestedConditionDropdown = ({
   conditionFields,
   value,
   onChange,
   placeholder,
   variant = "primary",
+  maxLevels = 2, // Support up to 4 levels for complex condition fields
+  isConditionField = false, // Flag to determine if this is for IF conditions
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentView, setCurrentView] = useState("parent"); // 'parent' or 'child'
-  const [selectedParent, setSelectedParent] = useState(null);
+  const [currentView, setCurrentView] = useState("level1"); // 'level1', 'level2', 'level3', 'level4'
+  const [selectedLevel1, setSelectedLevel1] = useState(null);
+  const [selectedLevel2, setSelectedLevel2] = useState(null);
+  const [selectedLevel3, setSelectedLevel3] = useState(null);
   const triggerRef = useRef(null);
 
   // Register dropdown for global dismiss
@@ -189,30 +195,178 @@ const NestedConditionDropdown = ({
     isOpen,
     () => {
       setIsOpen(false);
-      setCurrentView("parent");
-      setSelectedParent(null);
+      setCurrentView("level1");
+      setSelectedLevel1(null);
+      setSelectedLevel2(null);
+      setSelectedLevel3(null);
     },
     triggerRef
   );
 
-  const parentOptions = Object.keys(conditionFields);
+  const level1Options = Object.keys(conditionFields);
 
-  const handleParentClick = (parentOption) => {
-    setSelectedParent(parentOption);
-    setCurrentView("child");
+  const handleLevel1Click = (level1Option) => {
+    setSelectedLevel1(level1Option);
+    setCurrentView("level2");
+  };
+
+  const handleLevel2Click = (level2Option) => {
+    const level2Data = conditionFields[selectedLevel1][level2Option];
+
+    // Check if this has more levels
+    if (
+      level2Data &&
+      typeof level2Data === "object" &&
+      Object.keys(level2Data).length > 0
+    ) {
+      // For condition fields, check if level 3 contains operators (IS, IS NOT, etc.)
+      if (isConditionField) {
+        const level3Keys = Object.keys(level2Data);
+        const isOperatorLevel = level3Keys.some((key) =>
+          [
+            "IS",
+            "IS NOT",
+            "CONTAINS",
+            "DOES NOT CONTAIN",
+            "STARTS WITH",
+            "ENDS WITH",
+            "IS EMPTY",
+            "IS NOT EMPTY",
+            "LESS THAN",
+            "GREATER THAN",
+            "less than",
+            "before",
+            "during business hours",
+            "more than",
+            "outside business hours",
+            "after",
+            "is less or equal to",
+            "is less than",
+            "is greater than or equal to",
+            "is greater than",
+            "contains one of",
+            "contains all of",
+            "does not contain all of",
+            "does not contain any of",
+            "is not",
+            "starts with",
+            "ends with",
+            "is empty",
+            "is not empty",
+            "IS EMPTY",
+            "IS NOT EMPTY",
+          ].includes(key)
+        );
+
+        if (isOperatorLevel) {
+          // Stop here - let the separate operator dropdown handle the operators
+          onChange(`${selectedLevel1} > ${level2Option}`);
+          setIsOpen(false);
+          setCurrentView("level1");
+          setSelectedLevel1(null);
+          setSelectedLevel2(null);
+          setSelectedLevel3(null);
+          return;
+        }
+      }
+
+      setSelectedLevel2(level2Option);
+      setCurrentView("level3");
+    } else {
+      // Two-level structure - complete selection
+      onChange(`${selectedLevel1} > ${level2Option}`);
+      setIsOpen(false);
+      setCurrentView("level1");
+      setSelectedLevel1(null);
+      setSelectedLevel2(null);
+      setSelectedLevel3(null);
+    }
+  };
+
+  const handleLevel3Click = (level3Option) => {
+    const level3Data =
+      conditionFields[selectedLevel1][selectedLevel2][level3Option];
+
+    // Check if this has level 4 (for non-condition fields like ticket fields)
+    if (
+      level3Data &&
+      typeof level3Data === "object" &&
+      Object.keys(level3Data).length > 0
+    ) {
+      setSelectedLevel3(level3Option);
+      setCurrentView("level4");
+    } else {
+      // Three-level structure - complete selection
+      onChange(`${selectedLevel1} > ${selectedLevel2} > ${level3Option}`);
+      setIsOpen(false);
+      setCurrentView("level1");
+      setSelectedLevel1(null);
+      setSelectedLevel2(null);
+      setSelectedLevel3(null);
+    }
+  };
+
+  const handleLevel4Click = (level4Option) => {
+    onChange(
+      `${selectedLevel1} > ${selectedLevel2} > ${selectedLevel3} > ${level4Option}`
+    );
+    setIsOpen(false);
+    setCurrentView("level1");
+    setSelectedLevel1(null);
+    setSelectedLevel2(null);
+    setSelectedLevel3(null);
   };
 
   const handleBackClick = () => {
-    setCurrentView("parent");
-    setSelectedParent(null);
+    if (currentView === "level4") {
+      setCurrentView("level3");
+      setSelectedLevel3(null);
+    } else if (currentView === "level3") {
+      setCurrentView("level2");
+      setSelectedLevel2(null);
+    } else if (currentView === "level2") {
+      setCurrentView("level1");
+      setSelectedLevel1(null);
+    }
   };
 
-  const handleSubOptionClick = (subOption) => {
-    onChange(`${selectedParent} > ${subOption}`);
-    setIsOpen(false);
-    setCurrentView("parent");
-    setSelectedParent(null);
-  };
+  const renderArrowIcon = () => (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="ml-2"
+    >
+      <path
+        d="M4.5 3L7.5 6L4.5 9"
+        stroke="#858585"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+
+  const renderBackIcon = () => (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="rotate-180"
+    >
+      <path
+        d="M4.5 3L7.5 6L4.5 9"
+        stroke="#858585"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 
   return (
     <div className="relative">
@@ -228,71 +382,126 @@ const NestedConditionDropdown = ({
           data-dropdown-content
           className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[200px] max-h-[300px] overflow-y-auto"
         >
-          {currentView === "parent" ? (
-            // Parent menu
-            parentOptions.map((parentOption, index) => (
+          {currentView === "level1" ? (
+            // Level 1 menu
+            Array.isArray(level1Options) &&
+            level1Options.map((level1Option, index) => (
               <button
                 key={index}
                 className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg flex items-center justify-between"
-                onClick={() => handleParentClick(parentOption)}
+                onClick={() => handleLevel1Click(level1Option)}
               >
-                {parentOption}
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 12 12"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="ml-2"
-                >
-                  <path
-                    d="M4.5 3L7.5 6L4.5 9"
-                    stroke="#858585"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                {level1Option}
+                {renderArrowIcon()}
               </button>
             ))
-          ) : (
-            // Child menu
+          ) : currentView === "level2" ? (
+            // Level 2 menu
             <>
               <div className="px-3 py-2 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-600 flex items-center">
                 <button
                   onClick={handleBackClick}
                   className="mr-2 p-1 hover:bg-gray-200 rounded"
                 >
-                  <svg
-                    width="12"
-                    height="12"
-                    viewBox="0 0 12 12"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="rotate-180"
-                  >
-                    <path
-                      d="M4.5 3L7.5 6L4.5 9"
-                      stroke="#858585"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                  {renderBackIcon()}
                 </button>
-                {selectedParent}
+                {selectedLevel1}
               </div>
-              {Object.keys(conditionFields[selectedParent]).map(
-                (subOption, subIndex) => (
+              {conditionFields[selectedLevel1] &&
+                Object.keys(conditionFields[selectedLevel1]).map(
+                  (level2Option, index) => {
+                    const level2Data =
+                      conditionFields[selectedLevel1][level2Option];
+                    const hasLevel3 =
+                      level2Data &&
+                      typeof level2Data === "object" &&
+                      Object.keys(level2Data).length > 0;
+
+                    return (
+                      <button
+                        key={index}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg flex items-center justify-between"
+                        onClick={() => handleLevel2Click(level2Option)}
+                      >
+                        {level2Option}
+                        {hasLevel3 && renderArrowIcon()}
+                      </button>
+                    );
+                  }
+                )}
+            </>
+          ) : currentView === "level3" ? (
+            // Level 3 menu
+            <>
+              <div className="px-3 py-2 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-600 flex items-center">
+                <button
+                  onClick={handleBackClick}
+                  className="mr-2 p-1 hover:bg-gray-200 rounded"
+                >
+                  {renderBackIcon()}
+                </button>
+                {selectedLevel1} {`>`} {selectedLevel2}
+              </div>
+              {conditionFields[selectedLevel1] &&
+                conditionFields[selectedLevel1][selectedLevel2] &&
+                Object.keys(
+                  conditionFields[selectedLevel1][selectedLevel2]
+                ).map((level3Option, index) => {
+                  const level3Data =
+                    conditionFields[selectedLevel1][selectedLevel2][
+                      level3Option
+                    ];
+                  const hasLevel4 =
+                    isConditionField &&
+                    level3Data &&
+                    Array.isArray(level3Data) &&
+                    level3Data.length > 0;
+
+                  return (
+                    <button
+                      key={index}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg flex items-center justify-between"
+                      onClick={() => handleLevel3Click(level3Option)}
+                    >
+                      {level3Option}
+                      {hasLevel4 && renderArrowIcon()}
+                    </button>
+                  );
+                })}
+            </>
+          ) : (
+            // Level 4 menu
+            <>
+              <div className="px-3 py-2 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-600 flex items-center">
+                <button
+                  onClick={handleBackClick}
+                  className="mr-2 p-1 hover:bg-gray-200 rounded"
+                >
+                  {renderBackIcon()}
+                </button>
+                {selectedLevel1} {`>`} {selectedLevel2} {`>`} {selectedLevel3}
+              </div>
+              {conditionFields[selectedLevel1] &&
+                conditionFields[selectedLevel1][selectedLevel2] &&
+                conditionFields[selectedLevel1][selectedLevel2][
+                  selectedLevel3
+                ] &&
+                Array.isArray(
+                  conditionFields[selectedLevel1][selectedLevel2][
+                    selectedLevel3
+                  ]
+                ) &&
+                conditionFields[selectedLevel1][selectedLevel2][
+                  selectedLevel3
+                ].map((level4Option, index) => (
                   <button
-                    key={subIndex}
+                    key={index}
                     className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg"
-                    onClick={() => handleSubOptionClick(subOption)}
+                    onClick={() => handleLevel4Click(level4Option)}
                   >
-                    {subOption}
+                    {level4Option}
                   </button>
-                )
-              )}
+                ))}
             </>
           )}
         </div>
@@ -312,19 +521,19 @@ export default function TriggerCustom() {
   ]);
 
   const triggerEvents = [
-    "New message in ticket",
-    "ticket created",
-    "ticket updated",
-    "ticket assigned to user",
-    "ticket snooze delay ends",
-    "satisfaction survey responded",
+    "TICKET CREATED",
+    "TICKET UPDATED",
+    "TICKET ASSIGNED TO USER",
+    "TICKET SNOOZE DELAY ENDS",
+    "NEW MESSAGE IN TICKET",
+    "SATISFACTION SURVEY RESPONDED",
   ];
 
   const actionsList = [
     "Send email",
     "Reply to customer",
     "Add internal note",
-    "Apply macro",
+    "Apply predefined response",
     "Add tags",
     "Remove tags",
     "Reset tags",
@@ -335,70 +544,999 @@ export default function TriggerCustom() {
     "Assign agent",
     "Assign team",
     "Delete ticket",
+    "Hide Facebook comment",
+    "Like Facebook comment",
+    "Exclude ticket from Auto-Merge",
+    "Exclude ticket from CSAT",
   ];
 
-  const conditionFields = {
-    Message: {
-      Body: ["contains", "does not contain", "is empty", "is not empty"],
-      Channel: ["email", "chat", "phone", "social media"],
-      "Created date": [
-        "is today",
-        "is yesterday",
-        "is this week",
-        "is this month",
-      ],
-      "From agent": ["is", "is not", "contains", "does not contain"],
-      Integration: ["email", "chat", "phone", "social media"],
+  // Placeholder datasets for Action configurations
+  const statusOptions = [
+    "open",
+    "pending",
+    "hold",
+    "processing",
+    "solved",
+    "closed",
+  ];
+
+  const tagOptions = [
+    "sample ticket",
+    "ORDER-STATUS",
+    "received",
+    "not-received",
+    "not-shipped",
+    "RETURN/EXCHANGE",
+    "shipped",
+    "damaged",
+    "instructions",
+    "ORDER-CHANGE/CANCEL",
+    "edit-address",
+    "already-shipped",
+    "partial-refund",
+    "cancel-refund",
+    "quick-reply-FAQ",
+    "during-business-hours",
+    "automatic-ooo",
+    "VIP",
+    "policy",
+    "outside-business-hours",
+    "social-question",
+    "auto-reply",
+    "auto-close",
+    "PRODUCT",
+    "social-lead",
+    "discount-request",
+    "full-refund",
+    "order-wrong",
+    "REFUND",
+    "change-order",
+  ];
+
+  const predefinedResponses = [
+    "Welcome reply",
+    "Order delay apology",
+    "Return policy",
+    "Shipping update",
+  ];
+
+  const agentOptions = [
+    "Alex Johnson",
+    "Priya Singh",
+    "Diego Martinez",
+    "Zoë Chen",
+    "🗙 Clear assignee",
+  ];
+
+  const teamOptions = [
+    "Support",
+    "Sales",
+    "Billing",
+    "Fulfillment",
+    "🗙 Clear assignee",
+  ];
+
+  const productOptions = [
+    "Sample Product A",
+    "Sample Product B",
+    "Sample Product C",
+  ];
+
+  const ticketFieldOptions = {
+    "Contact reason": {
+      "Pre-sale": {
+        "Product question": [],
+        Recommendation: [],
+        "Notify when in stock": [],
+        "Website questions": [],
+        "Coupon/Discount": [],
+      },
+      Order: {
+        Change: [],
+        Cancel: [],
+        "Missing item": [],
+        Status: [],
+        "Wrong item": [],
+      },
+      Shipping: {
+        "Change Address": [],
+        "Delivery not received": [],
+        "Damaged in transit": [],
+        "Lost in transit": [],
+        "Arrived late": [],
+      },
+      Feedback: {
+        Positive: [],
+        Negative: [],
+      },
+      Subscription: {
+        Cancel: [],
+        Change: [],
+      },
+      Spam: {},
+      Warranty: {},
+      Exchange: {},
+      Return: {},
+      Wholesale: {},
+      Marketing: {},
+      Other: {},
     },
+    Product: {
+      "Dropdown menu of products including search bar": productOptions,
+    },
+    Resolution: {
+      Updates: [],
+      Canceled: [],
+    },
+  };
+
+  const conditionFields = {
     Ticket: {
-      Status: ["open", "pending", "resolved", "closed"],
-      Priority: ["low", "medium", "high", "urgent"],
-      Subject: ["contains", "does not contain", "is empty", "is not empty"],
-      Tags: ["contains", "does not contain", "is empty", "is not empty"],
-      "Created date": [
-        "is today",
-        "is yesterday",
-        "is this week",
-        "is this month",
-      ],
+      "Assignee user": {
+        IS: ["username"],
+        "IS NOT": ["username"],
+        "is empty": [],
+        "is not empty": [],
+      },
+      "Assignee team": {
+        IS: ["username"],
+        "IS NOT": ["username"],
+        "is empty": [],
+        "is not empty": [],
+      },
+      "Assignee user email": {
+        IS: ["add word/sentence"],
+        "is not": ["add word/sentence"],
+        "contains all of": ["add words"],
+        "contains one of": ["add words"],
+        "does not contain all of": ["add words"],
+        "does not contain any of": ["add words"],
+        "ends with": ["add word/sentence"],
+        "starts with": ["add word/sentence"],
+      },
+      Channel: {
+        IS: [
+          "Email",
+          "Facebook",
+          "Facebook Mention",
+          "Facebook Messenger",
+          "Help Center",
+          "Instagram Ad Comment",
+          "Instagram Comment",
+          "SMS",
+          "Whatsapp",
+          "Chat",
+          "Slack",
+        ],
+        "IS NOT": [
+          "Email",
+          "Facebook",
+          "Facebook Mention",
+          "Facebook Messenger",
+          "Help Center",
+          "Instagram Ad Comment",
+          "Instagram Comment",
+          "SMS",
+          "Whatsapp",
+          "Chat",
+          "Slack",
+        ],
+      },
+      "Created date": {
+        "less than": ["... day(s) ago", "... minute(s) ago", "... hour(s) ago"],
+        before: ["date format"],
+        "during business hours": [],
+        "more than": ["... minute(s) ago", "... day(s) ago", "... hour(s) ago"],
+        "outside business hours": [],
+        after: ["date format"],
+      },
+      "From agent": {
+        IS: ["true", "false"],
+        "IS NOT": ["true", "false"],
+      },
+      Language: {
+        IS: [
+          "ar",
+          "bg",
+          "bn",
+          "ca",
+          "cs",
+          "cy",
+          "da",
+          "de",
+          "el",
+          "en",
+          "eo",
+          "es",
+          "et",
+          "eu",
+          "fa",
+          "fi",
+          "fr",
+          "ga",
+          "gl",
+          "gu",
+          "he",
+          "hi",
+          "hr",
+          "hu",
+          "hy",
+          "id",
+          "is",
+          "it",
+          "ja",
+          "ka",
+          "kn",
+          "ko",
+          "lt",
+          "lv",
+          "mk",
+          "ml",
+          "mr",
+          "ne",
+          "nl",
+          "no",
+          "pa",
+          "pl",
+          "pt",
+          "ro",
+          "ru",
+          "sk",
+          "sl",
+          "sq",
+          "sr",
+          "sv",
+          "sw",
+          "ta",
+          "te",
+          "th",
+          "tl",
+          "tr",
+          "uk",
+          "ur",
+          "vi",
+          "zh-cn",
+          "zh-tw",
+        ],
+        "IS NOT": [
+          "bg",
+          "bn",
+          "ca",
+          "cs",
+          "cy",
+          "da",
+          "de",
+          "el",
+          "en",
+          "eo",
+          "es",
+          "et",
+          "eu",
+          "fa",
+          "fi",
+          "fr",
+          "ga",
+          "gl",
+          "gu",
+          "he",
+          "hi",
+          "hr",
+          "hu",
+          "hy",
+          "id",
+          "is",
+          "it",
+          "ja",
+          "ka",
+          "kn",
+          "ko",
+          "lt",
+          "lv",
+          "mk",
+          "ml",
+          "mr",
+          "ne",
+          "nl",
+          "no",
+          "pa",
+          "pl",
+          "pt",
+          "ro",
+          "ru",
+          "sk",
+          "sl",
+          "sq",
+          "sr",
+          "sv",
+          "sw",
+          "ta",
+          "te",
+          "th",
+          "tl",
+          "tr",
+          "uk",
+          "ur",
+          "vi",
+          "zh-cn",
+          "zh-tw",
+        ],
+      },
+      "Last message date": {
+        "less than": ["... day(s) ago", "... minute(s) ago", "... hour(s) ago"],
+        before: ["date format"],
+        "during business hours": [],
+        "more than": ["... minute(s) ago", "... day(s) ago", "... hour(s) ago"],
+        "outside business hours": [],
+        after: ["date format"],
+      },
+      "Last received message date": {
+        "less than": ["... day(s) ago", "... minute(s) ago", "... hour(s) ago"],
+        before: ["date format"],
+        "during business hours": [],
+        "more than": ["... minute(s) ago", "... day(s) ago", "... hour(s) ago"],
+        "outside business hours": [],
+        after: ["date format"],
+      },
+      "Reopened date": {
+        "less than": ["... day(s) ago", "... minute(s) ago", "... hour(s) ago"],
+        before: ["date format"],
+        "during business hours": [],
+        "more than": ["... minute(s) ago", "... day(s) ago", "... hour(s) ago"],
+        "outside business hours": [],
+        after: ["date format"],
+      },
+      "Satisfaction survey score": {
+        IS: [
+          "1 star emoji",
+          "2 star emoji's",
+          "3 star emoji's",
+          "4 star emoji's",
+          "5 star emoji's",
+        ],
+        "IS NOT": [
+          "1 star emoji",
+          "2 star emoji's",
+          "5 star emoji's",
+          "3 star emoji's",
+          "4 star emoji's",
+        ],
+        "is greater than or equal to": [
+          "1 star emoji",
+          "2 star emoji's",
+          "5 star emoji's",
+          "3 star emoji's",
+          "4 star emoji's",
+        ],
+        "is greater than": [
+          "1 star emoji",
+          "2 star emoji's",
+          "5 star emoji's",
+          "3 star emoji's",
+          "4 star emoji's",
+        ],
+        "is less or equal to": [
+          "1 star emoji",
+          "2 star emoji's",
+          "3 star emoji's",
+          "5 star emoji's",
+          "4 star emoji's",
+        ],
+        "is less than": [
+          "1 star emoji",
+          "2 star emoji's",
+          "3 star emoji's",
+          "5 star emoji's",
+          "4 star emoji's",
+        ],
+      },
+      Spam: {
+        IS: ["true", "false"],
+        "IS NOT": ["true", "false"],
+      },
+      Status: {
+        IS: statusOptions,
+        "IS NOT": statusOptions,
+      },
+      Tags: {
+        "contains one of": [
+          "sample ticket",
+          "ORDER-STATUS",
+          "received",
+          "not-received",
+          "not-shipped",
+          "RETURN/EXCHANGE",
+          "shipped",
+          "damaged",
+          "instructions",
+          "ORDER-CHANGE/CANCEL",
+          "edit-address",
+          "already-shipped",
+          "partial-refund",
+          "cancel-refund",
+          "quick-reply-FAQ",
+          "during-business-hours",
+          "automatic-ooo",
+          "VIP",
+          "policy",
+          "outside-business-hours",
+          "social-question",
+          "auto-reply",
+          "auto-close",
+          "PRODUCT",
+          "social-lead",
+          "discount-request",
+          "full-refund",
+          "order-wrong",
+          "REFUND",
+          "change-order",
+        ],
+        "contains all of": [
+          "sample ticket",
+          "ORDER-STATUS",
+          "received",
+          "not-received",
+          "not-shipped",
+          "RETURN/EXCHANGE",
+          "shipped",
+          "damaged",
+          "instructions",
+          "ORDER-CHANGE/CANCEL",
+          "edit-address",
+          "already-shipped",
+          "partial-refund",
+          "quick-reply-FAQ",
+          "during-business-hours",
+          "cancel-refund",
+          "automatic-ooo",
+          "VIP",
+          "policy",
+          "outside-business-hours",
+          "social-question",
+          "auto-reply",
+          "auto-close",
+          "PRODUCT",
+          "social-lead",
+          "discount-request",
+          "full-refund",
+          "order-wrong",
+          "REFUND",
+          "change-order",
+          "cancel-refund",
+        ],
+        "does not contain all of": [
+          "sample ticket",
+          "ORDER-STATUS",
+          "received",
+          "not-received",
+          "not-shipped",
+          "RETURN/EXCHANGE",
+          "shipped",
+          "damaged",
+          "instructions",
+          "ORDER-CHANGE/CANCEL",
+          "edit-address",
+          "already-shipped",
+          "partial-refund",
+          "cancel-refund",
+          "quick-reply-FAQ",
+          "during-business-hours",
+          "automatic-ooo",
+          "VIP",
+          "policy",
+          "outside-business-hours",
+          "social-question",
+          "auto-reply",
+          "auto-close",
+          "PRODUCT",
+          "social-lead",
+          "discount-request",
+          "full-refund",
+          "order-wrong",
+          "REFUND",
+          "change-order",
+        ],
+        "does not contain any of": [
+          "sample ticket",
+          "ORDER-STATUS",
+          "received",
+          "not-received",
+          "not-shipped",
+          "RETURN/EXCHANGE",
+          "shipped",
+          "damaged",
+          "instructions",
+          "ORDER-CHANGE/CANCEL",
+          "edit-address",
+          "already-shipped",
+          "partial-refund",
+          "cancel-refund",
+          "quick-reply-FAQ",
+          "during-business-hours",
+          "automatic-ooo",
+          "VIP",
+          "policy",
+          "outside-business-hours",
+          "social-question",
+          "auto-reply",
+          "auto-close",
+          "PRODUCT",
+          "social-lead",
+          "discount-request",
+          "full-refund",
+          "order-wrong",
+          "REFUND",
+          "change-order",
+        ],
+        "is empty": [],
+        "is not empty": [],
+      },
+      Subject: {
+        "contains all of": ["add words"],
+        "contains one of": ["add words"],
+        "does not contain all of": ["add words"],
+        "does not contain any of": ["add words"],
+        "ends with": ["add word/sentence"],
+        IS: ["add word/sentence"],
+        "starts with": ["add word/sentence"],
+      },
+      "Unsnooze date": {
+        "is empty": [],
+        "is not empty": [],
+      },
+      Via: {
+        IS: [
+          "api",
+          "contact_form",
+          "email",
+          "facebook",
+          "facebook-mention",
+          "facebook-messenger",
+          "facebook-recommendations",
+          "instagram-ad-comment",
+          "instagram-comment",
+          "instagram-direct-message",
+          "shopify",
+          "sms",
+          "whatsapp",
+          "trigger",
+        ],
+        "IS NOT": [
+          "api",
+          "contact_form",
+          "email",
+          "facebook",
+          "facebook-mention",
+          "facebook-messenger",
+          "facebook-recommendations",
+          "instagram-ad-comment",
+          "instagram-comment",
+          "instagram-direct-message",
+          "shopify",
+          "sms",
+          "whatsapp",
+          "trigger",
+        ],
+      },
+    },
+    Message: {
+      "Source from name": {
+        IS: ["add word/sentence"],
+        "is not": ["add word/sentence"],
+        "contains all of": ["add words"],
+        "contains one of": ["add words"],
+        "does not contain all of": ["add words"],
+        "does not contain any of": ["add words"],
+        "ends with": ["add word/sentence"],
+        "starts with": ["add word/sentence"],
+      },
+      "Source from address": {
+        IS: ["add word/sentence"],
+        "is not": ["add word/sentence"],
+        "contains all of": ["add words"],
+        "contains one of": ["add words"],
+        "does not contain all of": ["add words"],
+        "does not contain any of": ["add words"],
+        "ends with": ["add word/sentence"],
+        "starts with": ["add word/sentence"],
+      },
+      "Sender email": {
+        IS: ["add word/sentence"],
+        "is not": ["add word/sentence"],
+        "contains all of": ["add words"],
+        "contains one of": ["add words"],
+        "does not contain all of": ["add words"],
+        "does not contain any of": ["add words"],
+        "ends with": ["add word/sentence"],
+        "starts with": ["add word/sentence"],
+      },
+      Via: {
+        IS: [
+          "api",
+          "contact_form",
+          "email",
+          "facebook",
+          "facebook-mention",
+          "facebook-messenger",
+          "facebook-recommendations",
+          "instagram-ad-comment",
+          "instagram-comment",
+          "instagram-direct-message",
+          "shopify",
+          "sms",
+          "whatsapp",
+          "trigger",
+        ],
+        "IS NOT": [
+          "api",
+          "contact_form",
+          "email",
+          "facebook",
+          "facebook-mention",
+          "facebook-messenger",
+          "facebook-recommendations",
+          "instagram-ad-comment",
+          "instagram-comment",
+          "instagram-direct-message",
+          "shopify",
+          "sms",
+          "whatsapp",
+          "trigger",
+        ],
+      },
+      Sentiments: {
+        "contains one of": [
+          "negative",
+          "offensive",
+          "positive",
+          "urgent",
+          "threatening",
+          "promoter",
+        ],
+        "does not contain any of": [
+          "negative",
+          "offensive",
+          "positive",
+          "urgent",
+          "threatening",
+          "promoter",
+        ],
+      },
+      Public: {
+        IS: ["true", "false"],
+        "IS NOT": ["true", "false"],
+      },
+      Intents: {
+        "contains one of": [
+          "discount-request",
+          "exchange-request",
+          "exchange-issue",
+          "feedback",
+          "order-damaged",
+          "order-change",
+          "other-reply",
+          "order-wrong",
+          "order-cancel",
+          "other-question",
+          "other-thanks",
+          "product-recommendation",
+          "product-question",
+          "refund-request",
+          "refund-issue",
+          "return-request",
+          "return-issue",
+          "shipping-change",
+          "shipping-delivery-issue",
+          "shipping-policy",
+          "shipping-status",
+          "stock-request",
+          "subscription-cancel",
+          "subscription-change",
+        ],
+        "does not contain any of": [
+          "discount-request",
+          "exchange-request",
+          "exchange-issue",
+          "feedback",
+          "order-damaged",
+          "order-change",
+          "other-reply",
+          "order-wrong",
+          "order-cancel",
+          "other-question",
+          "other-thanks",
+          "product-recommendation",
+          "product-question",
+          "refund-request",
+          "refund-issue",
+          "return-request",
+          "return-issue",
+          "shipping-change",
+          "shipping-delivery-issue",
+          "shipping-policy",
+          "shipping-status",
+          "stock-request",
+          "subscription-cancel",
+          "subscription-change",
+        ],
+      },
+      "sent date": {
+        "less than": ["... day(s) ago", "... minute(s) ago", "... hour(s) ago"],
+        before: ["date format"],
+        "during business hours": [],
+        "more than": ["... minute(s) ago", "... day(s) ago", "... hour(s) ago"],
+        "outside business hours": [],
+        after: ["date format"],
+      },
+      Integration: {
+        IS: ["Connected outbound email address"],
+        "IS NOT": ["Connected outbound email address"],
+      },
+      "From agent": {
+        IS: ["true", "false"],
+        "IS NOT": ["true", "false"],
+      },
+      "Created date": {
+        "less than": ["... day(s) ago", "... minute(s) ago", "... hour(s) ago"],
+        before: ["date format"],
+        "during business hours": [],
+        "more than": ["... minute(s) ago", "... day(s) ago", "... hour(s) ago"],
+        "outside business hours": [],
+        after: ["date format"],
+      },
+      Channel: {
+        IS: [
+          "Email",
+          "Facebook",
+          "Facebook Mention",
+          "Facebook Messenger",
+          "Help Center",
+          "Instagram Ad Comment",
+          "Instagram Comment",
+          "SMS",
+          "Whatsapp",
+          "Chat",
+          "Slack",
+        ],
+        "IS NOT": [
+          "Email",
+          "Facebook",
+          "Facebook Mention",
+          "Facebook Messenger",
+          "Help Center",
+          "Instagram Ad Comment",
+          "Instagram Comment",
+          "SMS",
+          "Whatsapp",
+          "Chat",
+          "Slack",
+        ],
+      },
+      Body: {
+        "contains all of": ["add words"],
+        "contains one of": ["add words"],
+        "does not contain all of": ["add words"],
+        "does not contain any of": ["add words"],
+        "ends with": ["add word/sentence"],
+        IS: ["add word/sentence"],
+        "starts with": ["add word/sentence"],
+      },
     },
     Customer: {
-      Email: ["is", "is not", "contains", "does not contain"],
-      Name: ["is", "is not", "contains", "does not contain"],
-      Company: ["is", "is not", "contains", "does not contain"],
-      Tags: ["contains", "does not contain", "is empty", "is not empty"],
+      Data: {
+        "contains one of": ["add value"],
+        "contains all of": ["add value"],
+        "does not contain all of": ["add value"],
+        "does not contain any of": ["add value"],
+      },
+      Email: {
+        "contains one of": ["add value"],
+        "contains all of": ["add value"],
+        "does not contain any of": ["add value"],
+        "does not contain all of": ["add value"],
+      },
+      "Other integrations": {
+        "contains one of": ["add value"],
+        "contains all of": ["add value"],
+        "does not contain all of": ["add value"],
+        "does not contain any of": ["add value"],
+      },
     },
     "Shopify Last Order": {
-      "Order number": ["is", "is not", "contains", "does not contain"],
-      "Order status": ["pending", "fulfilled", "cancelled", "refunded"],
-      "Order date": [
-        "is today",
-        "is yesterday",
-        "is this week",
-        "is this month",
-      ],
-      "Order total": ["greater than", "less than", "equals", "is empty"],
+      "SHIPPING ADDRESS: Province": {
+        IS: ["add word/sentence"],
+        "is not": ["add word/sentence"],
+        "contains all of": ["add words"],
+        "contains one of": ["add words"],
+        "does not contain all of": ["add words"],
+        "does not contain any of": ["add words"],
+        "ends with": ["add word/sentence"],
+        "starts with": ["add word/sentence"],
+      },
+      "SHIPPING ADDRESS: Country": {
+        IS: ["add word/sentence"],
+        "is not": ["add word/sentence"],
+        "contains all of": ["add words"],
+        "contains one of": ["add words"],
+        "does not contain all of": ["add words"],
+        "does not contain any of": ["add words"],
+        "ends with": ["add word/sentence"],
+        "starts with": ["add word/sentence"],
+      },
+      "LAST FULFILLMENT: Tracking number": {
+        "IS EMPTY": [],
+        "IS NOT EMPTY": [],
+      },
+      "LAST FULFILLMENT: Status": {
+        IS: ["failure", "canceled", "open", "error", "pending", "success"],
+        "IS NOT": [
+          "failure",
+          "canceled",
+          "success",
+          "open",
+          "error",
+          "pending",
+        ],
+        "IS EMPTY": [],
+        "IS NOT EMPTY": [],
+      },
+      "LAST FULFILLMENT: Shipment status": {
+        IS: [
+          "attempted_delivery",
+          "confirmed",
+          "delivered",
+          "failure",
+          "in_transit",
+          "label_purchased",
+          "out_for_delivery",
+          "ready_for_pickup",
+        ],
+        "IS NOT": [
+          "attempted_delivery",
+          "confirmed",
+          "delivered",
+          "failure",
+          "in_transit",
+          "ready_for_pickup",
+          "label_purchased",
+          "out_for_delivery",
+        ],
+      },
+      "LAST FULFILLMENT: Created date": {
+        "less than": ["... minute(s) ago", "... day(s) ago", "... hour(s) ago"],
+        before: ["date format"],
+        "during business hours": [],
+        "more than": ["... minute(s) ago", "... day(s) ago", "... hour(s) ago"],
+        "outside business hours": [],
+        after: ["date format"],
+      },
+      "Total price": {
+        "is less or equal to": ["add value"],
+        "is less than": ["add value"],
+        IS: ["add value"],
+        "IS NOT": ["add value"],
+        "is greater than or equal to": ["add value"],
+        "is greater than": ["add value"],
+      },
+      Tags: {
+        "contains one of": ["add value"],
+        "contains all of": ["add value"],
+        "does not contain all of": ["add value"],
+        "does not contain any of": ["add value"],
+      },
+      "Fulfillment status": {
+        IS: ["fulfilled", "partial", "restocked"],
+        "IS NOT": ["fulfilled", "partial", "restocked"],
+        "IS EMPTY": [],
+        "IS NOT EMPTY": [],
+      },
+      "Financial status": {
+        IS: [
+          "pending",
+          "authorized",
+          "voided",
+          "paid",
+          "partially_paid",
+          "partially_refunded",
+          "refunded",
+        ],
+        "IS NOT": [
+          "pending",
+          "authorized",
+          "paid",
+          "partially_paid",
+          "partially_refunded",
+          "refunded",
+          "voided",
+        ],
+      },
+      "Created date": {
+        "less than": ["... minute(s) ago", "... day(s) ago", "... hour(s) ago"],
+        before: ["date format"],
+        "during business hours": [],
+        "more than": ["... minute(s) ago", "... day(s) ago", "... hour(s) ago"],
+        "outside business hours": [],
+        after: ["date format"],
+      },
     },
     "Shopify Customer": {
-      "Customer ID": ["is", "is not", "contains", "does not contain"],
-      "Total orders": ["greater than", "less than", "equals", "is empty"],
-      "Total spent": ["greater than", "less than", "equals", "is empty"],
-      "Customer tags": [
-        "contains",
-        "does not contain",
-        "is empty",
-        "is not empty",
-      ],
+      "Created date": {
+        "less than": ["... minute(s) ago", "... day(s) ago", "... hour(s) ago"],
+        before: ["date format"],
+        "during business hours": [],
+        "more than": ["... minute(s) ago", "... hour(s) ago", "... day(s) ago"],
+        "outside business hours": [],
+        after: ["date format"],
+      },
+      "Orders count": {
+        "is less or equal to": ["add value"],
+        "is less than": ["add value"],
+        IS: ["add value"],
+        "IS NOT": ["add value"],
+        "is greater than or equal to": ["add value"],
+        "is greater than": ["add value"],
+      },
+      Tags: {
+        "is less or equal to": ["add value"],
+        "is less than": ["add value"],
+        IS: ["add value"],
+        "IS NOT": ["add value"],
+        "is greater than or equal to": ["add value"],
+        "is greater than": ["add value"],
+      },
+      "Total spent": {
+        "is less or equal to": ["add value"],
+        "is less than": ["add value"],
+        IS: ["add value"],
+        "IS NOT": ["add value"],
+        "is greater than or equal to": ["add value"],
+        "is greater than": ["add value"],
+      },
     },
     "Self Service": {
-      "Article viewed": ["is", "is not", "contains", "does not contain"],
-      "Search term": [
-        "contains",
-        "does not contain",
-        "is empty",
-        "is not empty",
-      ],
-      Category: ["is", "is not", "contains", "does not contain"],
+      "Order management": {
+        IS: [
+          "Cancel order",
+          "Return order",
+          "Report issue: I didn't get my refund",
+          "Report issue: I forgot to apply my discount code",
+          "Report issue: I'd like a discount code",
+          "Report issue: I'd like to change my shipping address",
+          "Report issue: I'd like to change the delivery date",
+          "Report issue: I'd like to get a refund for this order",
+          "Report issue: I'd like to reorder some items",
+          "Report issue: I'm past my expected delivery date",
+          "Report issue: My order has been stuck in transit",
+          "Report issue: My order should have shipped by now",
+          "Report issue: Other",
+          "Report issue: My order was damaged in delivery",
+          "Report issue: The items in my order are defective",
+          "Report issue: The items are different from what I ordered",
+          "Report issue: I'd like to edit my order",
+        ],
+        "IS NOT": [
+          "Cancel order",
+          "Return order",
+          "Report issue: I didn't get my refund",
+          "Report issue: I forgot to apply my discount code",
+          "Report issue: I'd like a discount code",
+          "Report issue: I'd like to change my shipping address",
+          "Report issue: I'd like to change the delivery date",
+          "Report issue: I'd like to get a refund for this order",
+          "Report issue: I'd like to reorder some items",
+          "Report issue: I'm past my expected delivery date",
+          "Report issue: My order has been stuck in transit",
+          "Report issue: My order should have shipped by now",
+          "Report issue: Other",
+          "Report issue: My order was damaged in delivery",
+          "Report issue: The items in my order are defective",
+          "Report issue: The items are different from what I ordered",
+          "Report issue: I'd like to edit my order",
+        ],
+      },
+      "Self-service store": {
+        IS: ["Select store"],
+        "IS NOT": ["Select store"],
+      },
     },
   };
 
@@ -421,15 +1559,36 @@ export default function TriggerCustom() {
   const getOperatorsForField = (field, conditionFields) => {
     if (!field || !field.includes(" > ")) return operators;
 
-    const [parentCategory, subField] = field.split(" > ");
-    if (
-      conditionFields[parentCategory] &&
-      conditionFields[parentCategory][subField]
-    ) {
-      return conditionFields[parentCategory][subField];
+    const parts = field.split(" > ");
+    if (parts.length === 2) {
+      // Two-level structure - check if it has operator-based structure
+      const [parentCategory, subField] = parts;
+      if (
+        conditionFields[parentCategory] &&
+        conditionFields[parentCategory][subField] &&
+        typeof conditionFields[parentCategory][subField] === "object"
+      ) {
+        // Return the available operators (keys of the nested object)
+        return Object.keys(conditionFields[parentCategory][subField]);
+      }
+      // Otherwise use default operators
+      return operators;
     }
 
     return operators;
+  };
+
+  // Helper function to extract operator from field selection
+  const getOperatorFromField = (field) => {
+    if (!field || !field.includes(" > ")) return null;
+
+    const parts = field.split(" > ");
+    if (parts.length === 3) {
+      // Third part is the operator
+      return parts[2];
+    }
+
+    return null;
   };
 
   const add =
@@ -523,6 +1682,7 @@ export default function TriggerCustom() {
       newNode.logicalOp = logicalOperator || "IF"; // Set the logical operator
     } else if (childType === "action") {
       newNode.action = null;
+      newNode.actionConfig = {};
     } else if (childType === "else") {
       newNode.action = null; // ELSE only has action, no conditions
     }
@@ -706,10 +1866,221 @@ export default function TriggerCustom() {
               <RuleDropdown
                 options={actionsList}
                 value={node.action}
-                onChange={(action) => updateNode(node.id, { action })}
+                onChange={(action) =>
+                  updateNode(node.id, { action, actionConfig: {} })
+                }
                 placeholder="Choose action to perform..."
                 variant="success"
               />
+              {node.action === "Send email" && (
+                <input
+                  type="text"
+                  placeholder="Email form (placeholder)"
+                  className="px-3 py-2 border rounded"
+                  onChange={(e) =>
+                    updateNode(node.id, {
+                      actionConfig: {
+                        ...(node.actionConfig || {}),
+                        body: e.target.value,
+                      },
+                    })
+                  }
+                />
+              )}
+              {node.action === "Reply to customer" && (
+                <input
+                  type="text"
+                  placeholder="Customer email form (placeholder)"
+                  className="px-3 py-2 border rounded"
+                  onChange={(e) =>
+                    updateNode(node.id, {
+                      actionConfig: {
+                        ...(node.actionConfig || {}),
+                        body: e.target.value,
+                      },
+                    })
+                  }
+                />
+              )}
+              {node.action === "Add internal note" && (
+                <input
+                  type="text"
+                  placeholder="Note form (placeholder)"
+                  className="px-3 py-2 border rounded"
+                  onChange={(e) =>
+                    updateNode(node.id, {
+                      actionConfig: {
+                        ...(node.actionConfig || {}),
+                        note: e.target.value,
+                      },
+                    })
+                  }
+                />
+              )}
+              {node.action === "Apply predefined response" && (
+                <RuleDropdown
+                  options={predefinedResponses}
+                  value={node.actionConfig?.template}
+                  onChange={(val) =>
+                    updateNode(node.id, {
+                      actionConfig: {
+                        ...(node.actionConfig || {}),
+                        template: val,
+                      },
+                    })
+                  }
+                  placeholder="Select predefined response..."
+                  variant="success"
+                />
+              )}
+              {node.action === "Add tags" && (
+                <RuleDropdown
+                  options={tagOptions}
+                  value={node.actionConfig?.tag}
+                  onChange={(val) =>
+                    updateNode(node.id, {
+                      actionConfig: { ...(node.actionConfig || {}), tag: val },
+                    })
+                  }
+                  placeholder="Dropdown of tags"
+                  variant="success"
+                />
+              )}
+              {node.action === "Remove tags" && (
+                <RuleDropdown
+                  options={tagOptions}
+                  value={node.actionConfig?.tag}
+                  onChange={(val) =>
+                    updateNode(node.id, {
+                      actionConfig: { ...(node.actionConfig || {}), tag: val },
+                    })
+                  }
+                  placeholder="Dropdown of tags"
+                  variant="success"
+                />
+              )}
+              {node.action === "Reset tags" && (
+                <RuleDropdown
+                  options={tagOptions}
+                  value={node.actionConfig?.tag}
+                  onChange={(val) =>
+                    updateNode(node.id, {
+                      actionConfig: { ...(node.actionConfig || {}), tag: val },
+                    })
+                  }
+                  placeholder="Dropdown of tags"
+                  variant="success"
+                />
+              )}
+              {node.action === "Set subject" && (
+                <input
+                  type="text"
+                  placeholder="Set subject..."
+                  className="px-3 py-2 border rounded"
+                  onChange={(e) =>
+                    updateNode(node.id, {
+                      actionConfig: {
+                        ...(node.actionConfig || {}),
+                        subject: e.target.value,
+                      },
+                    })
+                  }
+                />
+              )}
+              {node.action === "Set status" && (
+                <RuleDropdown
+                  options={statusOptions}
+                  value={node.actionConfig?.status}
+                  onChange={(val) =>
+                    updateNode(node.id, {
+                      actionConfig: {
+                        ...(node.actionConfig || {}),
+                        status: val,
+                      },
+                    })
+                  }
+                  placeholder="Select status"
+                  variant="success"
+                />
+              )}
+              {node.action === "Set ticket field" && (
+                <NestedConditionDropdown
+                  conditionFields={ticketFieldOptions}
+                  value={node.actionConfig?.ticketField}
+                  onChange={(val) =>
+                    updateNode(node.id, {
+                      actionConfig: {
+                        ...(node.actionConfig || {}),
+                        ticketField: val,
+                      },
+                    })
+                  }
+                  placeholder="Select ticket field"
+                  variant="success"
+                  maxLevels={3}
+                />
+              )}
+              {node.action === "Snooze for" && (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min={1}
+                    className="px-3 py-2 border rounded w-24"
+                    placeholder="Value"
+                    onChange={(e) =>
+                      updateNode(node.id, {
+                        actionConfig: {
+                          ...(node.actionConfig || {}),
+                          amount: Number(e.target.value),
+                        },
+                      })
+                    }
+                  />
+                  <RuleDropdown
+                    options={["minute(s)", "hour(s)", "day(s)"]}
+                    value={node.actionConfig?.unit}
+                    onChange={(val) =>
+                      updateNode(node.id, {
+                        actionConfig: {
+                          ...(node.actionConfig || {}),
+                          unit: val,
+                        },
+                      })
+                    }
+                    placeholder="Unit"
+                    variant="success"
+                  />
+                </div>
+              )}
+              {node.action === "Assign agent" && (
+                <RuleDropdown
+                  options={agentOptions}
+                  value={node.actionConfig?.agent}
+                  onChange={(val) =>
+                    updateNode(node.id, {
+                      actionConfig: {
+                        ...(node.actionConfig || {}),
+                        agent: val,
+                      },
+                    })
+                  }
+                  placeholder="Dropdown of agent names"
+                  variant="success"
+                />
+              )}
+              {node.action === "Assign team" && (
+                <RuleDropdown
+                  options={teamOptions}
+                  value={node.actionConfig?.team}
+                  onChange={(val) =>
+                    updateNode(node.id, {
+                      actionConfig: { ...(node.actionConfig || {}), team: val },
+                    })
+                  }
+                  placeholder="Dropdown of team names"
+                  variant="success"
+                />
+              )}
               {node.action && (
                 <div className="ml-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
                   ✓ Action configured
@@ -724,30 +2095,192 @@ export default function TriggerCustom() {
               <NestedConditionDropdown
                 conditionFields={conditionFields}
                 value={node.field}
-                onChange={(field) => updateNode(node.id, { field })}
+                onChange={(field) => {
+                  updateNode(node.id, {
+                    field: field,
+                    // Clear operator and value when field changes
+                    operator: null,
+                    value: null,
+                  });
+                }}
                 placeholder="Select field to check..."
                 variant="primary"
+                isConditionField={true}
+                maxLevels={4}
               />
-              {node.field && (
-                <RuleDropdown
-                  options={getOperatorsForField(node.field, conditionFields)}
-                  value={node.operator}
-                  onChange={(operator) => updateNode(node.id, { operator })}
-                  placeholder="Select operator..."
-                  variant="primary"
-                />
-              )}
-              {node.field && node.operator && (
-                <input
-                  type="text"
-                  value={node.value || ""}
-                  onChange={(e) =>
-                    updateNode(node.id, { value: e.target.value })
+              {node.field &&
+                getOperatorsForField(node.field, conditionFields).length >
+                  0 && (
+                  <RuleDropdown
+                    options={getOperatorsForField(node.field, conditionFields)}
+                    value={node.operator}
+                    onChange={(operator) => updateNode(node.id, { operator })}
+                    placeholder="Select operator..."
+                    variant="primary"
+                  />
+                )}
+              {node.field &&
+                node.operator &&
+                (() => {
+                  // Do not show a value control for empty/not-empty operators
+                  const noValueOps = [
+                    "IS EMPTY",
+                    "IS NOT EMPTY",
+                    "is empty",
+                    "is not empty",
+                  ];
+                  if (noValueOps.includes(node.operator)) return null;
+
+                  // Check if we have predefined values for this field + operator combination
+                  const parts = node.field.split(" > ");
+                  if (parts.length >= 2 && node.operator) {
+                    const [parentCategory, subField] = parts;
+
+                    if (
+                      conditionFields[parentCategory] &&
+                      conditionFields[parentCategory][subField] &&
+                      typeof conditionFields[parentCategory][subField] ===
+                        "object" &&
+                      conditionFields[parentCategory][subField][
+                        node.operator
+                      ] &&
+                      Array.isArray(
+                        conditionFields[parentCategory][subField][node.operator]
+                      )
+                    ) {
+                      const values =
+                        conditionFields[parentCategory][subField][
+                          node.operator
+                        ];
+
+                      // 1) Duration pattern: values like "... minute(s) ago" etc → number + unit dropdown
+                      const hasDuration = values.some(
+                        (v) => typeof v === "string" && v.includes("minute(s)")
+                      );
+                      const hasHour = values.some(
+                        (v) => typeof v === "string" && v.includes("hour(s)")
+                      );
+                      const hasDay = values.some(
+                        (v) => typeof v === "string" && v.includes("day(s)")
+                      );
+                      if (hasDuration || hasHour || hasDay) {
+                        const unitOptions = [
+                          hasDuration ? "minute(s) ago" : null,
+                          hasHour ? "hour(s) ago" : null,
+                          hasDay ? "day(s) ago" : null,
+                        ].filter(Boolean);
+                        const currentAmount =
+                          (node.value && node.value.amount) || "";
+                        const currentUnit =
+                          (node.value && node.value.unit) || unitOptions[0];
+                        return (
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              min={0}
+                              value={currentAmount}
+                              onChange={(e) =>
+                                updateNode(node.id, {
+                                  value: {
+                                    amount: Number(e.target.value),
+                                    unit: currentUnit,
+                                  },
+                                })
+                              }
+                              placeholder="Value"
+                              className="px-3 py-2 border rounded w-24"
+                            />
+                            <RuleDropdown
+                              options={unitOptions}
+                              value={currentUnit}
+                              onChange={(val) =>
+                                updateNode(node.id, {
+                                  value: {
+                                    amount: currentAmount || 0,
+                                    unit: val,
+                                  },
+                                })
+                              }
+                              placeholder="Unit"
+                              variant="primary"
+                            />
+                          </div>
+                        );
+                      }
+
+                      // 2) Numeric placeholder
+                      if (values.some((v) => v === "add value")) {
+                        return (
+                          <input
+                            type="number"
+                            value={node.value || ""}
+                            onChange={(e) =>
+                              updateNode(node.id, {
+                                value: Number(e.target.value),
+                              })
+                            }
+                            placeholder="add number"
+                            className="px-4 py-2 border-2 border-amber-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 min-w-[150px] bg-white shadow-sm"
+                          />
+                        );
+                      }
+
+                      // 3) Text placeholders
+                      if (
+                        values.some(
+                          (v) =>
+                            v === "add word/sentence" ||
+                            v === "add words" ||
+                            v === "date format"
+                        )
+                      ) {
+                        const ph = values.find(
+                          (v) =>
+                            v === "add word/sentence" ||
+                            v === "add words" ||
+                            v === "date format"
+                        );
+                        return (
+                          <input
+                            type="text"
+                            value={node.value || ""}
+                            onChange={(e) =>
+                              updateNode(node.id, { value: e.target.value })
+                            }
+                            placeholder={ph}
+                            className="px-4 py-2 border-2 border-amber-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 min-w-[150px] bg-white shadow-sm"
+                          />
+                        );
+                      }
+
+                      // 4) Fallback to dropdown with predefined list
+                      return (
+                        <RuleDropdown
+                          options={values}
+                          value={node.value}
+                          onChange={(val) =>
+                            updateNode(node.id, { value: val })
+                          }
+                          placeholder="Select value..."
+                          variant="primary"
+                        />
+                      );
+                    }
                   }
-                  placeholder="Enter value..."
-                  className="px-4 py-2 border-2 border-amber-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 min-w-[150px] bg-white shadow-sm"
-                />
-              )}
+
+                  // Default to text input
+                  return (
+                    <input
+                      type="text"
+                      value={node.value || ""}
+                      onChange={(e) =>
+                        updateNode(node.id, { value: e.target.value })
+                      }
+                      placeholder="Enter value..."
+                      className="px-4 py-2 border-2 border-amber-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 min-w-[150px] bg-white shadow-sm"
+                    />
+                  );
+                })()}
               {node.field && node.operator && node.value && (
                 <div className="ml-2 px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-medium">
                   ✓ Condition set
