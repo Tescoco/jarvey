@@ -2455,13 +2455,32 @@ export default function TriggerCustom() {
                     (child) => child.logicalOp === "OR"
                   );
 
-                  // Build available buttons based on what's not yet selected
-                  const buttons = [];
+                  // If neither AND nor OR exist, show both options
+                  if (!hasAnd && !hasOr) {
+                    return (
+                      <>
+                        <button
+                          className="inline-flex items-center gap-2 px-3 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
+                          onClick={() => addChildNode(node.id, "if", "AND")}
+                        >
+                          <span>➕</span>
+                          Add AND
+                        </button>
+                        <button
+                          className="inline-flex items-center gap-2 px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
+                          onClick={() => addChildNode(node.id, "if", "OR")}
+                        >
+                          <span>🔄</span>
+                          Add OR
+                        </button>
+                      </>
+                    );
+                  }
 
-                  if (!hasAnd) {
-                    buttons.push(
+                  // If AND exists, only allow more AND statements
+                  if (hasAnd && !hasOr) {
+                    return (
                       <button
-                        key="add-and"
                         className="inline-flex items-center gap-2 px-3 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
                         onClick={() => addChildNode(node.id, "if", "AND")}
                       >
@@ -2471,10 +2490,10 @@ export default function TriggerCustom() {
                     );
                   }
 
-                  if (!hasOr) {
-                    buttons.push(
+                  // If OR exists, only allow more OR statements
+                  if (hasOr && !hasAnd) {
+                    return (
                       <button
-                        key="add-or"
                         className="inline-flex items-center gap-2 px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
                         onClick={() => addChildNode(node.id, "if", "OR")}
                       >
@@ -2484,8 +2503,8 @@ export default function TriggerCustom() {
                     );
                   }
 
-                  // Return buttons if any are available, otherwise return null
-                  return buttons.length > 0 ? <>{buttons}</> : null;
+                  // If both exist (shouldn't happen with proper logic), don't show any buttons
+                  return null;
                 })()}
 
                 {/* Add ELSE button - only show for IF statements (not AND/OR) and if no ELSE child exists */}
