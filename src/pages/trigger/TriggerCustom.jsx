@@ -87,6 +87,11 @@ const RuleDropdown = ({
   // Register dropdown for global dismiss
   useDismissibleDropdown(isOpen, () => setIsOpen(false), triggerRef);
 
+  // Hide the entire dropdown if options is an empty array
+  if (Array.isArray(options) && options.length === 0) {
+    return null;
+  }
+
   return (
     <div className="relative">
       <Alert
@@ -2253,7 +2258,10 @@ export default function TriggerCustom() {
                         );
                       }
 
-                      // 4) Fallback to dropdown with predefined list
+                      // 4) Fallback to dropdown with predefined list (hide if empty)
+                      if (Array.isArray(values) && values.length === 0) {
+                        return null;
+                      }
                       return (
                         <RuleDropdown
                           options={values}
