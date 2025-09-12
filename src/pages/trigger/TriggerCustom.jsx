@@ -1686,13 +1686,15 @@ export default function TriggerCustom() {
       newNode.value = null;
       newNode.logicalOp = logicalOperator || "IF"; // Set the logical operator
 
-      // Automatically add a THEN statement underneath any IF statement
-      const thenNode = {
-        id: Date.now() + 1,
-        type: "then",
-        children: [],
-      };
-      newNode.children = [thenNode];
+      // Only automatically add a THEN statement for main IF statements, not for AND/OR
+      if (logicalOperator === "IF" || !logicalOperator) {
+        const thenNode = {
+          id: Date.now() + 1,
+          type: "then",
+          children: [],
+        };
+        newNode.children = [thenNode];
+      }
     } else if (childType === "action") {
       newNode.action = null;
       newNode.actionConfig = {};
