@@ -178,7 +178,7 @@ export default function LeftUser({ className }) {
         {/* Status dot */}
         <div
           className={`absolute bottom-0 left-0 size-3 rounded-full border-2 border-white ${
-            isAvailable ? "bg-green-500" : "bg-red-500"
+            isAvailable ? "bg-green" : "bg-red-500"
           }`}
         />
       </div>

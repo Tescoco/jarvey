@@ -96,7 +96,7 @@ export default function ChatSettings() {
                   : ""
               }  `}
             >
-              <div className="md:h-[calc(100vh-325px)] overflow-y-auto pr-4 lg:pr-5'">
+              <div className="md:h-[calc(100vh-175px)] overflow-y-auto pr-4 lg:pr-5'">
                 {activeTab === "Appearances" && (
                   <Appearances
                     chatConfig={chatConfig}

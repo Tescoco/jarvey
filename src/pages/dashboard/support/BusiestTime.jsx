@@ -21,7 +21,13 @@ export default function Overview() {
     "Sunday",
   ];
   const hours = [
-    "08:00",
+    "00:00",
+    "01:00",
+    "02:00",
+    "03:00",
+    "04:00",
+    "05:00",
+    "06:00",
     "07:00",
     "08:00",
     "09:00",
@@ -32,6 +38,13 @@ export default function Overview() {
     "14:00",
     "15:00",
     "16:00",
+    "17:00",
+    "18:00",
+    "19:00",
+    "20:00",
+    "21:00",
+    "22:00",
+    "23:00",
   ];
   const getColor = (count) => {
     if (!count) return "bg-white";
@@ -171,15 +184,27 @@ export default function Overview() {
                         const cell = scheduleData.find(
                           (entry) => entry.day === day && entry.hour === hour
                         );
+                        const isWeekday =
+                          day === "Monday" ||
+                          day === "Tuesday" ||
+                          day === "Wednesday" ||
+                          day === "Thursday" ||
+                          day === "Friday";
+                        const hourNumber = parseInt(hour.split(":")[0], 10);
+                        const isBusinessHour =
+                          isWeekday && hourNumber >= 8 && hourNumber <= 16;
                         return (
                           <td
                             key={day + hour}
                             data-kay={day + hour}
                             style={{
-                              borderLeft: cell?.count && "4px dashed #FE4234",
+                              borderLeft:
+                                isBusinessHour && "4px dashed #FE4234",
                             }}
-                            className={`h-[40px] !p-0 border-l-2 border-dashed ${
-                              cell?.count ? "border-[#FE4234]" : "border-stroke"
+                            className={`h-[40px] !p-0 ${
+                              isBusinessHour
+                                ? "border-l-2 border-dashed border-[#FE4234]"
+                                : ""
                             }`}
                           >
                             <div

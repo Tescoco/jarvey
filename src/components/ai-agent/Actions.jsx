@@ -613,23 +613,26 @@ export default function actions() {
                           variant="purple"
                         />
 
-                        <input
-                          type={
-                            condition.fieldType === "number"
-                              ? "number"
-                              : condition.fieldType === "date"
-                              ? "date"
-                              : "text"
-                          }
-                          value={condition.value}
-                          onChange={(e) =>
-                            updateCondition(condition.id, {
-                              value: e.target.value,
-                            })
-                          }
-                          placeholder="value"
-                          className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm min-w-[100px]"
-                        />
+                        {condition.operator !== "Does not exist" &&
+                          condition.operator !== "Exists" && (
+                            <input
+                              type={
+                                condition.fieldType === "number"
+                                  ? "number"
+                                  : condition.fieldType === "date"
+                                  ? "date"
+                                  : "text"
+                              }
+                              value={condition.value}
+                              onChange={(e) =>
+                                updateCondition(condition.id, {
+                                  value: e.target.value,
+                                })
+                              }
+                              placeholder="value"
+                              className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm min-w-[100px]"
+                            />
+                          )}
 
                         <button
                           onClick={() => removeCondition(condition.id)}

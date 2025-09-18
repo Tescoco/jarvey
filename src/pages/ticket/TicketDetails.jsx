@@ -1024,6 +1024,7 @@ export default function Tickets() {
   const [requiredToastMsg, setRequiredToastMsg] = useState(
     "Resolution is required."
   );
+  const [turnRed, setTurnRed] = useState(false);
 
   const moreList = [
     `Add tag`,
@@ -1063,6 +1064,8 @@ export default function Tickets() {
   const handleSend = (closeAfterSend = false) => {
     if (!resolution) {
       setRequiredToastMsg("Resolution is required.");
+      setTurnRed(true);
+      setShowMoreFields(true);
       setShowRequiredToast(true);
       setTimeout(() => setShowRequiredToast(false), 2200);
       return;
@@ -1876,7 +1879,12 @@ export default function Tickets() {
               </button>
             </div>
             {showMoreFields && (
-              <button className="font-medium text-xs flex items-center gap-1 mt-3">
+              <button
+                style={{
+                  color: turnRed ? "#FE4234" : "#111111",
+                }}
+                className="font-medium text-xs flex items-center gap-1 mt-3"
+              >
                 Resolution
                 <span className="bg-primary size-5 rounded-[5px] flex items-center justify-center">
                   <svg
