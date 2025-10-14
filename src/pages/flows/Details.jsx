@@ -203,6 +203,15 @@ export default function Details() {
                 <button
                   className="size-10 btn bg-primary border-primary text-white min-w-0 rounded-full p-0"
                   key={index}
+                  onClick={() => {
+                    if (index === 0 && window.flowChartZoomIn) {
+                      window.flowChartZoomIn();
+                    } else if (index === 1 && window.flowChartZoomOut) {
+                      window.flowChartZoomOut();
+                    } else if (index === 2 && window.flowChartResetZoom) {
+                      window.flowChartResetZoom();
+                    }
+                  }}
                 >
                   {item}
                 </button>

@@ -232,6 +232,20 @@ export default function Articles() {
     dragItem.current = null;
   };
 
+  const handleDuplicateArticle = (articleIndex) => {
+    const articleToDuplicate = items[articleIndex];
+    const duplicatedArticle = {
+      ...articleToDuplicate,
+      store: {
+        ...articleToDuplicate.store,
+        name: `${articleToDuplicate.store.name} (Copy)`,
+      },
+    };
+    const newItems = [...items];
+    newItems.splice(articleIndex + 1, 0, duplicatedArticle);
+    setItems(newItems);
+  };
+
   const contact = [
     { name: "Category 1" },
     { name: "Category 2" },
@@ -263,7 +277,10 @@ export default function Articles() {
 
   const [editArticle, setEditArticle] = useState(false);
   const [showCreateArticle, setShowCreateArticle] = useState(false);
+  const [showEditArticle, setShowEditArticle] = useState(false);
   const [showCreateCategory, setShowCreateCategory] = useState(false);
+  const [showShareOptions, setShowShareOptions] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
 
   // Editable textarea states for Article Settings modal
   const [excerptText, setExcerptText] = useState(
@@ -532,12 +549,10 @@ export default function Articles() {
           <tbody>
             {items.map((item, index) => (
               <tr
-                className="cursor-pointer"
                 draggable
                 onDragStart={() => handleDragStart(index)}
                 onDragOver={(e) => handleDragOver(e, index)}
                 onDrop={() => handleDrop(index)}
-                onClick={() => setEditArticle(true)}
                 key={index}
               >
                 <td>
@@ -561,7 +576,10 @@ export default function Articles() {
                 <td>
                   <div className="flex items-center gap-3">
                     <div className="flex-none h-4"></div>
-                    <span className="hover:text-primary">
+                    <span
+                      className="hover:text-primary cursor-pointer"
+                      onClick={() => setShowEditArticle(true)}
+                    >
                       {item.store.name}
                     </span>
                   </div>
@@ -582,14 +600,29 @@ export default function Articles() {
                   <div className="flex items-center justify-center gap-3">
                     <button
                       className="text-gray hover:text-primary p-2 -m-2"
-                      onClick={() => setEditArticle(true)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditArticle(true);
+                      }}
                     >
                       {setting}
                     </button>
-                    <button className="text-gray hover:text-primary p-2 -m-2">
+                    <button
+                      className="text-gray hover:text-primary p-2 -m-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDuplicateArticle(index);
+                      }}
+                    >
                       {copyIcon}
                     </button>
-                    <button className="text-gray hover:text-primary p-2 -m-2">
+                    <button
+                      className="text-gray hover:text-primary p-2 -m-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowShareOptions(true);
+                      }}
+                    >
                       {share}
                     </button>
                   </div>
@@ -623,13 +656,36 @@ export default function Articles() {
               </div>
               <div className="flex items-center gap-2 lg:gap-3">
                 {Icons.map((item, idx) => (
-                  <a
+                  <button
                     key={idx}
-                    href={`${item.url}`}
-                    className="flex items-center justify-center"
+                    onClick={() => {
+                      if (idx === 0) {
+                        // Share icon
+                        setShowShareOptions(true);
+                      } else if (idx === 1) {
+                        // View icon
+                        setShowViewModal(true);
+                      } else if (idx === 2) {
+                        // Edit icon
+                        setShowEditArticle(true);
+                      } else if (idx === 3) {
+                        // Close icon
+                        setEditArticle(false);
+                      }
+                    }}
+                    className="flex items-center justify-center p-2 hover:bg-gray-100 rounded-md transition-colors"
+                    title={
+                      idx === 0
+                        ? "Share article"
+                        : idx === 1
+                        ? "View article"
+                        : idx === 2
+                        ? "Edit article"
+                        : "Close"
+                    }
                   >
                     {item.icon}
-                  </a>
+                  </button>
                 ))}
               </div>
             </div>
@@ -837,6 +893,176 @@ export default function Articles() {
               onClick={() => setShowCreateArticle(false)}
             >
               Publish Article
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {showEditArticle && (
+        <Modal closeIconHide={false} innerClass="max-w-[860px]">
+          <div className="flex items-center justify-between mb-4">
+            <h5 className="text-[#0A0D14] text-xl lg:text-2xl font-semibold">
+              Edit Article
+            </h5>
+            <div className="flex items-center gap-3">
+              <Link
+                to="#"
+                className="flex items-center flex-wrap gap-2 font-inter font-normal text-sm text-[#111111]/70 h-9 px-3 bg-white border border-stroke rounded-[10px]"
+              >
+                {icon} Public
+              </Link>
+              <Dropdown
+                className="mb-0"
+                btnClass="!h-9"
+                dropDownClass="w-max !left-auto right-0"
+                items={langList}
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 relative z-0">
+            <Dropdown
+              className="mb-0"
+              label=""
+              placeholder="Category"
+              items={contact}
+              dropDownClass="z-20"
+            />
+            <Input label="Title" required placeholder="Article title" />
+          </div>
+          <div className="mb-5">
+            <div className="flex items-center justify-between mb-1">
+              <h6 className="text-[#0A0D14] text-sm font-semibold !leading-[1.42]">
+                Slug
+              </h6>
+              <button className="text-[#7856FF] flex items-center gap-2 text-sm font-semibold !leading-[1.42]">
+                {copyIcon2} Copy
+              </button>
+            </div>
+            <div className="rounded-[10px] border border-[#E2E4E9] py-[10px] px-3 text-xs text-[#888]">
+              https://jarvey.jarveyai.help/en-US/articles/
+              <span className="text-[#888]">category-slug</span>
+            </div>
+          </div>
+          <div className="mb-5">
+            <TextEditor2 />
+          </div>
+          <TextEditor className="mb-5" />
+          <div className="flex items-center justify-end gap-3">
+            <button className="btn" onClick={() => setShowEditArticle(false)}>
+              Discard changes
+            </button>
+            <button
+              className="btn bg-primary !text-white"
+              onClick={() => setShowEditArticle(false)}
+            >
+              Update Article
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {showShareOptions && (
+        <Modal closeIconHide={false} innerClass="max-w-[400px]">
+          <div className="mb-4">
+            <h5 className="text-[#0A0D14] text-xl lg:text-2xl font-semibold mb-4">
+              Share Article
+            </h5>
+            <div className="space-y-3">
+              <button className="w-full flex items-center gap-3 p-3 border border-[#E2E4E9] rounded-[10px] hover:bg-gray-50 transition-colors">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M15.8333 8.33333H10.8333C10.3731 8.33333 10 7.96024 10 7.5V4.16667C10 3.70643 10.3731 3.33333 10.8333 3.33333H13.3333L16.6667 0V6.66667H15.8333C15.3731 6.66667 15 7.03976 15 7.5V8.33333Z"
+                    fill="#858585"
+                  />
+                  <path
+                    d="M13.3333 11.6667H9.16667C8.70643 11.6667 8.33333 12.0398 8.33333 12.5V15.8333C8.33333 16.2936 7.96024 16.6667 7.5 16.6667H4.16667L0.833333 20V13.3333H1.66667C2.1269 13.3333 2.5 12.9602 2.5 12.5V11.6667H5C5.46024 11.6667 5.83333 11.2936 5.83333 10.8333V9.16667C5.83333 8.70643 6.20643 8.33333 6.66667 8.33333H8.33333L13.3333 11.6667Z"
+                    fill="#858585"
+                  />
+                </svg>
+                <span className="text-sm font-medium">Copy Link</span>
+              </button>
+              <button className="w-full flex items-center gap-3 p-3 border border-[#E2E4E9] rounded-[10px] hover:bg-gray-50 transition-colors">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10 0C4.477 0 0 4.477 0 10C0 15.523 4.477 20 10 20C15.523 20 20 15.523 20 10C20 4.477 15.523 0 10 0ZM13.5 10.5H11V13.5C11 13.776 10.776 14 10.5 14C10.224 14 10 13.776 10 13.5V10.5H7.5C7.224 10.5 7 10.276 7 10C7 9.724 7.224 9.5 7.5 9.5H10V6.5C10 6.224 10.224 6 10.5 6C10.776 6 11 6.224 11 6.5V9.5H13.5C13.776 9.5 14 9.724 14 10C14 10.276 13.776 10.5 13.5 10.5Z"
+                    fill="#858585"
+                  />
+                </svg>
+                <span className="text-sm font-medium">Share on Facebook</span>
+              </button>
+              <button className="w-full flex items-center gap-3 p-3 border border-[#E2E4E9] rounded-[10px] hover:bg-gray-50 transition-colors">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M20 3.924C19.264 4.25 18.473 4.47 17.643 4.573C18.491 4.061 19.141 3.258 19.467 2.295C18.684 2.76 17.821 3.088 16.902 3.261C16.157 2.461 15.127 1.963 13.991 1.963C11.93 1.963 10.253 3.64 10.253 5.701C10.253 5.989 10.285 6.269 10.349 6.539C6.704 6.355 3.407 4.612 1.336 1.793C1.022 2.331 0.846 2.948 0.846 3.601C0.846 5.819 1.974 7.674 3.681 8.779C2.991 8.757 2.335 8.567 1.732 8.235V8.287C1.732 10.109 3.029 11.619 4.735 11.957C4.431 12.04 4.109 12.085 3.778 12.085C3.535 12.085 3.299 12.061 3.071 12.016C3.545 13.503 4.906 14.537 6.516 14.566C5.221 15.583 3.584 16.188 1.825 16.188C1.515 16.188 1.209 16.17 0.909 16.135C2.537 17.181 4.474 17.806 6.517 17.806C13.984 17.806 18.087 12.129 18.087 6.129L18.081 5.688C18.862 5.126 19.543 4.407 20 3.924Z"
+                    fill="#858585"
+                  />
+                </svg>
+                <span className="text-sm font-medium">Share on Twitter</span>
+              </button>
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-3">
+            <button className="btn" onClick={() => setShowShareOptions(false)}>
+              Cancel
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {showViewModal && (
+        <Modal closeIconHide={false} innerClass="max-w-[800px]">
+          <div className="mb-4">
+            <h5 className="text-[#0A0D14] text-xl lg:text-2xl font-semibold mb-4">
+              View Article
+            </h5>
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold text-[#0A0D14] mb-2">
+                  Do you offer refunds or exchanges?
+                </h3>
+                <div className="text-sm text-[#858585] mb-4">
+                  <p>
+                    Yes, we offer refunds and exchanges within 30 days of
+                    purchase. To be eligible for a refund or exchange, items
+                    must be returned in their original condition, with all tags
+                    and packaging intact.
+                  </p>
+                  <p>
+                    Please note that certain items may not be eligible for
+                    return, such as personalized or custom-made products.
+                  </p>
+                </div>
+              </div>
+              <div className="border-t border-[#E2E4E9] pt-4">
+                <div className="flex items-center gap-4 text-xs text-[#858585]">
+                  <span>Published: Oct 18, 2024</span>
+                  <span>Status: Published</span>
+                  <span>Language: English (US)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-3">
+            <button className="btn" onClick={() => setShowViewModal(false)}>
+              Close
             </button>
           </div>
         </Modal>

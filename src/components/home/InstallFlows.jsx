@@ -65,6 +65,28 @@ export default function InstallFlows({ install }) {
     ]);
     setTemplateModalOpen(false);
   };
+
+  const handleDeleteFlow = (flowToDelete) => {
+    setInstalledFlows((prev) => prev.filter((flow) => flow !== flowToDelete));
+  };
+
+  const handleDuplicateFlow = (flowToDuplicate) => {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+    const date = `${dd}/${mm}/${yyyy}`;
+
+    setInstalledFlows((prev) => [
+      {
+        name: `${flowToDuplicate.name} (Copy)`,
+        stock: "-",
+        date,
+        img: flag,
+      },
+      ...prev,
+    ]);
+  };
   return (
     <>
       <div className={`${c_24}`}>
@@ -109,7 +131,25 @@ export default function InstallFlows({ install }) {
                     </td>
                     <td>
                       <div className=" flex items-center justify-end gap-2 ">
-                        <button>
+                        <button onClick={() => handleEdit()}>
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 14 14"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M11.6665 3.73464L10.2653 2.3335C10.0938 2.162 9.81617 2.162 9.64467 2.3335L2.33317 9.645C2.244 9.73417 2.18734 9.85083 2.17067 9.97417L1.604 13.3971L5.02567 12.8304C5.149 12.8138 5.26567 12.7571 5.35484 12.668L12.6663 5.3565C12.8378 5.185 12.8378 4.90733 12.6663 4.73583L11.2652 3.73464ZM11.6665 3.73464L10.2653 2.3335C10.0938 2.162 9.81617 2.162 9.64467 2.3335L2.33317 9.645C2.244 9.73417 2.18734 9.85083 2.17067 9.97417L1.604 13.3971L5.02567 12.8304C5.149 12.8138 5.26567 12.7571 5.35484 12.668L12.6663 5.3565C12.8378 5.185 12.8378 4.90733 12.6663 4.73583L11.2652 3.73464Z"
+                              fill="#7856FF"
+                            />
+                            <path
+                              d="M13.3971 1.604L12.3957 0.6025C12.0692 0.276 11.5415 0.276 11.2151 0.6025L10.2653 1.5525L12.4475 3.73467L13.3971 2.78517C13.7237 2.45867 13.7237 1.9305 13.3971 1.604ZM13.3971 1.604L12.3957 0.6025C12.0692 0.276 11.5415 0.276 11.2151 0.6025L10.2653 1.5525L12.4475 3.73467L13.3971 2.78517C13.7237 2.45867 13.7237 1.9305 13.3971 1.604Z"
+                              fill="#7856FF"
+                            />
+                          </svg>
+                        </button>
+                        <button onClick={() => handleDuplicateFlow(item)}>
                           <svg
                             width="14"
                             height="14"
@@ -130,7 +170,7 @@ export default function InstallFlows({ install }) {
                             />
                           </svg>
                         </button>
-                        <button>
+                        <button onClick={() => handleDeleteFlow(item)}>
                           <svg
                             width="14"
                             height="14"

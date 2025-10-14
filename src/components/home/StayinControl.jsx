@@ -291,7 +291,10 @@ export default function StayinControl({ install }) {
                     </td>
                     <td>
                       <div className="flex items-center justify-end gap-2">
-                        <button className="btn bg-off !px-2 !py-1 text-xs">
+                        <button
+                          onClick={() => handleEdit()}
+                          className="btn bg-off !px-2 !py-1 text-xs"
+                        >
                           Edit
                         </button>
                         <button

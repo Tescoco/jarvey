@@ -130,18 +130,104 @@ export default function FlowChart({ onSave, analysisMode = false }) {
     }
   };
 
-  // Expose save function to parent component
+  // Function to zoom in
+  const zoomIn = () => {
+    const factor = 1.05;
+    const newScale = Math.min(2.5, Math.max(0.5, viewportScale * factor));
+
+    // Center the zoom on the viewport center
+    const viewportEl = viewportRef.current;
+    if (viewportEl) {
+      const rect = viewportEl.getBoundingClientRect();
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      // Convert center to world coordinates
+      const worldX = (centerX - viewportOffset.x) / viewportScale;
+      const worldY = (centerY - viewportOffset.y) / viewportScale;
+
+      // Calculate new offset to keep center stable
+      const newOffsetX = centerX - worldX * newScale;
+      const newOffsetY = centerY - worldY * newScale;
+
+      setViewportScale(newScale);
+      setViewportOffset({ x: newOffsetX, y: newOffsetY });
+    }
+  };
+
+  // Function to zoom out
+  const zoomOut = () => {
+    const factor = 0.95;
+    const newScale = Math.min(2.5, Math.max(0.5, viewportScale * factor));
+
+    // Center the zoom on the viewport center
+    const viewportEl = viewportRef.current;
+    if (viewportEl) {
+      const rect = viewportEl.getBoundingClientRect();
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      // Convert center to world coordinates
+      const worldX = (centerX - viewportOffset.x) / viewportScale;
+      const worldY = (centerY - viewportOffset.y) / viewportScale;
+
+      // Calculate new offset to keep center stable
+      const newOffsetX = centerX - worldX * newScale;
+      const newOffsetY = centerY - worldY * newScale;
+
+      setViewportScale(newScale);
+      setViewportOffset({ x: newOffsetX, y: newOffsetY });
+    }
+  };
+
+  // Function to reset zoom and center
+  const resetZoom = () => {
+    const viewportEl = viewportRef.current;
+    const contentEl = contentRef.current;
+    if (!viewportEl || !contentEl) return;
+
+    // Reset scale to 1
+    const newScale = 1;
+    setViewportScale(newScale);
+
+    // Center the content using the same logic as initial centering
+    const raf = requestAnimationFrame(() => {
+      const vw = viewportEl.clientWidth;
+      const vh = viewportEl.clientHeight;
+      const cw = contentEl.offsetWidth;
+      const ch = contentEl.offsetHeight;
+      if (vw && vh && cw && ch) {
+        const offsetX = (vw - cw * newScale) / 2;
+        const offsetY = (vh - ch * newScale) / 2;
+        setViewportOffset({ x: offsetX, y: offsetY });
+      }
+    });
+  };
+
+  // Expose functions to parent component
   useEffect(() => {
     if (onSave) {
       window.flowChartSave = saveChanges;
     }
+    window.flowChartZoomIn = zoomIn;
+    window.flowChartZoomOut = zoomOut;
+    window.flowChartResetZoom = resetZoom;
 
     return () => {
       if (window.flowChartSave) {
         delete window.flowChartSave;
       }
+      if (window.flowChartZoomIn) {
+        delete window.flowChartZoomIn;
+      }
+      if (window.flowChartZoomOut) {
+        delete window.flowChartZoomOut;
+      }
+      if (window.flowChartResetZoom) {
+        delete window.flowChartResetZoom;
+      }
     };
-  }, [nodes, onSave]);
+  }, [nodes, onSave, viewportScale, viewportOffset]);
 
   const handleNodesChange = (newNodes) => {
     setNodes(newNodes);

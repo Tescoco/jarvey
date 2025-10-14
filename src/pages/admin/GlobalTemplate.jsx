@@ -602,7 +602,7 @@ export default function GlobalTemplate() {
                       <img
                         src={templateConfig.logo}
                         alt="Company Logo"
-                        className="w-10 h-10 object-contain rounded bg-white p-1"
+                        className="w-10 h-10 object-contain rounded"
                       />
                     ) : (
                       <div className="w-10 h-10 rounded bg-white" />
