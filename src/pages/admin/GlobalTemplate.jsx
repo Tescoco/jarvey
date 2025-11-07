@@ -12,6 +12,7 @@ export default function GlobalTemplate() {
     mainColor: "#3B82F6", // header color
     conversionColor: "#7856FF", // accent/link color
     logo: null, // uploaded logo
+    logoSize: 40, // logo size in pixels (default 40px)
   });
 
   // Logo upload handler
@@ -561,11 +562,36 @@ export default function GlobalTemplate() {
                     )}
                   </div>
                   {templateConfig.logo && (
-                    <div className="mt-2">
+                    <div className="mt-3">
+                      <div className="mb-3">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Logo Size: {templateConfig.logoSize}px
+                        </label>
+                        <input
+                          type="range"
+                          min="20"
+                          max="120"
+                          value={templateConfig.logoSize}
+                          onChange={(e) =>
+                            updateTemplateConfig({
+                              logoSize: parseInt(e.target.value),
+                            })
+                          }
+                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                        />
+                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                          <span>20px</span>
+                          <span>120px</span>
+                        </div>
+                      </div>
                       <img
                         src={templateConfig.logo}
                         alt="Logo preview"
-                        className="w-16 h-16 object-contain border border-gray-200 rounded-lg"
+                        className="object-contain border border-gray-200 rounded-lg"
+                        style={{
+                          width: `${templateConfig.logoSize}px`,
+                          height: `${templateConfig.logoSize}px`,
+                        }}
                       />
                     </div>
                   )}
@@ -602,10 +628,20 @@ export default function GlobalTemplate() {
                       <img
                         src={templateConfig.logo}
                         alt="Company Logo"
-                        className="w-10 h-10 object-contain rounded"
+                        className="object-contain rounded"
+                        style={{
+                          width: `${templateConfig.logoSize}px`,
+                          height: `${templateConfig.logoSize}px`,
+                        }}
                       />
                     ) : (
-                      <div className="w-10 h-10 rounded bg-white" />
+                      <div
+                        className="rounded bg-white"
+                        style={{
+                          width: `${templateConfig.logoSize}px`,
+                          height: `${templateConfig.logoSize}px`,
+                        }}
+                      />
                     )}
                   </div>
                   {/* Body */}

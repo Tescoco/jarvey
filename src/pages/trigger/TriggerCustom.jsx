@@ -3,7 +3,8 @@ import Switch from "../../components/Switch";
 import Top from "../../layouts/Top";
 import { arrow_left } from "../../utilities/Classes";
 import Input from "../../components/Input";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useDismissibleDropdown } from "../../hooks/useDismissible";
 
 export const Alert = ({
@@ -73,7 +74,7 @@ export const Alert = ({
   );
 };
 
-// Dropdown component for rule builder
+// Modal-style dropdown component for rule builder
 const RuleDropdown = ({
   options,
   value,
@@ -92,25 +93,22 @@ const RuleDropdown = ({
     return null;
   }
 
-  return (
-    <div className="relative">
-      <Alert
-        ref={triggerRef}
-        text={value || placeholder}
-        variant={variant}
-        rightIcon="arrow"
-        onClick={() => setIsOpen(!isOpen)}
-      />
-      {isOpen && (
-        <div
-          data-dropdown-content
-          className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[200px] max-h-[200px] overflow-y-auto"
-        >
+  const dropdownContent = isOpen && (
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center"
+      onClick={() => setIsOpen(false)}
+    >
+      <div
+        data-dropdown-content
+        className="bg-white border border-gray-200 rounded-lg shadow-xl max-h-[400px] overflow-y-auto min-w-[300px] max-w-[500px] mx-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="p-2">
           {Array.isArray(options) &&
             options.map((option, index) => (
               <button
                 key={index}
-                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg"
+                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 rounded-md transition-colors"
                 onClick={() => {
                   onChange(option);
                   setIsOpen(false);
@@ -120,12 +118,25 @@ const RuleDropdown = ({
               </button>
             ))}
         </div>
-      )}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="relative">
+      <Alert
+        ref={triggerRef}
+        text={value || placeholder}
+        variant={variant}
+        rightIcon="arrow"
+        onClick={() => setIsOpen(!isOpen)}
+      />
+      {dropdownContent && createPortal(dropdownContent, document.body)}
     </div>
   );
 };
 
-// Multi-select dropdown component for trigger events
+// Modal-style multi-select dropdown component for trigger events
 const MultiSelectTriggerDropdown = ({
   options,
   selectedValues,
@@ -145,25 +156,22 @@ const MultiSelectTriggerDropdown = ({
     (option) => !selectedValues.includes(option)
   );
 
-  return (
-    <div className="relative">
-      <Alert
-        ref={triggerRef}
-        text={placeholder}
-        variant={variant}
-        rightIcon="arrow"
-        onClick={() => setIsOpen(!isOpen)}
-      />
-      {isOpen && availableOptions.length > 0 && (
-        <div
-          data-dropdown-content
-          className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[200px] max-h-[200px] overflow-y-auto"
-        >
+  const dropdownContent = isOpen && availableOptions.length > 0 && (
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center"
+      onClick={() => setIsOpen(false)}
+    >
+      <div
+        data-dropdown-content
+        className="bg-white border border-gray-200 rounded-lg shadow-xl max-h-[400px] overflow-y-auto min-w-[300px] max-w-[500px] mx-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="p-2">
           {Array.isArray(availableOptions) &&
             availableOptions.map((option, index) => (
               <button
                 key={index}
-                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg"
+                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 rounded-md transition-colors"
                 onClick={() => {
                   onAdd(option);
                   setIsOpen(false);
@@ -173,12 +181,25 @@ const MultiSelectTriggerDropdown = ({
               </button>
             ))}
         </div>
-      )}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="relative">
+      <Alert
+        ref={triggerRef}
+        text={placeholder}
+        variant={variant}
+        rightIcon="arrow"
+        onClick={() => setIsOpen(!isOpen)}
+      />
+      {dropdownContent && createPortal(dropdownContent, document.body)}
     </div>
   );
 };
 
-// Nested dropdown component for IF statement conditions and ticket field actions
+// Modal-style nested dropdown component for IF statement conditions and ticket field actions
 const NestedConditionDropdown = ({
   conditionFields,
   value,
@@ -373,45 +394,44 @@ const NestedConditionDropdown = ({
     </svg>
   );
 
-  return (
-    <div className="relative">
-      <Alert
-        ref={triggerRef}
-        text={value || placeholder}
-        variant={variant}
-        rightIcon="arrow"
-        onClick={() => setIsOpen(!isOpen)}
-      />
-      {isOpen && (
-        <div
-          data-dropdown-content
-          className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[200px] max-h-[300px] overflow-y-auto"
-        >
-          {currentView === "level1" ? (
-            // Level 1 menu
-            Array.isArray(level1Options) &&
-            level1Options.map((level1Option, index) => (
-              <button
-                key={index}
-                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg flex items-center justify-between"
-                onClick={() => handleLevel1Click(level1Option)}
-              >
-                {level1Option}
-                {renderArrowIcon()}
-              </button>
-            ))
-          ) : currentView === "level2" ? (
-            // Level 2 menu
-            <>
-              <div className="px-3 py-2 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-600 flex items-center">
+  const dropdownContent = isOpen && (
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center"
+      onClick={() => setIsOpen(false)}
+    >
+      <div
+        data-dropdown-content
+        className="bg-white border border-gray-200 rounded-lg shadow-xl max-h-[500px] overflow-y-auto min-w-[400px] max-w-[600px] mx-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {currentView === "level1" ? (
+          // Level 1 menu
+          <div className="p-2">
+            {Array.isArray(level1Options) &&
+              level1Options.map((level1Option, index) => (
                 <button
-                  onClick={handleBackClick}
-                  className="mr-2 p-1 hover:bg-gray-200 rounded"
+                  key={index}
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 rounded-md transition-colors flex items-center justify-between"
+                  onClick={() => handleLevel1Click(level1Option)}
                 >
-                  {renderBackIcon()}
+                  {level1Option}
+                  {renderArrowIcon()}
                 </button>
-                {selectedLevel1}
-              </div>
+              ))}
+          </div>
+        ) : currentView === "level2" ? (
+          // Level 2 menu
+          <>
+            <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-700 flex items-center">
+              <button
+                onClick={handleBackClick}
+                className="mr-3 p-1 hover:bg-gray-200 rounded transition-colors"
+              >
+                {renderBackIcon()}
+              </button>
+              {selectedLevel1}
+            </div>
+            <div className="p-2">
               {conditionFields[selectedLevel1] &&
                 Object.keys(conditionFields[selectedLevel1]).map(
                   (level2Option, index) => {
@@ -425,7 +445,7 @@ const NestedConditionDropdown = ({
                     return (
                       <button
                         key={index}
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg flex items-center justify-between"
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 rounded-md transition-colors flex items-center justify-between"
                         onClick={() => handleLevel2Click(level2Option)}
                       >
                         {level2Option}
@@ -434,19 +454,21 @@ const NestedConditionDropdown = ({
                     );
                   }
                 )}
-            </>
-          ) : currentView === "level3" ? (
-            // Level 3 menu
-            <>
-              <div className="px-3 py-2 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-600 flex items-center">
-                <button
-                  onClick={handleBackClick}
-                  className="mr-2 p-1 hover:bg-gray-200 rounded"
-                >
-                  {renderBackIcon()}
-                </button>
-                {selectedLevel1} {`>`} {selectedLevel2}
-              </div>
+            </div>
+          </>
+        ) : currentView === "level3" ? (
+          // Level 3 menu
+          <>
+            <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-700 flex items-center">
+              <button
+                onClick={handleBackClick}
+                className="mr-3 p-1 hover:bg-gray-200 rounded transition-colors"
+              >
+                {renderBackIcon()}
+              </button>
+              {selectedLevel1} {`>`} {selectedLevel2}
+            </div>
+            <div className="p-2">
               {conditionFields[selectedLevel1] &&
                 conditionFields[selectedLevel1][selectedLevel2] &&
                 Object.keys(
@@ -465,7 +487,7 @@ const NestedConditionDropdown = ({
                   return (
                     <button
                       key={index}
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg flex items-center justify-between"
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 rounded-md transition-colors flex items-center justify-between"
                       onClick={() => handleLevel3Click(level3Option)}
                     >
                       {level3Option}
@@ -473,19 +495,21 @@ const NestedConditionDropdown = ({
                     </button>
                   );
                 })}
-            </>
-          ) : (
-            // Level 4 menu
-            <>
-              <div className="px-3 py-2 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-600 flex items-center">
-                <button
-                  onClick={handleBackClick}
-                  className="mr-2 p-1 hover:bg-gray-200 rounded"
-                >
-                  {renderBackIcon()}
-                </button>
-                {selectedLevel1} {`>`} {selectedLevel2} {`>`} {selectedLevel3}
-              </div>
+            </div>
+          </>
+        ) : (
+          // Level 4 menu
+          <>
+            <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-700 flex items-center">
+              <button
+                onClick={handleBackClick}
+                className="mr-3 p-1 hover:bg-gray-200 rounded transition-colors"
+              >
+                {renderBackIcon()}
+              </button>
+              {selectedLevel1} {`>`} {selectedLevel2} {`>`} {selectedLevel3}
+            </div>
+            <div className="p-2">
               {conditionFields[selectedLevel1] &&
                 conditionFields[selectedLevel1][selectedLevel2] &&
                 conditionFields[selectedLevel1][selectedLevel2][
@@ -501,16 +525,29 @@ const NestedConditionDropdown = ({
                 ].map((level4Option, index) => (
                   <button
                     key={index}
-                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg"
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 rounded-md transition-colors"
                     onClick={() => handleLevel4Click(level4Option)}
                   >
                     {level4Option}
                   </button>
                 ))}
-            </>
-          )}
-        </div>
-      )}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="relative">
+      <Alert
+        ref={triggerRef}
+        text={value || placeholder}
+        variant={variant}
+        rightIcon="arrow"
+        onClick={() => setIsOpen(!isOpen)}
+      />
+      {dropdownContent && createPortal(dropdownContent, document.body)}
     </div>
   );
 };
@@ -1844,7 +1881,7 @@ export default function TriggerCustom() {
           )}
 
           {node.type === "when" && (
-            <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-4 flex-wrap overflow-visible">
               <div className={styling.badge}>🚀 WHEN</div>
               <MultiSelectTriggerDropdown
                 options={triggerEvents}
@@ -1913,7 +1950,7 @@ export default function TriggerCustom() {
           )}
 
           {node.type === "then" && (
-            <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-4 flex-wrap overflow-visible">
               <div className={styling.badge}>⚡ THEN</div>
               <RuleDropdown
                 options={["Action", "IF statement"]}
@@ -1933,7 +1970,7 @@ export default function TriggerCustom() {
           )}
 
           {node.type === "action" && (
-            <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-4 flex-wrap overflow-visible">
               <div className={styling.badge}>🎯 ACTION</div>
               <RuleDropdown
                 options={actionsList}
@@ -2162,7 +2199,7 @@ export default function TriggerCustom() {
           )}
 
           {node.type === "if" && (
-            <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-4 flex-wrap overflow-visible">
               <div className={styling.badge}>🔍 {node.logicalOp || "IF"}</div>
               <NestedConditionDropdown
                 conditionFields={conditionFields}
@@ -2365,7 +2402,7 @@ export default function TriggerCustom() {
           )}
 
           {node.type === "else" && (
-            <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-4 flex-wrap overflow-visible">
               <div className="bg-red-600 text-white px-3 py-1.5 rounded-full font-semibold text-sm">
                 ❌ ELSE
               </div>
@@ -2571,8 +2608,8 @@ export default function TriggerCustom() {
           <p className="text-[#0A0D14] text-sm font-medium !leading-[1.42] tracking-[-0.084px] mb-2 lg:mb-3">
             Trigger Conditions
           </p>
-          <div className="overflow-x-auto">
-            <div className="border-2 border-indigo-200 rounded-xl lg:rounded-2xl xl:rounded-[20px] p-6 lg:p-8 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 shadow-lg">
+          <div className="overflow-x-auto overflow-y-visible min-h-[300px]">
+            <div className="border-2 border-indigo-200 rounded-xl lg:rounded-2xl xl:rounded-[20px] p-6 lg:p-8 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 shadow-lg overflow-visible">
               {ruleNodes.map((node) => renderNode(node, 0, null, null))}
             </div>
           </div>

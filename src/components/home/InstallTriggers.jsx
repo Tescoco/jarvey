@@ -391,6 +391,13 @@ export default function InstallTriggers({ install }) {
     setIsDragging(false);
   };
 
+  const handleEdit = (item) => {
+    // onboarding/trigger-setting?install=true
+    if (window.location.pathname.includes("/onboarding")) {
+      window.location.href = `/onboarding/trigger-setting?install=true&edit=true`;
+    }
+  };
+
   return (
     <>
       <div className={`${c_24} mb-5`}>
@@ -459,7 +466,10 @@ export default function InstallTriggers({ install }) {
                   </td>
                   <td>
                     <div className="flex items-center justify-end gap-2">
-                      <button className="btn bg-off !px-2 !py-1 text-xs">
+                      <button
+                        onClick={() => handleEdit(row)}
+                        className="btn bg-off !px-2 !py-1 text-xs"
+                      >
                         Edit
                       </button>
                       <button

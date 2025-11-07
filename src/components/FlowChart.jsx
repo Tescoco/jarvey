@@ -40,7 +40,7 @@ export default function FlowChart({ onSave, analysisMode = false }) {
   const isInteractiveElement = (el) => {
     if (!el) return false;
     return !!el.closest(
-      'button, a, input, textarea, select, [role="button"], [contenteditable="true"]'
+      'button, a, input, textarea, select, [role="button"], [contenteditable="true"], .cursor-pointer, [onclick]'
     );
   };
 
@@ -245,6 +245,109 @@ export default function FlowChart({ onSave, analysisMode = false }) {
               data: {
                 ...node.data,
                 content: formData.triggerText,
+              },
+            };
+          }
+          if (node.children) {
+            return {
+              ...node,
+              children: updateNodeContent(node.children),
+            };
+          }
+          return node;
+        });
+      };
+
+      const updatedNodes = updateNodeContent(nodes);
+      setNodes(updatedNodes);
+    } else if (
+      sidePanel.type === "message" &&
+      sidePanel.nodeId &&
+      sidePanel.data.isEditing === true
+    ) {
+      // Update existing message node content
+      const updateNodeContent = (nodeList) => {
+        return nodeList.map((node) => {
+          if (node.id === sidePanel.nodeId) {
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                content: formData.messageText,
+              },
+            };
+          }
+          if (node.children) {
+            return {
+              ...node,
+              children: updateNodeContent(node.children),
+            };
+          }
+          // Handle branch containers
+          if (node.type === "branch-container") {
+            // Check if the node is in branches
+            const updatedBranches = node.data.branches?.map((branch) => {
+              if (branch.id === sidePanel.nodeId) {
+                return {
+                  ...branch,
+                  data: {
+                    ...branch.data,
+                    content: formData.messageText,
+                  },
+                };
+              }
+              return branch;
+            });
+
+            // Check if the node is in branch chains
+            const updatedBranchChains = { ...node.data.branchChains };
+            for (const branchId in updatedBranchChains) {
+              updatedBranchChains[branchId] = updatedBranchChains[branchId].map(
+                (chainNode) => {
+                  if (chainNode.id === sidePanel.nodeId) {
+                    return {
+                      ...chainNode,
+                      data: {
+                        ...chainNode.data,
+                        content: formData.messageText,
+                      },
+                    };
+                  }
+                  return chainNode;
+                }
+              );
+            }
+
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                branches: updatedBranches,
+                branchChains: updatedBranchChains,
+              },
+            };
+          }
+          return node;
+        });
+      };
+
+      const updatedNodes = updateNodeContent(nodes);
+      setNodes(updatedNodes);
+    } else if (
+      sidePanel.type === "end" &&
+      sidePanel.nodeId &&
+      sidePanel.data.isEditing === true
+    ) {
+      // Update existing end node content
+      const updateNodeContent = (nodeList) => {
+        return nodeList.map((node) => {
+          if (node.id === sidePanel.nodeId) {
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                content: formData.endText,
+                subtitle: formData.endSubtitle,
               },
             };
           }
@@ -563,7 +666,7 @@ export default function FlowChart({ onSave, analysisMode = false }) {
               open: true,
               type: "start",
               nodeId: node.id,
-              data: { currentText: node.data.content },
+              data: { currentText: node.data.content, isEditing: true },
             })
           }
         >
@@ -577,7 +680,8 @@ export default function FlowChart({ onSave, analysisMode = false }) {
           <div className="flex flex-col items-center my-2">
             <div className="w-0.5 h-4 bg-primary"></div>
             <button
-              onClick={() => {
+              onClick={(event) => {
+                event.stopPropagation();
                 setSelectedNodeForAdd(node.id);
                 setShowModal(true);
               }}
@@ -660,7 +764,21 @@ export default function FlowChart({ onSave, analysisMode = false }) {
     }
 
     return (
-      <div className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[250px] relative z-1 text-start">
+      <div
+        className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[250px] relative z-1 text-start cursor-pointer hover:bg-gray-50 transition-colors"
+        onClick={() => {
+          setSidePanel({
+            open: true,
+            type: "end",
+            nodeId: node.id,
+            data: {
+              currentText: node.data.content,
+              currentSubtitle: node.data.subtitle,
+              isEditing: true,
+            },
+          });
+        }}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1 py-1 px-2 rounded-lg bg-[#F7F7F7] mb-1">
             <span className="text-heading text-[10px] font-bold">
@@ -740,7 +858,23 @@ export default function FlowChart({ onSave, analysisMode = false }) {
 
     return (
       <div className="flex flex-col items-center">
-        <div className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[250px] relative z-1 text-start">
+        <div
+          className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[250px] relative z-1 text-start cursor-pointer hover:bg-gray-50 transition-colors"
+          onClick={() => {
+            // Open side panel for editing this node
+            setSidePanel({
+              open: true,
+              type: node.data.nodeType || "message",
+              nodeId: node.id,
+              data: {
+                currentText: node.data.content,
+                nodeType: node.data.nodeType,
+                config: node.data.config || {},
+                isEditing: true,
+              },
+            });
+          }}
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1 py-1 px-2 rounded-lg bg-primary/10 mb-1">
               <span className="text-primary font-semibold text-[10px]">
@@ -749,7 +883,10 @@ export default function FlowChart({ onSave, analysisMode = false }) {
             </div>
             {!analysisMode && (
               <button
-                onClick={() => removeNode(node.id)}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  removeNode(node.id);
+                }}
                 className="text-gray-400 hover:text-red-500 transition-colors p-1"
               >
                 <svg
@@ -791,7 +928,8 @@ export default function FlowChart({ onSave, analysisMode = false }) {
           <div className="flex flex-col items-center my-2">
             <div className="w-0.5 h-4 bg-primary"></div>
             <button
-              onClick={() => {
+              onClick={(event) => {
+                event.stopPropagation();
                 setSelectedNodeForAdd(node.id);
                 setShowModal(true);
               }}
@@ -1128,7 +1266,22 @@ export default function FlowChart({ onSave, analysisMode = false }) {
           {branches.map((branch, index) => (
             <div key={branch.id} className="flex flex-col items-center">
               {/* Individual branch node */}
-              <div className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[200px] relative z-1 text-start">
+              <div
+                className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[200px] relative z-1 text-start cursor-pointer hover:bg-gray-50 transition-colors"
+                onClick={() => {
+                  setSidePanel({
+                    open: true,
+                    type: "message",
+                    nodeId: branch.id,
+                    data: {
+                      currentText: branch.data.content,
+                      nodeType: "branch-response",
+                      config: {},
+                      isEditing: true,
+                    },
+                  });
+                }}
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1 py-1 px-2 rounded-lg bg-primary/10 mb-1">
                     <span className="text-primary font-semibold text-[10px]">
@@ -1173,7 +1326,8 @@ export default function FlowChart({ onSave, analysisMode = false }) {
                 <div className="flex flex-col items-center my-2">
                   <div className="w-0.5 h-4 bg-primary"></div>
                   <button
-                    onClick={() => {
+                    onClick={(event) => {
+                      event.stopPropagation();
                       setSelectedNodeForAdd(branch.id);
                       setShowModal(true);
                     }}
@@ -1213,7 +1367,22 @@ export default function FlowChart({ onSave, analysisMode = false }) {
                     key={chainNode.id}
                     className="flex flex-col items-center"
                   >
-                    <div className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[200px] relative z-1 text-start">
+                    <div
+                      className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[200px] relative z-1 text-start cursor-pointer hover:bg-gray-50 transition-colors"
+                      onClick={() => {
+                        setSidePanel({
+                          open: true,
+                          type: "message",
+                          nodeId: chainNode.id,
+                          data: {
+                            currentText: chainNode.data.content,
+                            nodeType: chainNode.data.nodeType || "message",
+                            config: chainNode.data.config || {},
+                            isEditing: true,
+                          },
+                        });
+                      }}
+                    >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1 py-1 px-2 rounded-lg bg-primary/10 mb-1">
                           <span className="text-primary font-semibold text-[10px]">
@@ -1253,7 +1422,8 @@ export default function FlowChart({ onSave, analysisMode = false }) {
                       <div className="flex flex-col items-center my-2">
                         <div className="w-0.5 h-4 bg-primary"></div>
                         <button
-                          onClick={() => {
+                          onClick={(event) => {
+                            event.stopPropagation();
                             setSelectedNodeForAdd(chainNode.id);
                             setShowModal(true);
                           }}
@@ -1509,6 +1679,21 @@ export default function FlowChart({ onSave, analysisMode = false }) {
                 currentText={sidePanel.data.currentText}
               />
             )}
+            {sidePanel.type === "message" && (
+              <MessagePanel
+                onSubmit={handleSidePanelSubmit}
+                currentText={sidePanel.data.currentText}
+                nodeId={sidePanel.nodeId}
+              />
+            )}
+            {sidePanel.type === "end" && (
+              <EndPanel
+                onSubmit={handleSidePanelSubmit}
+                currentText={sidePanel.data.currentText}
+                currentSubtitle={sidePanel.data.currentSubtitle}
+                nodeId={sidePanel.nodeId}
+              />
+            )}
             {sidePanel.type === "multiple-choice" && (
               <MultipleChoicePanel
                 onSubmit={handleSidePanelSubmit}
@@ -1685,11 +1870,11 @@ export default function FlowChart({ onSave, analysisMode = false }) {
           nodes={nodes}
           onChange={handleNodesChange}
           registerNodes={registerNodes}
-          backgroundColor="#F7F7F7"
+          backgroundColor="inherit"
           layout="vertical"
           spaceX={15}
           spaceY={10}
-          className="flow-builder-container min-h-full"
+          className="flow-builder-container min-h-full bg-inherit"
           readonly={false}
           customLineComponent={CustomLineComponent}
         />
@@ -1772,8 +1957,16 @@ export default function FlowChart({ onSave, analysisMode = false }) {
 // Side Panel Components (keeping all existing functionality)
 const StartPanel = ({ onSubmit, currentText }) => {
   const [triggerText, setTriggerText] = useState(currentText || "");
+  const [error, setError] = useState("");
 
   const handleSubmit = () => {
+    // Validate required field
+    if (!triggerText.trim()) {
+      setError("Trigger button text is required");
+      return;
+    }
+
+    setError("");
     onSubmit({ triggerText });
   };
 
@@ -1786,10 +1979,16 @@ const StartPanel = ({ onSubmit, currentText }) => {
         <input
           type="text"
           value={triggerText}
-          onChange={(e) => setTriggerText(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+          onChange={(e) => {
+            setTriggerText(e.target.value);
+            if (error) setError(""); // Clear error when user starts typing
+          }}
+          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+            error ? "border-red-500" : "border-gray-300"
+          }`}
           placeholder="Enter trigger button text..."
         />
+        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
         <p className="text-xs text-gray-500 mt-2">
           The flow will be triggered when customers click this button.
         </p>
@@ -1805,9 +2004,221 @@ const StartPanel = ({ onSubmit, currentText }) => {
   );
 };
 
+const MessagePanel = ({ onSubmit, currentText, nodeId }) => {
+  const [messageText, setMessageText] = useState(currentText || "");
+  const [error, setError] = useState("");
+
+  const handleSubmit = () => {
+    // Validate required field
+    if (!messageText.trim()) {
+      setError("Message content is required");
+      return;
+    }
+
+    setError("");
+    onSubmit({ messageText, nodeId });
+  };
+
+  return (
+    <div>
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Message Content <span className="text-red-500">*</span>
+        </label>
+        <textarea
+          value={messageText}
+          onChange={(e) => {
+            setMessageText(e.target.value);
+            if (error) setError(""); // Clear error when user starts typing
+          }}
+          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none ${
+            error ? "border-red-500" : "border-gray-300"
+          }`}
+          rows="4"
+          placeholder="Enter message content..."
+        />
+        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+        <p className="text-xs text-gray-500 mt-2">
+          This message will be displayed to customers in the flow.
+        </p>
+      </div>
+
+      <button
+        onClick={handleSubmit}
+        className="w-full bg-primary text-white py-3 px-4 rounded-lg hover:bg-primary-dark transition-colors"
+      >
+        Save
+      </button>
+    </div>
+  );
+};
+
+const EndPanel = ({ onSubmit, currentText, currentSubtitle, nodeId }) => {
+  const [endText, setEndText] = useState(currentText || "Ask for feedback");
+  const [endSubtitle, setEndSubtitle] = useState(
+    currentSubtitle || "Ask for feedback"
+  );
+  const [selectedAction, setSelectedAction] = useState("Ask for feedback");
+
+  const actionOptions = [
+    "Ask for feedback",
+    "Create ticket",
+    "End interaction",
+  ];
+
+  const handleSubmit = () => {
+    onSubmit({
+      endText: selectedAction,
+      endSubtitle: selectedAction,
+      nodeId,
+    });
+  };
+
+  const renderActionContent = () => {
+    switch (selectedAction) {
+      case "Ask for feedback":
+        return (
+          <div className="mb-6">
+            {/* Preview of the feedback interface */}
+            <div className="border border-gray-200 rounded-lg p-4 bg-gray-50 mb-4">
+              <div className="text-center">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  Was this helpful?
+                </h3>
+                <div className="flex justify-center gap-4 mb-6">
+                  <button className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg">
+                    Yes, thank you
+                  </button>
+                  <button className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg">
+                    No, I need more help
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <p className="text-sm text-gray-600 mb-4">
+              Customers will be asked for feedback and a ticket is created in
+              the channel if customers select "No, I need more help". Feedback
+              will always be requested in the channel language.
+            </p>
+
+            <div className="border-t pt-4">
+              <h4 className="text-sm font-medium text-gray-900 mb-3">
+                If ticket is created
+              </h4>
+
+              <div className="mb-3">
+                <button className="text-sm text-primary hover:underline flex items-center gap-1">
+                  <span>+</span> Add Tags
+                </button>
+              </div>
+
+              <div>
+                <select className="w-full p-2 border border-gray-300 rounded-lg text-sm bg-gray-100">
+                  <option>Unassigned ▼</option>
+                  <option>Assign yourself</option>
+                  <option>Mian Asad Ali</option>
+                  <option>RyanMkd</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "Create ticket":
+        return (
+          <div className="mb-6">
+            <div className="border-t pt-4">
+              <h4 className="text-sm font-medium text-gray-900 mb-3">
+                When ticket is created
+              </h4>
+
+              <div className="mb-3">
+                <button className="text-sm text-primary hover:underline flex items-center gap-1">
+                  <span>+</span> Add Tags
+                </button>
+              </div>
+
+              <div>
+                <select className="w-full p-2 border border-gray-300 rounded-lg text-sm bg-gray-100">
+                  <option>Unassigned ▼</option>
+                  <option>Assign yourself</option>
+                  <option>Mian Asad Ali</option>
+                  <option>RyanMkd</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "End interaction":
+        return (
+          <div className="mb-6">
+            <p className="text-sm text-gray-600">
+              The interaction will end and be considered automated. Customers
+              will not be able to create a ticket and must leave the flow to ask
+              for further support.
+            </p>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div>
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Action <span className="text-red-500">*</span>
+        </label>
+        <div className="relative">
+          <select
+            value={selectedAction}
+            onChange={(e) => setSelectedAction(e.target.value)}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent appearance-none bg-white"
+          >
+            {actionOptions.map((option) => (
+              <option key={option} value={option}>
+                {option === "Ask for feedback" && "👍"} {option}
+              </option>
+            ))}
+          </select>
+          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+            <svg
+              className="w-4 h-4 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      {renderActionContent()}
+
+      <button
+        onClick={handleSubmit}
+        className="w-full bg-primary text-white py-3 px-4 rounded-lg hover:bg-primary-dark transition-colors"
+      >
+        Save
+      </button>
+    </div>
+  );
+};
+
 const MultipleChoicePanel = ({ onSubmit, data }) => {
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState(["Option 1", "Option 2"]);
+  const [error, setError] = useState("");
 
   const addOption = () => {
     if (options.length < 6) {
@@ -1828,6 +2239,20 @@ const MultipleChoicePanel = ({ onSubmit, data }) => {
   };
 
   const handleSubmit = () => {
+    // Validate required field
+    if (!question.trim()) {
+      setError("Question is required");
+      return;
+    }
+
+    // Validate options are not empty
+    const emptyOptions = options.filter((option) => !option.trim());
+    if (emptyOptions.length > 0) {
+      setError("All options must have text");
+      return;
+    }
+
+    setError("");
     onSubmit({ question, options });
   };
 
@@ -1839,14 +2264,20 @@ const MultipleChoicePanel = ({ onSubmit, data }) => {
         </label>
         <textarea
           value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+          onChange={(e) => {
+            setQuestion(e.target.value);
+            if (error) setError(""); // Clear error when user starts typing
+          }}
+          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none ${
+            error ? "border-red-500" : "border-gray-300"
+          }`}
           rows="3"
           placeholder="Enter your question..."
           maxLength={5000}
         />
+        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
         <div className="flex justify-between items-center mt-1">
-          <span className="text-xs text-gray-500">0/5000</span>
+          <span className="text-xs text-gray-500">{question.length}/5000</span>
         </div>
       </div>
 
@@ -1890,8 +2321,16 @@ const TextReplyPanel = ({ onSubmit, data }) => {
   const [question, setQuestion] = useState("");
   const [placeholder, setPlaceholder] = useState("Type your answer here...");
   const [maxLength, setMaxLength] = useState(1000);
+  const [error, setError] = useState("");
 
   const handleSubmit = () => {
+    // Validate required field
+    if (!question.trim()) {
+      setError("Question is required");
+      return;
+    }
+
+    setError("");
     onSubmit({ question, placeholder, maxLength });
   };
 
@@ -1904,10 +2343,16 @@ const TextReplyPanel = ({ onSubmit, data }) => {
         <input
           type="text"
           value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+          onChange={(e) => {
+            setQuestion(e.target.value);
+            if (error) setError(""); // Clear error when user starts typing
+          }}
+          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+            error ? "border-red-500" : "border-gray-300"
+          }`}
           placeholder="What would you like to ask?"
         />
+        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
       </div>
 
       <div className="mb-4">
@@ -1953,6 +2398,7 @@ const FileUploadPanel = ({ onSubmit, data }) => {
   const [question, setQuestion] = useState("");
   const [maxFiles, setMaxFiles] = useState(1);
   const [allowedTypes, setAllowedTypes] = useState(["image", "document"]);
+  const [error, setError] = useState("");
 
   const handleTypeChange = (type) => {
     setAllowedTypes((prev) =>
@@ -1961,6 +2407,19 @@ const FileUploadPanel = ({ onSubmit, data }) => {
   };
 
   const handleSubmit = () => {
+    // Validate required field
+    if (!question.trim()) {
+      setError("Question is required");
+      return;
+    }
+
+    // Validate at least one file type is selected
+    if (allowedTypes.length === 0) {
+      setError("At least one file type must be selected");
+      return;
+    }
+
+    setError("");
     onSubmit({ question, maxFiles, allowedTypes });
   };
 
@@ -1973,10 +2432,16 @@ const FileUploadPanel = ({ onSubmit, data }) => {
         <input
           type="text"
           value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+          onChange={(e) => {
+            setQuestion(e.target.value);
+            if (error) setError(""); // Clear error when user starts typing
+          }}
+          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+            error ? "border-red-500" : "border-gray-300"
+          }`}
           placeholder="Please upload your file"
         />
+        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
       </div>
 
       <div className="mb-4">
@@ -2026,8 +2491,16 @@ const FileUploadPanel = ({ onSubmit, data }) => {
 const AutomatedAnswerPanel = ({ onSubmit, data }) => {
   const [message, setMessage] = useState("");
   const [delay, setDelay] = useState(0);
+  const [error, setError] = useState("");
 
   const handleSubmit = () => {
+    // Validate required field
+    if (!message.trim()) {
+      setError("Message is required");
+      return;
+    }
+
+    setError("");
     onSubmit({ message, delay });
   };
 
@@ -2039,11 +2512,17 @@ const AutomatedAnswerPanel = ({ onSubmit, data }) => {
         </label>
         <textarea
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+          onChange={(e) => {
+            setMessage(e.target.value);
+            if (error) setError(""); // Clear error when user starts typing
+          }}
+          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none ${
+            error ? "border-red-500" : "border-gray-300"
+          }`}
           rows="4"
           placeholder="Enter your automated response..."
         />
+        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
       </div>
 
       <div className="mb-6">
@@ -2217,8 +2696,24 @@ const HttpRequestPanel = ({ onSubmit, data }) => {
   const [url, setUrl] = useState("");
   const [method, setMethod] = useState("GET");
   const [description, setDescription] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = () => {
+    // Validate required field
+    if (!url.trim()) {
+      setError("URL is required");
+      return;
+    }
+
+    // Validate URL format
+    try {
+      new URL(url);
+    } catch {
+      setError("Please enter a valid URL");
+      return;
+    }
+
+    setError("");
     onSubmit({ url, method, description });
   };
 
@@ -2260,10 +2755,16 @@ const HttpRequestPanel = ({ onSubmit, data }) => {
         <input
           type="url"
           value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+          onChange={(e) => {
+            setUrl(e.target.value);
+            if (error) setError(""); // Clear error when user starts typing
+          }}
+          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+            error ? "border-red-500" : "border-gray-300"
+          }`}
           placeholder="https://api.example.com/endpoint"
         />
+        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
       </div>
 
       <button
@@ -2281,8 +2782,21 @@ const ConditionsPanel = ({ onSubmit, data }) => {
   const [operator, setOperator] = useState("equals");
   const [value, setValue] = useState("");
   const [description, setDescription] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = () => {
+    // Validate required fields
+    if (!variable) {
+      setError("Variable is required");
+      return;
+    }
+
+    if (!value.trim()) {
+      setError("Value is required");
+      return;
+    }
+
+    setError("");
     onSubmit({ variable, operator, value, description });
   };
 
@@ -2307,8 +2821,13 @@ const ConditionsPanel = ({ onSubmit, data }) => {
         </label>
         <select
           value={variable}
-          onChange={(e) => setVariable(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+          onChange={(e) => {
+            setVariable(e.target.value);
+            if (error) setError(""); // Clear error when user makes selection
+          }}
+          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+            error ? "border-red-500" : "border-gray-300"
+          }`}
         >
           <option value="">Select variable...</option>
           <option value="user_type">User Type</option>
@@ -2342,10 +2861,16 @@ const ConditionsPanel = ({ onSubmit, data }) => {
         <input
           type="text"
           value={value}
-          onChange={(e) => setValue(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+          onChange={(e) => {
+            setValue(e.target.value);
+            if (error) setError(""); // Clear error when user starts typing
+          }}
+          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+            error ? "border-red-500" : "border-gray-300"
+          }`}
           placeholder="Enter value to compare"
         />
+        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
       </div>
 
       <button
