@@ -1,7 +1,6 @@
 import Input from '../Input'
 import Dropdown from '../Dropdown';
 import React, { useState, useEffect } from "react";
-import React, { useState } from 'react';
 
 
 
