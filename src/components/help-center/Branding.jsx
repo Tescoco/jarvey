@@ -1,6 +1,6 @@
 import Input from '../Input'
 import Dropdown from '../Dropdown';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 import viewStyle_1 from '../../assets/img/layout-img.png'
 import viewStyle_2 from '../../assets/img/layout-img2.png'

@@ -5,8 +5,8 @@ import Progress from "../../components/Progress";
 import { bottom_border, c_border, save_btn } from "../../utilities/Classes";
 import { Link } from "react-router-dom";
 import AddArticles from "../../components/help-center/AddArticles";
-import { Basics } from "../../components/help-center/Basics";
-import { Branding } from "../../components/help-center/Branding";
+import Basics from "../../components/help-center/Basics";
+import Branding from "../../components/help-center/Branding";
 import Automated from "../../components/help-center/Automated";
 
 export default function CreateHelpCenter() {
