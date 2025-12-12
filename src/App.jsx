@@ -129,6 +129,11 @@ import CreateField from "./pages/ticket/CreateField";
 import FieldConditions from "./pages/ticket/FieldConditions";
 import FieldConditionCreate from "./pages/ticket/FieldConditionCreate";
 import HomePage from "./pages/home/HomePage";
+import Integrations from "./pages/home/Integrations";
+import WhatsApp from "./pages/home/Whatsapp";
+import Benchmark from "./pages/home/Becnchmark";
+import Gorgias from "./pages/home/Gorgias";
+import Upgrade from "./pages/home/Upgrade";
 
 // Super Admin
 
@@ -260,6 +265,30 @@ export default function App() {
         {
           path: "message",
           element: <Message />,
+        },
+        {
+          path: "integration",
+          element: <Integrations />,
+        },
+        {
+          path: "watshapp",
+          element: <WhatsApp />,
+        },
+        {
+          path: "bench",
+          element: <Benchmark />,
+        },
+        {
+          path: "favorite-apps",
+          element: <FavoriteApps />
+        },
+        {
+          path: "gorgias",
+          element: <Gorgias />,
+        },
+        {
+          path: "upgrade",
+          element: <Upgrade />,
         },
         {
           path: "email-configuration",
