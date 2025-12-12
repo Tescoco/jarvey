@@ -23,6 +23,21 @@ export default function Create() {
     window.history.back();
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault(); // stop default redirect
+
+    const form = e.target;
+
+    // HTML validation check
+    if (!form.checkValidity()) {
+      form.reportValidity(); // show browser validation popups
+      return;
+    }
+
+    // if valid → proceed
+    handleSave();
+  };
+
   // save changes
   const handleSave = () => {
     if (window.location.pathname.includes("/onboarding")) {
@@ -49,19 +64,39 @@ export default function Create() {
       >
         <StoreDropdown includeAllStores={true} className="mb-0 min-w-[120px]" />
       </Top>
-      <div className="grid grid-cols-1 gap-4 lg:gap-6 p-4 md:p-5 lg:p-6">
-        <Input className="mb-0" type="text" label="SLA Name" required />
+      <form
+        className="grid grid-cols-1 gap-4 lg:gap-6 p-4 md:p-5 lg:p-6"
+        onSubmit={handleSubmit}
+      >
+        {/* <div className="grid grid-cols-1 gap-4 lg:gap-6 p-4 md:p-5 lg:p-6"> */}
+        {/* <Input className="mb-0" type="text" label="SLA Name" required /> */}
+        <Input
+          className="mb-0"
+          type="text"
+          label="SLA Name"
+          name="sla_name"
+          required
+        />
+
         <div className="-mb-2 lg:-mb-3">
           <h4 className="mb-0.5 leading-normal">Conditions</h4>
           <p className="text-xs text-gray !leading-normal">
             All Conditions should be met in order for the SLA to trigger
           </p>
         </div>
+        {/* <Input
+          className="mb-0"
+          type="email"
+          label="Channels(S)"
+          placeholder="Email"
+          required
+        /> */}
         <Input
           className="mb-0"
           type="email"
           label="Channels(S)"
           placeholder="Email"
+          name="sla_channel"
           required
         />
         <div>
@@ -187,14 +222,21 @@ export default function Create() {
           >
             Cancel
           </button>
-          <button
+          {/* <button
             className="btn shadow text-white md:min-w-[170px]"
             onClick={handleSave}
           >
             Save Changes
+          </button> */}
+          <button
+            type="submit"
+            className="btn shadow text-white md:min-w-[170px]"
+          >
+            Save Changes
           </button>
         </div>
-      </div>
+        {/* </div> */}
+      </form>
     </>
   );
 }

@@ -171,6 +171,41 @@ export default function NewTicket() {
     }
   };
 
+
+  const handleSaveChanges = () => {
+    // Add validation logic here
+    console.log('Saving changes...', {
+      selectedFieldType,
+      dropdownValues,
+      textValue,
+      numberValue,
+      yesNoValue
+    });
+
+    // Example: Add your save logic here
+    // api.saveField(fieldData).then(...)
+
+    alert('Changes saved successfully!');
+    // Navigate back or show success message
+  };
+
+  const handleArchive = () => {
+    if (window.confirm('Are you sure you want to archive this field?')) {
+      console.log('Archiving field...');
+      // Add your archive logic here
+      alert('Field archived!');
+    }
+  };
+
+  const handleCancel = () => {
+    if (window.confirm('Are you sure you want to cancel? Unsaved changes will be lost.')) {
+      // Navigate back to ticket fields page
+      // window.history.back();
+      navigate('/app/ticket-fields');
+    }
+  };
+
+
   return (
     <>
       <Top title=" ">
@@ -287,7 +322,7 @@ export default function NewTicket() {
         {/* Dynamic content based on selected field type */}
         {renderFieldTypeContent()}
 
-        <div className="md:flex items-center justify-between">
+        {/* <div className="md:flex items-center justify-between">
           <a
             href="#"
             className="btn min-w-max px-3 !border-[#7856FF] !text-[#7856FF] hover:!text-white mb-3 md:mb-0"
@@ -305,7 +340,31 @@ export default function NewTicket() {
               Save Changes
             </a>
           </div>
+        </div> */}
+
+        <div className="md:flex items-center justify-between">
+          <button
+            onClick={handleArchive}
+            className="btn min-w-max px-3 !border-[#7856FF] !text-[#7856FF] hover:!text-white mb-3 md:mb-0"
+          >
+            Archived
+          </button>
+          <div className="flex items-center gap-3 lg:gap-4">
+            <button
+              onClick={handleCancel}
+              className="btn min-w-max px-3 !border-[#7856FF] !text-[#7856FF] hover:!text-white"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSaveChanges}
+              className="btn min-w-max px-3 !bg-[#7856FF] text-white"
+            >
+              Save Changes
+            </button>
+          </div>
         </div>
+
       </div>
     </>
   );

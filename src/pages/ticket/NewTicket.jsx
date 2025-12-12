@@ -188,7 +188,13 @@ export default function NewTicket() {
                   <button onClick={() => setActiveTab2(item)} key={index} className={`grow font-inter font-medium text-xs 2xl:text-sm px-4 md:px-5 pb-3 border-b border-solid ${item === activeTab2 ? 'border-btn text-btn' : 'border-transparent text-heading'}`}>{item}</button>
                 ))}
               </div>
-              <TableFilter textHidden BtnClass="!p-2" className='mt-3 md:mt-4 !mb-0 !p-0 !flex-nowrap md:!justify-end relative z-[2]' searchClass='!mr-0' />
+              <TableFilter
+                textHidden
+                BtnClass="!p-2" className='mt-3 md:mt-4 !mb-0 !p-0 !flex-nowrap md:!justify-end relative z-[2]'
+                searchClass='!mr-0'
+                onSearch={handleSearch}
+                searchValue={searchQuery}
+              />
             </div>
           </div>
         </div>

@@ -24,6 +24,9 @@ export default function Slas() {
   ];
 
   const [items, setItems] = useState(tableData);
+  const [selectedChannel, setSelectedChannel] = useState(null);
+  const [isChannelModalOpen, setIsChannelModalOpen] = useState(false);
+
   const dragItem = useRef(null);
   const handleDragStart = (index) => {
     dragItem.current = index;
@@ -52,6 +55,16 @@ export default function Slas() {
       };
       return updateData;
     });
+  };
+
+  const openChannelSLA = (item) => {
+    setSelectedChannel(item);
+    setIsChannelModalOpen(true);
+  };
+
+  const closeChannelModal = () => {
+    setIsChannelModalOpen(false);
+    setSelectedChannel(null);
   };
 
   return (
@@ -98,9 +111,8 @@ export default function Slas() {
                 {tableHead.map((item, index) => (
                   <th
                     key={index}
-                    className={`${
-                      index != 0 ? "!text-center" : ""
-                    } !text-[#525866]`}
+                    className={`${index != 0 ? "!text-center" : ""
+                      } !text-[#525866]`}
                   >
                     {index === 0 ? (
                       <div className="flex items-center gap-2">
@@ -172,8 +184,12 @@ export default function Slas() {
                     </td>
                     <td className="text-center">{item.update}</td>
                     <td className="!py-4">
-                      <Link
+                      {/* <Link
                         to=""
+                        className="flex items-center justify-center text-gray hover:text-primary"
+                      > */}
+                      <button
+                        onClick={() => openChannelSLA(item)}
                         className="flex items-center justify-center text-gray hover:text-primary"
                       >
                         <svg
@@ -188,7 +204,8 @@ export default function Slas() {
                             fill="currentColor"
                           />
                         </svg>
-                      </Link>
+                      </button>
+                      {/* </Link> */}
                     </td>
                   </tr>
                 ))
@@ -205,6 +222,30 @@ export default function Slas() {
             </tbody>
           </table>
         </div>
+
+        
+        {isChannelModalOpen && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            <div className="bg-white w-full max-w-lg p-6 rounded-lg shadow-xl">
+              <h2 className="text-xl font-semibold mb-4">Channel SLA Details</h2>
+
+              <p className="mb-4 text-gray-600">
+                Showing SLA details for:
+                <span className="font-medium text-primary ml-1">
+                  {selectedChannel?.name}
+                </span>
+              </p>
+
+              <button
+                onClick={closeChannelModal}
+                className="btn shadow !text-white mt-4"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+
       </div>
     </>
   );
