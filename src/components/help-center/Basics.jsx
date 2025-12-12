@@ -1,7 +1,9 @@
 import Input from '../Input'
 import Dropdown from '../Dropdown';
+import React, { useState, useEffect } from "react";
 
-export default function Basics() {
+
+export default function Basics({ onValidationChange }) {
 
   const [formData, setFormData] = useState({
     brandName: '',
@@ -94,10 +96,11 @@ export default function Basics() {
     { name: 'contact-5' },
   ]
 
+
   const validateField = (name, value) => {
     switch (name) {
       case 'brandName':
-        if (!value || !value.trim()) return 'Brand Name is required';
+        if (!value?.trim()) return 'Brand Name is required';
         if (value.trim().length < 2) return 'Brand Name must be at least 2 characters';
         return '';
 
@@ -106,8 +109,9 @@ export default function Basics() {
         return '';
 
       case 'subdomain':
-        if (!value || !value.trim()) return 'Subdomain is required';
-        if (!/^[a-zA-Z0-9-]+$/.test(value)) return 'Subdomain can only contain letters, numbers, and hyphens';
+        if (!value?.trim()) return 'Subdomain is required';
+        if (!/^[a-zA-Z0-9-]+$/.test(value))
+          return 'Subdomain can only contain letters, numbers, and hyphens';
         if (value.length < 3) return 'Subdomain must be at least 3 characters';
         return '';
 
@@ -126,11 +130,11 @@ export default function Basics() {
       const error = validateField(key, formData[key]);
       if (error) newErrors[key] = error;
     });
+
     setErrors(newErrors);
 
     const isValid = Object.keys(newErrors).length === 0;
 
-    // Notify parent component
     if (onValidationChange) {
       onValidationChange(isValid, formData);
     }
@@ -138,30 +142,31 @@ export default function Basics() {
     return isValid;
   };
 
-  // Handle field change
+  useEffect(() => {
+    // EXPOSE the validation function to parent properly
+    window.validateBasicsForm = validateForm;
+  }, [formData]);
+
   const handleChange = (name, value) => {
     setFormData(prev => ({ ...prev, [name]: value }));
 
-    // Clear error when user starts typing
     if (touched[name]) {
       const error = validateField(name, value);
       setErrors(prev => ({ ...prev, [name]: error }));
     }
   };
 
-  // Handle blur to show validation
   const handleBlur = (name) => {
     setTouched(prev => ({ ...prev, [name]: true }));
     const error = validateField(name, formData[name]);
     setErrors(prev => ({ ...prev, [name]: error }));
   };
 
-  // Expose validate function to parent
-  React.useEffect(() => {
-    if (window.validateBasicsForm) {
-      window.validateBasicsForm = validateForm;
-    }
-  }, [formData]);
+  // React.useEffect(() => {
+  //   if (window.validateBasicsForm) {
+  //     window.validateBasicsForm = validateForm;
+  //   }
+  // }, [formData]);
 
 
 
