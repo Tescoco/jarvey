@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import shopify from "../../assets/img/flag.svg";
 import {
   copyIcon2,
@@ -19,8 +19,21 @@ import Dropdown from "../Dropdown";
 import { Link } from "react-router-dom";
 
 export default function Articles() {
+  const dragItem = useRef(null);
+  const fileInputRef = useRef(null);
+
+  // Contact/category options
+  const contact = [
+    { name: "Category 1" },
+    { name: "Category 2" },
+    { name: "Category 3" },
+    { name: "Category 4" },
+    { name: "Category 5" },
+  ];
+
   const tableHead = [``, `Articles`, `👍`, ``, `Actions`];
-  const tableData = [
+
+  const initialTableData = [
     {
       name: (
         <svg
@@ -66,7 +79,7 @@ export default function Articles() {
         </svg>
       ),
       store: {
-        name: "Do you offer refunds or exhanges 2?",
+        name: "Do you offer refunds or exchanges 2?",
       },
       language: {
         parsent: "0%",
@@ -93,115 +106,7 @@ export default function Articles() {
         </svg>
       ),
       store: {
-        name: "Do you offer refunds or exhanges?",
-      },
-      language: {
-        parsent: "0%",
-        des: "Draft",
-        img: shopify,
-      },
-      date: "Oct 18, 2024",
-    },
-    {
-      name: (
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 20 20"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M6.66667 4.79134C6.66667 4.21604 7.13304 3.74967 7.70833 3.74967C8.28363 3.74967 8.75 4.21604 8.75 4.79134C8.75 5.36664 8.28363 5.83301 7.70833 5.83301C7.13304 5.83301 6.66667 5.36664 6.66667 4.79134ZM11.25 4.79134C11.25 4.21604 11.7164 3.74967 12.2917 3.74967C12.867 3.74967 13.3333 4.21604 13.3333 4.79134C13.3333 5.36664 12.867 5.83301 12.2917 5.83301C11.7164 5.83301 11.25 5.36664 11.25 4.79134ZM6.66667 15.208C6.66667 14.6327 7.13304 14.1663 7.70833 14.1663C8.28363 14.1663 8.75 14.6327 8.75 15.208C8.75 15.7833 8.28363 16.2497 7.70833 16.2497C7.13304 16.2497 6.66667 15.7833 6.66667 15.208ZM11.25 15.208C11.25 14.6327 11.7164 14.1663 12.2917 14.1663C12.867 14.1663 13.3333 14.6327 13.3333 15.208C13.3333 15.7833 12.867 16.2497 12.2917 16.2497C11.7164 16.2497 11.25 15.7833 11.25 15.208ZM6.66667 9.91634C6.66667 9.34104 7.13304 8.87467 7.70833 8.87467C8.28363 8.87467 8.75 9.34104 8.75 9.91634V9.99967C8.75 10.575 8.28363 11.0413 7.70833 11.0413C7.13304 11.0413 6.66667 10.575 6.66667 9.99967V9.91634ZM11.25 9.91634C11.25 9.34104 11.7164 8.87467 12.2917 8.87467C12.867 8.87467 13.3333 9.34104 13.3333 9.91634V9.99967C13.3333 10.575 12.867 11.0413 12.2917 11.0413C11.7164 11.0413 11.25 10.575 11.25 9.99967V9.91634Z"
-            fill="#858585"
-            stroke="#858585"
-            strokeWidth="0.833333"
-          />
-        </svg>
-      ),
-      store: {
-        name: "Do you offer refunds or exhanges?",
-      },
-      language: {
-        parsent: "0%",
-        des: "Draft",
-        img: shopify,
-      },
-      date: "Oct 18, 2024",
-    },
-    {
-      name: (
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 20 20"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M6.66667 4.79134C6.66667 4.21604 7.13304 3.74967 7.70833 3.74967C8.28363 3.74967 8.75 4.21604 8.75 4.79134C8.75 5.36664 8.28363 5.83301 7.70833 5.83301C7.13304 5.83301 6.66667 5.36664 6.66667 4.79134ZM11.25 4.79134C11.25 4.21604 11.7164 3.74967 12.2917 3.74967C12.867 3.74967 13.3333 4.21604 13.3333 4.79134C13.3333 5.36664 12.867 5.83301 12.2917 5.83301C11.7164 5.83301 11.25 5.36664 11.25 4.79134ZM6.66667 15.208C6.66667 14.6327 7.13304 14.1663 7.70833 14.1663C8.28363 14.1663 8.75 14.6327 8.75 15.208C8.75 15.7833 8.28363 16.2497 7.70833 16.2497C7.13304 16.2497 6.66667 15.7833 6.66667 15.208ZM11.25 15.208C11.25 14.6327 11.7164 14.1663 12.2917 14.1663C12.867 14.1663 13.3333 14.6327 13.3333 15.208C13.3333 15.7833 12.867 16.2497 12.2917 16.2497C11.7164 16.2497 11.25 15.7833 11.25 15.208ZM6.66667 9.91634C6.66667 9.34104 7.13304 8.87467 7.70833 8.87467C8.28363 8.87467 8.75 9.34104 8.75 9.91634V9.99967C8.75 10.575 8.28363 11.0413 7.70833 11.0413C7.13304 11.0413 6.66667 10.575 6.66667 9.99967V9.91634ZM11.25 9.91634C11.25 9.34104 11.7164 8.87467 12.2917 8.87467C12.867 8.87467 13.3333 9.34104 13.3333 9.91634V9.99967C13.3333 10.575 12.867 11.0413 12.2917 11.0413C11.7164 11.0413 11.25 10.575 11.25 9.99967V9.91634Z"
-            fill="#858585"
-            stroke="#858585"
-            strokeWidth="0.833333"
-          />
-        </svg>
-      ),
-      store: {
-        name: "Do you offer refunds or exhanges?",
-      },
-      language: {
-        parsent: "0%",
-        des: "Draft",
-        img: shopify,
-      },
-      date: "Oct 18, 2024",
-    },
-    {
-      name: (
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 20 20"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M6.66667 4.79134C6.66667 4.21604 7.13304 3.74967 7.70833 3.74967C8.28363 3.74967 8.75 4.21604 8.75 4.79134C8.75 5.36664 8.28363 5.83301 7.70833 5.83301C7.13304 5.83301 6.66667 5.36664 6.66667 4.79134ZM11.25 4.79134C11.25 4.21604 11.7164 3.74967 12.2917 3.74967C12.867 3.74967 13.3333 4.21604 13.3333 4.79134C13.3333 5.36664 12.867 5.83301 12.2917 5.83301C11.7164 5.83301 11.25 5.36664 11.25 4.79134ZM6.66667 15.208C6.66667 14.6327 7.13304 14.1663 7.70833 14.1663C8.28363 14.1663 8.75 14.6327 8.75 15.208C8.75 15.7833 8.28363 16.2497 7.70833 16.2497C7.13304 16.2497 6.66667 15.7833 6.66667 15.208ZM11.25 15.208C11.25 14.6327 11.7164 14.1663 12.2917 14.1663C12.867 14.1663 13.3333 14.6327 13.3333 15.208C13.3333 15.7833 12.867 16.2497 12.2917 16.2497C11.7164 16.2497 11.25 15.7833 11.25 15.208ZM6.66667 9.91634C6.66667 9.34104 7.13304 8.87467 7.70833 8.87467C8.28363 8.87467 8.75 9.34104 8.75 9.91634V9.99967C8.75 10.575 8.28363 11.0413 7.70833 11.0413C7.13304 11.0413 6.66667 10.575 6.66667 9.99967V9.91634ZM11.25 9.91634C11.25 9.34104 11.7164 8.87467 12.2917 8.87467C12.867 8.87467 13.3333 9.34104 13.3333 9.91634V9.99967C13.3333 10.575 12.867 11.0413 12.2917 11.0413C11.7164 11.0413 11.25 10.575 11.25 9.99967V9.91634Z"
-            fill="#858585"
-            stroke="#858585"
-            strokeWidth="0.833333"
-          />
-        </svg>
-      ),
-      store: {
-        name: "Do you offer refunds or exhanges?",
-      },
-      language: {
-        parsent: "0%",
-        des: "Draft",
-        img: shopify,
-      },
-      date: "Oct 18, 2024",
-    },
-    {
-      name: (
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 20 20"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M6.66667 4.79134C6.66667 4.21604 7.13304 3.74967 7.70833 3.74967C8.28363 3.74967 8.75 4.21604 8.75 4.79134C8.75 5.36664 8.28363 5.83301 7.70833 5.83301C7.13304 5.83301 6.66667 5.36664 6.66667 4.79134ZM11.25 4.79134C11.25 4.21604 11.7164 3.74967 12.2917 3.74967C12.867 3.74967 13.3333 4.21604 13.3333 4.79134C13.3333 5.36664 12.867 5.83301 12.2917 5.83301C11.7164 5.83301 11.25 5.36664 11.25 4.79134ZM6.66667 15.208C6.66667 14.6327 7.13304 14.1663 7.70833 14.1663C8.28363 14.1663 8.75 14.6327 8.75 15.208C8.75 15.7833 8.28363 16.2497 7.70833 16.2497C7.13304 16.2497 6.66667 15.7833 6.66667 15.208ZM11.25 15.208C11.25 14.6327 11.7164 14.1663 12.2917 14.1663C12.867 14.1663 13.3333 14.6327 13.3333 15.208C13.3333 15.7833 12.867 16.2497 12.2917 16.2497C11.7164 16.2497 11.25 15.7833 11.25 15.208ZM6.66667 9.91634C6.66667 9.34104 7.13304 8.87467 7.70833 8.87467C8.28363 8.87467 8.75 9.34104 8.75 9.91634V9.99967C8.75 10.575 8.28363 11.0413 7.70833 11.0413C7.13304 11.0413 6.66667 10.575 6.66667 9.99967V9.91634ZM11.25 9.91634C11.25 9.34104 11.7164 8.87467 12.2917 8.87467C12.867 8.87467 13.3333 9.34104 13.3333 9.91634V9.99967C13.3333 10.575 12.867 11.0413 12.2917 11.0413C11.7164 11.0413 11.25 10.575 11.25 9.99967V9.91634Z"
-            fill="#858585"
-            stroke="#858585"
-            strokeWidth="0.833333"
-          />
-        </svg>
-      ),
-      store: {
-        name: "Do you offer refunds or exhanges?",
+        name: "Shipping and delivery information",
       },
       language: {
         parsent: "0%",
@@ -212,14 +117,77 @@ export default function Articles() {
     },
   ];
 
-  const [items, setItems] = useState(tableData);
-  const dragItem = useRef(null);
+  // State management
+  const [items, setItems] = useState(initialTableData);
+  const [filteredItems, setFilteredItems] = useState(initialTableData);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [editArticle, setEditArticle] = useState(false);
+  const [showCreateArticle, setShowCreateArticle] = useState(false);
+  const [showEditArticle, setShowEditArticle] = useState(false);
+  const [showCreateCategory, setShowCreateCategory] = useState(false);
+  const [showShareOptions, setShowShareOptions] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+
+  // Article form states
+  const [articleTitle, setArticleTitle] = useState("");
+  const [articleCategory, setArticleCategory] = useState("");
+  const [articleSlug, setArticleSlug] = useState("");
+  const [articleContent, setArticleContent] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState("en-US");
+  const [metaTitle, setMetaTitle] = useState("");
+  const [useSameTitleAsMeta, setUseSameTitleAsMeta] = useState(false);
+
+  // Category form states
+  const [categoryTitle, setCategoryTitle] = useState("");
+  const [categorySlug, setCategorySlug] = useState("");
+  const [categoryLanguage, setCategoryLanguage] = useState("en-US");
+
+  // Editable textarea states for Article Settings modal
+  const [excerptText, setExcerptText] = useState("");
+  const [searchPreviewText, setSearchPreviewText] = useState("");
+
+  // Filter articles based on search
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setFilteredItems(items);
+    } else {
+      const filtered = items.filter((item) =>
+        item.store.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredItems(filtered);
+    }
+  }, [searchQuery, items]);
+
+  // Auto-generate slug from title
+  useEffect(() => {
+    if (articleTitle && !showEditArticle) {
+      const slug = articleTitle
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+      setArticleSlug(slug);
+    }
+  }, [articleTitle, showEditArticle]);
+
+  useEffect(() => {
+    if (categoryTitle) {
+      const slug = categoryTitle
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+      setCategorySlug(slug);
+    }
+  }, [categoryTitle]);
+
+  // Drag and drop handlers
   const handleDragStart = (index) => {
     dragItem.current = index;
   };
+
   const handleDragOver = (e) => {
     e.preventDefault();
   };
+
   const handleDrop = (dropIndex) => {
     if (dragItem.current !== null && dragItem.current !== dropIndex) {
       const copyItems = [...items];
@@ -232,6 +200,74 @@ export default function Articles() {
     dragItem.current = null;
   };
 
+  // File upload handler
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      console.log("File uploaded:", file.name);
+      alert(`File "${file.name}" uploaded successfully!`);
+    }
+  };
+
+  // Copy URL/Slug handler
+  const handleCopySlug = (text) => {
+    if (navigator.clipboard) {
+      navigator.clipboard
+        .writeText(text)
+        .then(() => {
+          alert("URL copied to clipboard!");
+        })
+        .catch((err) => {
+          console.error("Failed to copy:", err);
+          alert("Failed to copy URL");
+        });
+    } else {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand("copy");
+        alert("URL copied to clipboard!");
+      } catch (err) {
+        alert("Failed to copy URL");
+      }
+      document.body.removeChild(textArea);
+    }
+  };
+
+  // Add after handleCopySlug function (around line 340)
+  const handleCopyUrl = (url) => {
+    handleCopySlug(url); // Reuse existing copy function
+  };
+
+  // Share handlers
+  const handleShare = (platform) => {
+    const articleUrl = `https://jarvey.jarveyai.help/en-US/${articleSlug}`;
+    let shareUrl = "";
+
+    switch (platform) {
+      case "copy":
+        handleCopySlug(articleUrl);
+        break;
+      case "facebook":
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+          articleUrl
+        )}`;
+        window.open(shareUrl, "_blank");
+        break;
+      case "twitter":
+        shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(
+          articleUrl
+        )}`;
+        window.open(shareUrl, "_blank");
+        break;
+      default:
+        break;
+    }
+  };
+
+  // Duplicate article
   const handleDuplicateArticle = (articleIndex) => {
     const articleToDuplicate = items[articleIndex];
     const duplicatedArticle = {
@@ -246,16 +282,76 @@ export default function Articles() {
     setItems(newItems);
   };
 
-  const contact = [
-    { name: "Category 1" },
-    { name: "Category 2" },
-    { name: "Category 3" },
-    { name: "Category 4" },
-    { name: "Category 5" },
-  ];
+  // Create category handler
+  const handleCreateCategory = () => {
+    if (!categoryTitle.trim()) {
+      alert("Please enter a category title");
+      return;
+    }
+
+    console.log("Creating category:", {
+      title: categoryTitle,
+      slug: categorySlug,
+      language: categoryLanguage,
+    });
+
+    alert("Category created successfully!");
+    setCategoryTitle("");
+    setCategorySlug("");
+    setShowCreateCategory(false);
+  };
+
+  // Publish article handler with validation
+  const handlePublishArticle = (isUpdate = false) => {
+    const errors = [];
+
+    if (!articleTitle.trim()) {
+      errors.push("Title is required");
+    }
+
+    if (!articleCategory && !isUpdate) {
+      errors.push("Category is required");
+    }
+
+    if (!articleContent.trim()) {
+      errors.push("Article content is required");
+    }
+
+    if (errors.length > 0) {
+      alert("Please fix the following errors:\n" + errors.join("\n"));
+      return;
+    }
+
+    console.log(isUpdate ? "Updating article:" : "Publishing article:", {
+      title: articleTitle,
+      category: articleCategory,
+      slug: articleSlug,
+      content: articleContent,
+      language: selectedLanguage,
+      excerpt: excerptText,
+      metaTitle: useSameTitleAsMeta ? articleTitle : metaTitle,
+    });
+
+    alert(
+      isUpdate
+        ? "Article updated successfully!"
+        : "Article published successfully!"
+    );
+
+    // Reset form
+    setArticleTitle("");
+    setArticleCategory("");
+    setArticleSlug("");
+    setArticleContent("");
+    setExcerptText("");
+    setMetaTitle("");
+    setShowCreateArticle(false);
+    setShowEditArticle(false);
+  };
 
   const icon = [
     <svg
+      key="eye-icon"
       width="20"
       height="20"
       viewBox="0 0 20 20"
@@ -274,23 +370,6 @@ export default function Articles() {
       />
     </svg>,
   ];
-
-  const [editArticle, setEditArticle] = useState(false);
-  const [showCreateArticle, setShowCreateArticle] = useState(false);
-  const [showEditArticle, setShowEditArticle] = useState(false);
-  const [showCreateCategory, setShowCreateCategory] = useState(false);
-  const [showShareOptions, setShowShareOptions] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-
-  // Editable textarea states for Article Settings modal
-  const [excerptText, setExcerptText] = useState(
-    ""
-    // "['Yes' answer]. Yes, we offer refunds and exchanges within [# of days] days of purchase. To be eligible for a refund or exchange, items must be returned in their original condition, with all tags and packaging intact. Please note that ["
-  );
-  const [searchPreviewText, setSearchPreviewText] = useState(
-    ""
-    // "https://jarvey.jarveyai.help > do-you-offer-refunds-or-exchanges-1224851 Do you offer refunds or exchanges? ['Yes' answer]. Yes, we offer refunds and exchanges within [# of days] days of purchase. To be eligible for a refund or exchange, items must be returned in their original condition, with all tags and packaging intact. Please note that"
-  );
 
   const Icons = [
     {
@@ -311,7 +390,7 @@ export default function Articles() {
           />
         </svg>
       ),
-      url: "#",
+      action: "share",
     },
     {
       icon: (
@@ -340,7 +419,7 @@ export default function Articles() {
           />
         </svg>
       ),
-      url: "#",
+      action: "view",
     },
     {
       icon: (
@@ -360,7 +439,7 @@ export default function Articles() {
           />
         </svg>
       ),
-      url: "#",
+      action: "edit",
     },
     {
       icon: (
@@ -387,9 +466,10 @@ export default function Articles() {
           />
         </svg>
       ),
-      url: "#",
+      action: "close",
     },
   ];
+
   const IconsLIst = [
     {
       icon: (
@@ -454,14 +534,22 @@ export default function Articles() {
             placeholder="Search..."
             leftIcon={search}
             inputClass="!h-[38px]"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
         <div className="flex items-center gap-3 mb-3">
           <label
             htmlFor="input"
-            className="btn !bg-black !p-2 !min-w-max cursor-pointer transition-all duration-300"
+            className="btn !bg-black !p-2 !min-w-max cursor-pointer transition-all duration-300 hover:bg-gray-800"
           >
-            <input type="file" id="input" className="hidden" />
+            <input
+              type="file"
+              id="input"
+              className="hidden"
+              onChange={handleFileUpload}
+              accept=".pdf,.doc,.docx,.txt"
+            />
             <svg
               className="flex-none"
               width="20"
@@ -527,7 +615,7 @@ export default function Articles() {
           </svg>
         </span>
         <h3 className="text-base text-[#858585]">Uncategorised Articles </h3>
-        <p className="text-primary text-base underline">26</p>
+        <p className="text-primary text-base underline">{filteredItems.length}</p>
       </div>
 
       <div className="overflow-x-auto">
@@ -537,9 +625,8 @@ export default function Articles() {
               {tableHead.map((item, index) => (
                 <th
                   key={index}
-                  className={`${index === 2 ? "!pl-[6%] !text-center" : ""} ${
-                    index === tableHead.length - 1 ? "!text-center" : ""
-                  }`}
+                  className={`${index === 2 ? "!pl-[6%] !text-center" : ""} ${index === tableHead.length - 1 ? "!text-center" : ""
+                    }`}
                 >
                   {item}
                 </th>
@@ -547,13 +634,14 @@ export default function Articles() {
             </tr>
           </thead>
           <tbody>
-            {items.map((item, index) => (
+            {filteredItems.map((item, index) => (
               <tr
                 draggable
                 onDragStart={() => handleDragStart(index)}
                 onDragOver={(e) => handleDragOver(e, index)}
                 onDrop={() => handleDrop(index)}
                 key={index}
+                className="cursor-move hover:bg-gray-50"
               >
                 <td>
                   <span className="!text-black cursor-move">
@@ -595,7 +683,7 @@ export default function Articles() {
                     />
                   </div>
                 </td>
-                <td>Oct 18, 2024</td>
+                <td>{item.date}</td>
                 <td>
                   <div className="flex items-center justify-center gap-3">
                     <button
@@ -604,6 +692,7 @@ export default function Articles() {
                         e.stopPropagation();
                         setEditArticle(true);
                       }}
+                      title="Article Settings"
                     >
                       {setting}
                     </button>
@@ -613,6 +702,7 @@ export default function Articles() {
                         e.stopPropagation();
                         handleDuplicateArticle(index);
                       }}
+                      title="Duplicate Article"
                     >
                       {copyIcon}
                     </button>
@@ -622,6 +712,7 @@ export default function Articles() {
                         e.stopPropagation();
                         setShowShareOptions(true);
                       }}
+                      title="Share Article"
                     >
                       {share}
                     </button>
@@ -678,10 +769,10 @@ export default function Articles() {
                       idx === 0
                         ? "Share article"
                         : idx === 1
-                        ? "View article"
-                        : idx === 2
-                        ? "Edit article"
-                        : "Close"
+                          ? "View article"
+                          : idx === 2
+                            ? "Edit article"
+                            : "Close"
                     }
                   >
                     {item.icon}
@@ -1124,6 +1215,7 @@ export default function Articles() {
           </div>
         </Modal>
       )}
+
     </>
   );
 }

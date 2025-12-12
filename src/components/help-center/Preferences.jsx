@@ -1,9 +1,33 @@
-import React from "react";
+import React, { useState } from "react";
 import Dropdown from "../Dropdown";
 import Input from "../Input";
 import { langList } from "../../utilities/Classes";
 
+
 export default function Preferences() {
+  const [selectedLanguages, setSelectedLanguages] = useState(["English"]);
+  const [defaultLanguage, setDefaultLanguage] = useState("");
+  const [metaTitle, setMetaTitle] = useState("");
+  const [metaDescription, setMetaDescription] = useState("");
+
+
+  const handleSaveChanges = () => {
+    // Validation
+    if (!metaTitle.trim()) {
+      alert("Meta Title is required");
+      return;
+    }
+
+    console.log("Saving preferences:", {
+      selectedLanguages,
+      defaultLanguage,
+      metaTitle,
+      metaDescription,
+    });
+
+    alert("Preferences saved successfully!");
+  };
+
   return (
     <div className="preferences">
       <div className="text w-full lg:w-1/2">
@@ -25,7 +49,30 @@ export default function Preferences() {
               <button className="px-2.5 py-2 border border-solid border-[#E2E4E9] rounded-lg max-w-max text-xs text-black font-inter font-medium !leading-[130%] cursor-pointer">
                 English
               </button>
-              <button className="inline-block px-2.5 py-2 border border-solid border-[#E2E4E9] rounded-lg max-w-max cursor-pointer">
+              {/* <button className="inline-block px-2.5 py-2 border border-solid border-[#E2E4E9] rounded-lg max-w-max cursor-pointer">
+                <svg
+                  width="17"
+                  height="17"
+                  viewBox="0 0 17 17"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M8.50065 2.83398V8.50065M8.50065 8.50065V14.1673M8.50065 8.50065H2.83398M8.50065 8.50065H14.1673"
+                    stroke="#111111"
+                    strokeOpacity="0.7"
+                    strokeWidth="1.66667"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button> */}
+              <button
+                onClick={() => {
+                  // Add logic to show language picker modal
+                  console.log('Add language clicked');
+                }}
+                className="inline-block px-2.5 py-2 border border-solid border-[#E2E4E9] rounded-lg max-w-max cursor-pointer hover:bg-gray-50"
+              >
                 <svg
                   width="17"
                   height="17"
@@ -45,12 +92,21 @@ export default function Preferences() {
             </div>
           </div>
           <div className="">
+            {/* <Dropdown
+              className="mb-0"
+              label="Select email integration"
+              placeholder="English"
+              items={langList}
+              required={true}
+            /> */}
             <Dropdown
               className="mb-0"
               label="Select email integration"
               placeholder="English"
               items={langList}
               required={true}
+              value={defaultLanguage}
+              onChange={setDefaultLanguage}
             />
             <p className="text-xs text-[#858585] font-inter font-medium !leading-[120%] mt-1">
               Used when selected language isn't available or cannot be detected
@@ -67,12 +123,21 @@ export default function Preferences() {
           </p>
         </div>
         <div className="mb-4">
+          {/* <Input
+            className="mb-0"
+            type="text"
+            placeholder="Type here"
+            label="Meta Title"
+            required={true}
+          /> */}
           <Input
             className="mb-0"
             type="text"
             placeholder="Type here"
             label="Meta Title"
             required={true}
+            value={metaTitle}
+            onChange={(e) => setMetaTitle(e.target.value)}
           />
           <p className="text-xs text-[#858585] font-inter font-medium !leading-[120%] mt-1">
             Help Center title is displayed in search engines to help people find
@@ -80,12 +145,21 @@ export default function Preferences() {
           </p>
         </div>
         <div className="mb-4">
+          {/* <Input
+            className="mb-0"
+            type="text"
+            placeholder="Type here"
+            label="Meta Description"
+          /> */}
           <Input
             className="mb-0"
             type="text"
             placeholder="Type here"
             label="Meta Description"
+            value={metaDescription}
+            onChange={(e) => setMetaDescription(e.target.value)}
           />
+
           <p className="text-xs text-[#858585] font-inter font-medium !leading-[120%] mt-1">
             Help Center description is displayed in search engines to help
             people find it.
@@ -95,7 +169,7 @@ export default function Preferences() {
           <h4 className="text-lg text-black font-inter font-semibold !leading-[130%] ">
             Search Engine Preview<span className="text-[#FE4234]">*</span>
           </h4>
-          <div className="px-3 py-2.5 border border-solid border-[#E2E4E9] rounded-[10px]">
+          {/* <div className="px-3 py-2.5 border border-solid border-[#E2E4E9] rounded-[10px]">
             <a
               href=""
               className="text-sm text-[#858585] font-inter font-normal !leading-[120%] mb-3"
@@ -108,7 +182,26 @@ export default function Preferences() {
             <p className="text-sm text-[#858585] font-inter font-normal !leading-[120%]">
               Home page of the jarvey Help Center
             </p>
+          </div> */}
+
+          <div className="px-3 py-2.5 border border-solid border-[#E2E4E9] rounded-[10px]">
+            <a href="https://jarvey.jarveyai.help"
+              className="text-sm text-[#858585] font-inter font-normal !leading-[120%] mb-3"
+            >
+              https://jarvey.jarveyai.help
+            </a>
+            <h3 className="text-lg text-[#7856FF] font-inter font-medium !leading-[130%] mb-2">
+              {metaTitle || "jarvey Help Center"}
+            </h3>
+            <p className="text-sm text-[#858585] font-inter font-normal !leading-[120%]">
+              {metaDescription || "Home page of the jarvey Help Center"}
+            </p>
           </div>
+
+
+
+
+
           <p className="text-xs text-[#858585] font-inter font-medium !leading-[120%] mt-1">
             This is a preview of how your article is going to look like in
             search engines (e.g. Google, Duckduckgo, Bing...)
@@ -119,9 +212,15 @@ export default function Preferences() {
         <button className="btn !text-primary !border-primary main-w-max hover:!text-white">
           Cancel
         </button>
-        <button className="btn shadow !text-white main-w-max flex items-center gap-2">
+        <button
+          onClick={handleSaveChanges}
+          className="btn shadow !text-white main-w-max flex items-center gap-2"
+        >
           Save Changes
         </button>
+        {/* <button className="btn shadow !text-white main-w-max flex items-center gap-2">
+          Save Changes
+        </button> */}
       </div>
     </div>
   );
