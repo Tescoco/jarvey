@@ -7,6 +7,7 @@ import { c_24 } from "../../utilities/Classes";
 
 export default function AITest() {
   const stepConfig = ONBOARDING_STEPS_CONFIG["ai-test"];
+  
 
   return (
     <MainInner>

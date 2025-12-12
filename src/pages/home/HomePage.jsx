@@ -1,6 +1,7 @@
 import React from "react";
 import Top from "../../layouts/Top";
 import MainInner from "../../components/MainInner";
+import { Link } from "react-router-dom";
 
 export default function HomePage() {
   const recommendedSteps = [
@@ -78,44 +79,46 @@ export default function HomePage() {
 
               <div className="space-y-4">
                 {recommendedSteps.map((step) => (
-                  <div
-                    key={step.id}
-                    className="group bg-white border border-stroke rounded-xl p-6 hover:shadow-md transition-all duration-300 cursor-pointer"
-                  >
-                    <div className="flex items-start gap-4">
-                      {/* Icon */}
-                      <div className="flex-shrink-0 w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-xl">
-                        {step.icon}
-                      </div>
+                  <Link to={step.link} key={step.id}>
+                    <div
+                      key={step.id}
+                      className="group bg-white border border-stroke rounded-xl p-6 hover:shadow-md transition-all duration-300 cursor-pointer"
+                    >
+                      <div className="flex items-start gap-4">
+                        {/* Icon */}
+                        <div className="flex-shrink-0 w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-xl">
+                          {step.icon}
+                        </div>
 
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-base font-medium text-heading mb-2 group-hover:text-primary transition-colors">
-                          {step.title}
-                        </h3>
-                        <p className="text-sm text-text leading-relaxed">
-                          {step.description}
-                        </p>
-                      </div>
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-base font-medium text-heading mb-2 group-hover:text-primary transition-colors">
+                            {step.title}
+                          </h3>
+                          <p className="text-sm text-text leading-relaxed">
+                            {step.description}
+                          </p>
+                        </div>
 
-                      {/* Arrow */}
-                      <div className="flex-shrink-0 ml-4">
-                        <svg
-                          className="w-5 h-5 text-text group-hover:text-primary group-hover:translate-x-1 transition-all duration-300"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 5l7 7-7 7"
-                          />
-                        </svg>
+                        {/* Arrow */}
+                        <div className="flex-shrink-0 ml-4">
+                          <svg
+                            className="w-5 h-5 text-text group-hover:text-primary group-hover:translate-x-1 transition-all duration-300"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
+                          </svg>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>
