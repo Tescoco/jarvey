@@ -114,6 +114,11 @@ export default function Billing() {
   const [showPayment, setShowPayment] = useState(true);
   const [modal, setModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'paid', 'not paid'
+  const [dateFilter, setDateFilter] = useState({ from: '', to: '' });
+
   const rowsPerPage = 10;
 
   // FIX 2: Function to toggle individual plan expansion
@@ -223,6 +228,150 @@ export default function Billing() {
     },
   ];
 
+  // Filter function for table data
+  const filteredTableData = tableData.filter(item => {
+    const searchLower = searchQuery.toLowerCase();
+    // Search filter
+    const matchesSearch = (
+      item.date.toLowerCase().includes(searchLower) ||
+      item.amount.toLowerCase().includes(searchLower) ||
+      item.des.toLowerCase().includes(searchLower) ||
+      item.status.toLowerCase().includes(searchLower)
+    );
+
+    // Status filter
+    const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
+
+    // Date filter (if you want to implement date range)
+    const matchesDate = true; // You can implement date filtering logic here
+
+    return matchesSearch && matchesStatus && matchesDate;
+  });
+
+  const handleApplyFilters = () => {
+    setShowFilterModal(false);
+    setCurrentPage(1); // Reset to first page when filters change
+  };
+
+  // Add this function to reset filters
+  const handleResetFilters = () => {
+    setStatusFilter('all');
+    setDateFilter({ from: '', to: '' });
+    setCurrentPage(1);
+  };
+
+  const generatePDFWithLibrary = (item) => {
+    const printWindow = window.open('', '_blank');
+
+    if (!printWindow) {
+      alert('Please allow popups to download PDF');
+      return;
+    }
+
+    const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Invoice - ${item.date}</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          padding: 40px;
+          max-width: 800px;
+          margin: 0 auto;
+        }
+        .header {
+          text-align: center;
+          border-bottom: 3px solid #7856FF;
+          padding-bottom: 20px;
+          margin-bottom: 30px;
+        }
+        .invoice-details {
+          margin: 20px 0;
+        }
+        .invoice-row {
+          display: flex;
+          justify-content: space-between;
+          padding: 10px 0;
+          border-bottom: 1px solid #eee;
+        }
+        .invoice-row strong {
+          color: #333;
+        }
+        .status {
+          display: inline-block;
+          padding: 5px 15px;
+          border-radius: 5px;
+          font-weight: bold;
+        }
+        .status.paid {
+          background: #d4edda;
+          color: #176448;
+        }
+        .status.not-paid {
+          background: #f8d7da;
+          color: #FE4333;
+        }
+        .footer {
+          margin-top: 40px;
+          padding-top: 20px;
+          border-top: 2px solid #eee;
+          text-align: center;
+          color: #666;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>PAYMENT INVOICE</h1>
+        <p>Invoice for services rendered</p>
+      </div>
+      
+      <div class="invoice-details">
+        <div class="invoice-row">
+          <strong>Date:</strong>
+          <span>${item.date}</span>
+        </div>
+        
+        <div class="invoice-row">
+          <strong>Amount:</strong>
+          <span style="font-size: 24px; color: #7856FF;">${item.amount}</span>
+        </div>
+        
+        <div class="invoice-row">
+          <strong>Status:</strong>
+          <span class="status ${item.status === 'paid' ? 'paid' : 'not-paid'}">
+            ${item.status ? item.status.toUpperCase() : 'PENDING'}
+          </span>
+        </div>
+        
+        <div class="invoice-row">
+          <strong>Description:</strong>
+          <span>${item.des}</span>
+        </div>
+      </div>
+      
+      <div class="footer">
+        <p>Thank you for your business!</p>
+        <p>For questions, contact support@company.com</p>
+      </div>
+      
+      <script>
+        window.onload = function() {
+          window.print();
+          setTimeout(function() {
+            window.close();
+          }, 500);
+        };
+      </script>
+    </body>
+    </html>
+  `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+  };
+
   return (
     <>
       <Top />
@@ -233,8 +382,8 @@ export default function Billing() {
               onClick={() => setActiveTab(item)}
               key={index}
               className={`min-w-[140px] font-inter font-medium text-xs md:text-sm px-4 md:px-5 lg:px-6 pb-3 border-b border-solid ${item === activeTab
-                  ? "border-btn text-btn"
-                  : "border-transparent text-heading"
+                ? "border-btn text-btn"
+                : "border-transparent text-heading"
                 }`}
             >
               {item} Method
@@ -547,7 +696,22 @@ export default function Billing() {
               each billing period.
             </p>
             <div className={`${c_24} mt-5 md:mt-6`}>
-              <TableFilter />
+              <TableFilter
+                onSearch={setSearchQuery}
+                searchValue={searchQuery}
+                hideSortDrop={true}
+              >
+                <button
+                  className="btn min-w-[79px] gap-1 text-gray"
+                  onClick={() => setShowFilterModal(true)}
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2 4H14M4 8H12M6 12H10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                  Filter
+                </button>
+              </TableFilter>
+              {/* <TableFilter /> */}
               <div className="mt-5 overflow-x-auto">
                 <table className="table">
                   <thead>
@@ -564,7 +728,13 @@ export default function Billing() {
                     </tr>
                   </thead>
                   <tbody>
-                    {tableData
+                    {/* {tableData
+                      .slice(
+                        (currentPage - 1) * rowsPerPage,
+                        currentPage * rowsPerPage
+                      )
+                      .map((item, index) => ( */}
+                    {filteredTableData
                       .slice(
                         (currentPage - 1) * rowsPerPage,
                         currentPage * rowsPerPage
@@ -589,23 +759,92 @@ export default function Billing() {
                           <td>
                             <div
                               className={`max-w-max border rounded-lg text-sm font-medium px-3 py-1 ${item.status === "paid"
-                                  ? "border-[#176448] text-[#176448]"
-                                  : "border-[#FE4333] text-[#FE4333]"
+                                ? "border-[#176448] text-[#176448]"
+                                : "border-[#FE4333] text-[#FE4333]"
                                 }`}
                             >
                               {item.status === "paid" ? "Paid" : "Not Paid"}
                             </div>
                           </td>
                           <td>
-                            <button className="text-primary underline font-medium !leading-[1.4]">
+                            <button
+                              className="text-primary underline font-medium !leading-[1.4] hover:opacity-70 transition-opacity"
+                              onClick={() => generatePDFWithLibrary(item)}
+                              title="Download invoice as PDF"
+                            >
                               Download PDF
                             </button>
+                            {/* <button className="text-primary underline font-medium !leading-[1.4]">
+                              Download PDF
+                            </button> */}
                           </td>
                         </tr>
                       ))}
                   </tbody>
                 </table>
               </div>
+              {showFilterModal && (
+                // <Modal onClick={() => setShowFilterModal(false)} closeOnClick>
+                <Modal onClose={() => setShowFilterModal(false)}>
+                  <h3 className="text-xl font-semibold mb-4">Filter Payment History</h3>
+
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                      Status
+                    </label>
+                    <div className="flex flex-col gap-2">
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          name="status"
+                          value="all"
+                          checked={statusFilter === 'all'}
+                          onChange={(e) => setStatusFilter(e.target.value)}
+                          className="w-4 h-4"
+                        />
+                        <span>All</span>
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          name="status"
+                          value="paid"
+                          checked={statusFilter === 'paid'}
+                          onChange={(e) => setStatusFilter(e.target.value)}
+                          className="w-4 h-4"
+                        />
+                        <span>Paid</span>
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          name="status"
+                          value="not paid"
+                          checked={statusFilter === 'not paid'}
+                          onChange={(e) => setStatusFilter(e.target.value)}
+                          className="w-4 h-4"
+                        />
+                        <span>Not Paid</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-2 mt-6">
+                    <button
+                      onClick={handleResetFilters}
+                      className="px-4 py-2 rounded-md border border-gray-300 text-gray-700"
+                    >
+                      Reset
+                    </button>
+                    <button
+                      onClick={handleApplyFilters}
+                      className="px-4 py-2 rounded-md bg-blue-600 text-white"
+                    >
+                      Apply Filters
+                    </button>
+                  </div>
+                </Modal>
+              )}
               {/* Pagination controls */}
               <div className="flex justify-end items-center gap-2 mt-4">
                 <button
@@ -615,7 +854,7 @@ export default function Billing() {
                 >
                   Previous
                 </button>
-                {Array.from(
+                {/* {Array.from(
                   { length: Math.ceil(tableData.length / rowsPerPage) },
                   (_, i) => (
                     <button
@@ -627,17 +866,27 @@ export default function Billing() {
                       {i + 1}
                     </button>
                   )
+                )} */}
+                {Array.from(
+                  { length: Math.ceil(filteredTableData.length / rowsPerPage) },
+                  (_, i) => (
+                    <button
+                      key={i}
+                      className={`btn px-3 py-1 ${currentPage === i + 1 ? "bg-primary text-white" : ""}`}
+                      onClick={() => setCurrentPage(i + 1)}
+                    >
+                      {i + 1}
+                    </button>
+                  )
                 )}
                 <button
                   className="btn px-3 py-1"
                   onClick={() =>
                     setCurrentPage((p) =>
-                      Math.min(p + 1, Math.ceil(tableData.length / rowsPerPage))
+                      Math.min(p + 1, Math.ceil(filteredTableData.length / rowsPerPage))  // ✅ CORRECT
                     )
                   }
-                  disabled={
-                    currentPage === Math.ceil(tableData.length / rowsPerPage)
-                  }
+                  disabled={currentPage === Math.ceil(filteredTableData.length / rowsPerPage)}
                 >
                   Next
                 </button>
