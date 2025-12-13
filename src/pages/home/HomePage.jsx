@@ -13,7 +13,7 @@ export default function HomePage() {
       title: "Explore 3 strategies to automate 30%+ of your support tickets",
       description:
         "Learn how to streamline your support process, automate repetitive queries, reduce workload for your team, and enhance CX.",
-      link: "/strategies", // Add your actual route
+      link: "/app/strategies", // Add your actual route
     },
     {
       id: 2,
@@ -21,7 +21,7 @@ export default function HomePage() {
       title: "All your favourite apps, connected",
       description:
         "Connect 100+ apps to empower your team with AI and automation, share customer data between tools, and make updates in other apps.",
-      link: "/integrations", // Add your actual route
+      link: "/app/integrations", // Add your actual route
     },
     {
       id: 3,
@@ -29,7 +29,7 @@ export default function HomePage() {
       title: "Add WhatsApp",
       description:
         "Manage WhatsApp messages as tickets, see and respond to them directly in Gorgias, and link customer profiles for personalized support.",
-      link: "/whatsapp", // Add your actual route
+      link: "/app/whatsapp", // Add your actual route
     },
     {
       id: 4,
@@ -37,7 +37,7 @@ export default function HomePage() {
       title: "Want to upgrade your tech stack?",
       description:
         "Get the best tools with 10-30% discounts from 100+ Gorgias Certified Partners.",
-      link: "/partners", // Add your actual route
+      link: "/app/upgrade", // Add your actual route
     },
   ];
 
@@ -50,7 +50,7 @@ export default function HomePage() {
       actionColor: "text-blue-600",
       bgColor: "bg-red-50",
       emoji: "🎯",
-      link: "/benchmark", // Add your actual route or external URL
+      link: "/app/benchmark", // Add your actual route or external URL
       isExternal: false,
     },
     {
@@ -61,7 +61,7 @@ export default function HomePage() {
       actionColor: "text-blue-600",
       bgColor: "bg-orange-50",
       emoji: "📚",
-      link: "/academy", // Add your actual route or external URL
+      link: "/app/academy", // Add your actual route or external URL
       isExternal: false,
     },
   ];
