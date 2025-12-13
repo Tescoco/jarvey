@@ -15,7 +15,7 @@ export default function TriggerSetting() {
     },
     {
       title: "Product question",
-      des: "Thave ordered...",
+      des: "I have ordered...",
     },
     {
       title: "Promotion! -50%..",
@@ -44,6 +44,9 @@ export default function TriggerSetting() {
   const handleViewTickets = () => {
     // Switch to the "Affected Tickets" tab
     setValue(1);
+
+    // Optional: Smooth scroll to top of the section
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -148,7 +151,7 @@ export default function TriggerSetting() {
                 {/* FIX: Changed from <a> to <button> with onClick handler */}
                 <button
                   onClick={handleViewTickets}
-                  className="btn !text-[#7856FF] !border-[#7856FF] hover:!text-white"
+                  className="btn !text-[#7856FF] !border-[#7856FF] hover:!bg-[#7856FF] hover:!text-white transition-all duration-300"
                 >
                   View Tickets Closed by Trigger
                 </button>
@@ -164,35 +167,80 @@ export default function TriggerSetting() {
                 </p>
 
                 {/* Display list of affected tickets */}
-                <div className="space-y-3">
-                  {ListItem.map((ticket, idx) => (
-                    <div
-                      key={idx}
-                      className="border border-[#E2E4E9] rounded-lg p-4 hover:border-[#7856FF] transition-all duration-200"
-                    >
-                      <h5 className="text-[#0A0D14] font-semibold mb-1">
-                        {ticket.title}
-                      </h5>
-                      <p className="text-[#858585] text-sm">{ticket.des}</p>
-                      <div className="mt-2 flex items-center gap-2">
-                        <span className="text-xs text-[#FE4333] bg-[#FE4333]/10 px-2 py-1 rounded">
-                          Closed
-                        </span>
-                        <span className="text-xs text-[#858585]">
-                          Closed by trigger on Oct 18, 2024
-                        </span>
+                {ListItem.length > 0 ? (
+                  <div className="space-y-3">
+                    {ListItem.map((ticket, idx) => (
+                      <div
+                        key={idx}
+                        className="border border-[#E2E4E9] rounded-lg p-4 hover:border-[#7856FF] hover:shadow-md transition-all duration-200"
+                      >
+                        <div className="flex items-start justify-between gap-3 mb-2">
+                          <h5 className="text-[#0A0D14] font-semibold">
+                            {ticket.title}
+                          </h5>
+                          <span className="text-xs text-[#FE4333] bg-[#FE4333]/10 px-2 py-1 rounded whitespace-nowrap">
+                            Closed
+                          </span>
+                        </div>
+                        <p className="text-[#858585] text-sm mb-2">
+                          {ticket.des}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 14 14"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M7 0.333344C3.32 0.333344 0.333336 3.32001 0.333336 7.00001C0.333336 10.68 3.32 13.6667 7 13.6667C10.68 13.6667 13.6667 10.68 13.6667 7.00001C13.6667 3.32001 10.68 0.333344 7 0.333344ZM7 12.3333C4.06 12.3333 1.66667 9.94001 1.66667 7.00001C1.66667 4.06001 4.06 1.66668 7 1.66668C9.94 1.66668 12.3333 4.06001 12.3333 7.00001C12.3333 9.94001 9.94 12.3333 7 12.3333Z"
+                              fill="#858585"
+                            />
+                            <path
+                              d="M7.33333 3.66668H6.33333V7.66668L9.66667 9.66668L10.1667 8.86668L7.33333 7.16668V3.66668Z"
+                              fill="#858585"
+                            />
+                          </svg>
+                          <span className="text-xs text-[#858585]">
+                            Closed by trigger on {new Date(2024, 9, 18 + idx).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-
-                {ListItem.length === 0 && (
-                  <div className="text-center py-12">
-                    <p className="text-[#858585]">
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12 bg-[#F7F7F7] rounded-lg">
+                    <svg
+                      className="mx-auto mb-4 opacity-50"
+                      width="48"
+                      height="48"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H5V5H19V19Z"
+                        fill="#858585"
+                      />
+                      <path
+                        d="M7 12H17V14H7V12Z"
+                        fill="#858585"
+                      />
+                    </svg>
+                    <p className="text-[#858585] font-medium">
                       No tickets have been closed by this trigger yet.
                     </p>
                   </div>
                 )}
+
+                {/* Back to settings button */}
+                <button
+                  onClick={() => setValue(0)}
+                  className="mt-6 btn !text-[#858585] !border-[#E2E4E9] hover:!bg-[#F7F7F7] transition-all duration-300"
+                >
+                  ← Back to Trigger Settings
+                </button>
               </div>
             )}
           </div>
