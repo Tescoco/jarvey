@@ -134,6 +134,7 @@ import WhatsApp from "./pages/home/Whatsapp";
 import Benchmark from "./pages/home/Becnchmark";
 import Gorgias from "./pages/home/Gorgias";
 import Upgrade from "./pages/home/Upgrade";
+import FavoriteApps from "./pages/home/FavoriteApps";
 
 // Super Admin
 
