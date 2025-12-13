@@ -14,6 +14,7 @@ import OnboardingLayout from "./layouts/OnboardingLayout";
 import Error from "./layouts/Error";
 import Home from "./pages/Home";
 import Search from "./pages/Search";
+import Password from "./pages/admin/Password";
 import Notification from "./pages/Notification";
 import AiAgentSetting from "./pages/agent/AiAgentSetting";
 import AiAgent from "./pages/agent/AiAgent";
@@ -136,6 +137,7 @@ import Gorgias from "./pages/home/Gorgias";
 import Upgrade from "./pages/home/Upgrade";
 import FavoriteApps from "./pages/home/FavoriteApps";
 import Strategies from "./pages/home/Strategies";
+import ImportData from "./pages/admin/ImportData";
 
 // Super Admin
 
@@ -327,6 +329,14 @@ export default function App() {
         {
           path: "profile",
           element: <Profile />,
+        },
+        {
+          path: "password",
+          element: <Password />,
+        },
+        {
+          path: "import-data",
+          element: <ImportData />,
         },
         // agent pages
         {
