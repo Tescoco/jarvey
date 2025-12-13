@@ -135,6 +135,7 @@ import Benchmark from "./pages/home/Becnchmark";
 import Gorgias from "./pages/home/Gorgias";
 import Upgrade from "./pages/home/Upgrade";
 import FavoriteApps from "./pages/home/FavoriteApps";
+import Strategies from "./pages/home/Strategies";
 
 // Super Admin
 
@@ -268,15 +269,19 @@ export default function App() {
           element: <Message />,
         },
         {
-          path: "integration",
+          path: "integrations",
           element: <Integrations />,
         },
         {
-          path: "watshapp",
+          path: "strategies",
+          element: <Strategies />,
+        },
+        {
+          path: "whatsapp",
           element: <WhatsApp />,
         },
         {
-          path: "bench",
+          path: "benchmark",
           element: <Benchmark />,
         },
         {
@@ -284,7 +289,7 @@ export default function App() {
           element: <FavoriteApps />
         },
         {
-          path: "gorgias",
+          path: "academy",
           element: <Gorgias />,
         },
         {
