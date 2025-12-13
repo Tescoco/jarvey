@@ -272,8 +272,66 @@ export default function Email() {
       des: "Potential risk of deliverability issues with high email volume.",
     },
   ];
+
   const tabBtns = ["Email", "Jarvey Support"];
   const [activeData, setActiveData] = useState(tabBtns[0]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [signature, setSignature] = useState('');
+  const [selectedAgent, setSelectedAgent] = useState('Current Agent');
+  const [showAgentDropdown, setShowAgentDropdown] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Add filtering logic for emailTable
+  const filteredEmailTable = emailTable.filter(item => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      item.name.toLowerCase().includes(searchLower) ||
+      item.Email.toLowerCase().includes(searchLower) ||
+      item.Stores.toLowerCase().includes(searchLower)
+    );
+  });
+
+  const handleImportEmails = () => {
+    console.log('Importing emails...');
+    // Add your import logic here
+    alert('Importing the last 2 years of emails. This may take a few minutes.');
+    // You can show a loading state or open a modal here
+  };
+
+  const handleConnectStore = () => {
+    console.log('Connecting store...');
+    // Add your connection logic here
+    alert('Opening store connection dialog...');
+    // You can open a modal to select stores here
+  };
+
+  // Add handler functions for signature editor:
+  const handleFormatText = (format) => {
+    console.log(`Applying format: ${format}`);
+    // Add your text formatting logic here
+    // You can use document.execCommand or a rich text editor library
+  };
+
+  const handleDeleteIntegration = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = () => {
+    console.log('Deleting integration...');
+    // Add your delete API call here
+    alert('Integration deleted successfully!');
+    setShowDeleteConfirm(false);
+    // Redirect or update UI as needed
+  };
+
+  const handleSaveChanges = () => {
+    console.log('Saving changes...');
+    console.log('Signature:', signature);
+    // Add your save API call here
+    alert('Changes saved successfully!');
+    // You can show a success toast notification here
+  };
+
   return (
     <>
       <Top />
@@ -284,7 +342,12 @@ export default function Email() {
             from Jarvey
           </p>
           <div className={`${c_24}`}>
-            <TableFilter />
+            {/* <TableFilter /> */}
+            <TableFilter
+              onSearch={setSearchQuery}
+              searchValue={searchQuery}
+              hideSortDrop={true}
+            />
             <div className="overflow-auto">
               <table className="w-full table">
                 <thead>
@@ -300,7 +363,9 @@ export default function Email() {
                   </tr>
                 </thead>
                 <tbody>
-                  {emailTable.map((item, index) => (
+                  {/* {emailTable.map((item, index) => ( */}
+                  {/* // <tr key={index} className="!border-b border-[#E2E4E9]"> */}
+                  {filteredEmailTable.map((item, index) => (
                     <tr key={index} className="!border-b border-[#E2E4E9]">
                       <td className="md:text-sm text-[#0A0D14] font-medium">
                         <div className="flex items-center gap-2">
@@ -343,6 +408,14 @@ export default function Email() {
                       </td>
                     </tr>
                   ))}
+
+                  {filteredEmailTable.length === 0 && (
+                    <tr>
+                      <td colSpan="3" className="text-center py-4 text-gray-500">
+                        No emails found
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -355,7 +428,7 @@ export default function Email() {
               <p className="text-sm">Preferences</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4 md:mb-5 lg:mb-6">
-              {email.map((item, index) => (
+              {/* {email.map((item, index) => (
                 <div className={`${c_24} p-5`} key={index}>
                   <div className="mb-2">
                     <h3 className="text-[22px] text-heading font-semibold leading-[140%] mb-1">
@@ -364,6 +437,22 @@ export default function Email() {
                     <p className="text-sm ">{item.des}</p>
                   </div>
                   <button className="btn text-primary border-primary !font-semibold">
+                    {item.name}
+                  </button>
+                </div>
+              ))} */}
+              {email.map((item, index) => (
+                <div className={`${c_24} p-5`} key={index}>
+                  <div className="mb-2">
+                    <h3 className="text-[22px] text-heading font-semibold leading-[140%] mb-1">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm ">{item.des}</p>
+                  </div>
+                  <button
+                    className="btn text-primary border-primary !font-semibold hover:bg-primary hover:text-white transition-colors"
+                    onClick={index === 0 ? handleImportEmails : handleConnectStore}
+                  >
                     {item.name}
                   </button>
                 </div>
@@ -417,7 +506,7 @@ export default function Email() {
                 </p>
               </div>
             </div>
-            <div className="mb-4">
+            {/* <div className="mb-4">
               <h3 className="text-sm text-heading font-inter font-semibold !leading-[150%] mb-1">
                 Signature
               </h3>
@@ -450,7 +539,84 @@ export default function Email() {
                   </ul>
                 </div>
               </div>
+            </div> */}
+
+            <div className="mb-4">
+              <h3 className="text-sm text-heading font-inter font-semibold !leading-[150%] mb-1">
+                Signature
+              </h3>
+              <div className="flex flex-col justify-between overflow-y-auto min-h-[130px] p-4 pt-3 bg-white border border-stroke rounded-xl">
+                {/* Agent Selector */}
+                <div className="relative mb-3">
+                  <button
+                    className="flex items-center flex-wrap md:flex-nowrap gap-2.5 hover:bg-gray-50 px-2 py-1 rounded transition-colors"
+                    onClick={() => setShowAgentDropdown(!showAgentDropdown)}
+                  >
+                    <p className="text-sm font-medium">{selectedAgent}</p>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className={`transition-transform ${showAgentDropdown ? 'rotate-180' : ''}`}
+                    >
+                      <path
+                        d="M10.0001 10.8805L13.7126 7.16797L14.7731 8.22847L10.0001 13.0015L5.22705 8.22847L6.28755 7.16797L10.0001 10.8805Z"
+                        fill="#111111"
+                        fillOpacity="0.5"
+                      />
+                    </svg>
+                  </button>
+
+                  {/* Agent Dropdown */}
+                  {showAgentDropdown && (
+                    <div className="absolute top-full left-0 mt-1 bg-white border border-stroke rounded-lg shadow-lg z-10 min-w-[200px]">
+                      {['Current Agent', 'Agent 1', 'Agent 2', 'All Agents'].map((agent, idx) => (
+                        <button
+                          key={idx}
+                          className="w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors text-sm"
+                          onClick={() => {
+                            setSelectedAgent(agent);
+                            setShowAgentDropdown(false);
+                          }}
+                        >
+                          {agent}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Formatting Toolbar */}
+                <div className="flex flex-col gap-2">
+                  <ul className="flex items-center gap-2 py-2 border-b border-stroke">
+                    {textEditor.map((item, index) => (
+                      <li key={index}>
+                        <button
+                          className="text-[#111111]/50 hover:text-primary transition-colors p-1 rounded hover:bg-gray-50"
+                          onClick={() => handleFormatText(index)}
+                          title={`Format option ${index + 1}`}
+                        >
+                          {item.icon}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* Editable Signature Area */}
+                  <div
+                    contentEditable
+                    className="min-h-[80px] p-2 outline-none focus:ring-2 focus:ring-primary/20 rounded text-sm"
+                    onInput={(e) => setSignature(e.currentTarget.textContent)}
+                    suppressContentEditableWarning
+                  >
+                    {signature || 'Type your signature here...'}
+                  </div>
+                </div>
+              </div>
             </div>
+
             <div className="mb-4">
               {group.map((item, index) => (
                 <div
@@ -495,7 +661,7 @@ export default function Email() {
                 </div>
               ))}
             </div>
-            <div className="flex items-center justify-between">
+            {/* <div className="flex items-center justify-between">
               <button className="btn border-none flex items-center gap-2 text-sm !text-[#FE4333] font-medium !leading-[150%] hover:!bg-transparent hover:!scale-100">
                 <svg
                   width="14"
@@ -512,7 +678,61 @@ export default function Email() {
                 Delete Integration
               </button>
               <button className="btn bg-primary text-white">Save Changs</button>
+            </div> */}
+
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <button
+                className="btn border-none flex items-center gap-2 text-sm !text-[#FE4333] font-medium !leading-[150%] hover:!bg-red-50 hover:!scale-100 transition-colors"
+                onClick={handleDeleteIntegration}
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M3.28358 11.3056L3.78254 11.2734L3.28358 11.3056ZM10.7161 11.3056L10.2171 11.2734V11.2734L10.7161 11.3056ZM1.604 2.85547C1.32786 2.85547 1.104 3.07933 1.104 3.35547C1.104 3.63161 1.32786 3.85547 1.604 3.85547V2.85547ZM12.3957 3.85547C12.6718 3.85547 12.8957 3.63161 12.8957 3.35547C12.8957 3.07933 12.6718 2.85547 12.3957 2.85547V3.85547ZM6.18734 6.27214C6.18734 5.99599 5.96348 5.77214 5.68734 5.77214C5.4112 5.77214 5.18734 5.99599 5.18734 6.27214H6.18734ZM5.18734 9.48047C5.18734 9.75661 5.4112 9.98047 5.68734 9.98047C5.96348 9.98047 6.18734 9.75661 6.18734 9.48047H5.18734ZM8.81234 6.27214C8.81234 5.99599 8.58848 5.77214 8.31234 5.77214C8.0362 5.77214 7.81234 5.99599 7.81234 6.27214H8.81234ZM7.81234 9.48047C7.81234 9.75661 8.0362 9.98047 8.31234 9.98047C8.58848 9.98047 8.81234 9.75661 8.81234 9.48047H7.81234ZM8.77545 3.4801C8.84429 3.74752 9.11688 3.90852 9.3843 3.83969C9.65173 3.77086 9.81272 3.49827 9.74389 3.23084L8.77545 3.4801ZM2.77067 3.35547L2.27171 3.38766L2.78462 11.3378L3.28358 11.3056L3.78254 11.2734L3.26963 3.32328L2.77067 3.35547ZM4.44783 12.3971V12.8971H9.55185V12.3971V11.8971H4.44783V12.3971ZM10.7161 11.3056L11.2151 11.3378L11.728 3.38766L11.229 3.35547L10.73 3.32328L10.2171 11.2734L10.7161 11.3056ZM11.229 3.35547V2.85547H2.77067V3.35547V3.85547H11.229V3.35547ZM1.604 3.35547V3.85547H2.77067V3.35547V2.85547H1.604V3.35547ZM11.229 3.35547V3.85547H12.3957V3.35547V2.85547H11.229V3.35547ZM9.55185 12.3971V12.8971C10.4307 12.8971 11.1585 12.2148 11.2151 11.3378L10.7161 11.3056L10.2171 11.2734C10.1945 11.6242 9.90337 11.8971 9.55185 11.8971V12.3971ZM3.28358 11.3056L2.78462 11.3378C2.8412 12.2148 3.56901 12.8971 4.44783 12.8971V12.3971V11.8971C4.0963 11.8971 3.80518 11.6242 3.78254 11.2734L3.28358 11.3056ZM5.68734 6.27214H5.18734V9.48047H5.68734H6.18734V6.27214H5.68734ZM8.31234 6.27214H7.81234V9.48047H8.31234H8.81234V6.27214H8.31234ZM6.99985 1.60547V2.10547C7.85342 2.10547 8.57191 2.68926 8.77545 3.4801L9.25967 3.35547L9.74389 3.23084C9.42939 2.00891 8.32075 1.10547 6.99985 1.10547V1.60547ZM4.74003 3.35547L5.22424 3.4801C5.42779 2.68926 6.14628 2.10547 6.99985 2.10547V1.60547V1.10547C5.67894 1.10547 4.57031 2.00891 4.25581 3.23084L4.74003 3.35547Z"
+                    fill="#FE4333"
+                  />
+                </svg>
+                Delete Integration
+              </button>
+
+              <button
+                className="btn bg-primary text-white hover:bg-primary/90 transition-colors"
+                onClick={handleSaveChanges}
+              >
+                Save Changes
+              </button>
             </div>
+
+            {showDeleteConfirm && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-lg p-6 max-w-md w-full">
+                  <h3 className="text-xl font-semibold mb-4">Delete Integration</h3>
+                  <p className="mb-6 text-gray-600">
+                    Are you sure you want to delete this email integration? This action cannot be undone.
+                  </p>
+                  <div className="flex gap-3 justify-end">
+                    <button
+                      onClick={() => setShowDeleteConfirm(false)}
+                      className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={confirmDelete}
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
           </div>
         )}
       </MainInner>

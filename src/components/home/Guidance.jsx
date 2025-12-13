@@ -178,13 +178,14 @@ export default function Guidance() {
             <div className="md:flex items-center justify-center gap-2 lg:gap-[10px]">
               <button
                 onClick={() => setValue(false)}
-                className="btn mb-4 md:mb-0"
+                className="border rounded-lg p-1 mb-4 md:mb-0 hover:bg-[#8466FF] hover:text-white"
               >
                 Create Custom Guidance
               </button>
               <button
                 onClick={handleCreateFromTemplate}
-                className="btn mb-4 md:mb-0 !shadow-[0px_1px_2px_0px_rgba(90,_54,_191,_0.48),_0px_0px_0px_1px_#6E3FF3] !text-white !bg-[#8466FF] !bg-[linear-gradient(180deg,_rgba(255,_255,_255,_0.12)_0%,_rgba(255,_255,_255,_0.00)_100%),_#7856FF]"
+                className="border rounded-lg p-1 mb-4 md:mb-0 hover:bg-[#8466FF] hover:text-white"
+                // className="rounded-lg p-1 mb-4 md:mb-0 !shadow-[0px_1px_2px_0px_rgba(90,_54,_191,_0.48),_0px_0px_0px_1px_#6E3FF3] !text-white !bg-[#8466FF] !bg-[linear-gradient(180deg,_rgba(255,_255,_255,_0.12)_0%,_rgba(255,_255,_255,_0.00)_100%),_#7856FF]"
               >
                 Create From Template
               </button>
