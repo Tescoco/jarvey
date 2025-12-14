@@ -20,8 +20,10 @@ export default function EmailConfiguration() {
                         <button onClick={() => setActiveTab(item)} key={index} className={`min-w-[140px] font-inter font-medium text-sm px-4 md:px-5 lg:px-6 pb-3 border-b border-solid ${item === activeTab ? 'border-btn text-btn' : 'border-transparent text-heading'}`}>{item} Method</button>
                     ))}
                 </div>
-                {activeTab === "Outgoing" && <Incoming />}
-                {activeTab === "Incoming" && <Outgoing />}
+                {/* {activeTab === "Outgoing" && <Incoming />}
+                {activeTab === "Incoming" && <Outgoing />} */}
+                {activeTab === "Incoming" && <Incoming />}
+                {activeTab === "Outgoing" && <Outgoing />}
             </MainInner>
         </>
     )
