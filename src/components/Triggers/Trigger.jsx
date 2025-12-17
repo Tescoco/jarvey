@@ -90,13 +90,14 @@ export default function Trigger({ selectedStore }) {
   ]
 
   const [items, setItems] = useState(tableData);
-  // FIX 1: Added search state
   const [searchQuery, setSearchQuery] = useState("");
 
   const dragItem = useRef(null);
+  
   const handleDragStart = (index) => {
     dragItem.current = index;
   };
+
   const handleDragOver = (e) => {
     e.preventDefault();
   };
@@ -150,21 +151,26 @@ export default function Trigger({ selectedStore }) {
     },
   ]
 
-  // FIX 1: Added search handler
   const handleSearch = (query) => {
     setSearchQuery(query);
   };
 
-  // FIX 1 & 3: Filter items based on search query and selected store
+  // FIXED: Updated filtering logic to handle "All stores" correctly
   const filteredItems = items.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStore = !selectedStore || selectedStore === 'all' || item.store.name === selectedStore;
+
+    // If no store selected, "All stores", or empty string, show all items
+    if (!selectedStore || selectedStore === '' || selectedStore === 'All stores' || selectedStore === 'all') {
+      return matchesSearch;
+    }
+
+    // Otherwise filter by exact store name match
+    const matchesStore = item.store.name === selectedStore;
     return matchesSearch && matchesStore;
   });
 
   return (
     <div className='p-4 lg:p-5 xl:p-6'>
-      {/* FIX 1 & 2: Added search props and removed duplicate sort button by setting sortHidden */}
       <TableFilter
         onSearch={handleSearch}
         searchValue={searchQuery}
@@ -192,7 +198,6 @@ export default function Trigger({ selectedStore }) {
             </tr>
           </thead>
           <tbody>
-            {/* FIX 1 & 3: Use filteredItems instead of items */}
             {filteredItems.length > 0 ? (
               filteredItems.map((item, index) => (
                 <tr
@@ -210,7 +215,7 @@ export default function Trigger({ selectedStore }) {
                           </svg>
                         </span>
                         <Switch
-                          id={index}
+                          id={`trigger-${index}`}
                           onChange={() => toggleStatus(index)}
                           checked={item.status} />
                       </button>
@@ -229,7 +234,7 @@ export default function Trigger({ selectedStore }) {
             ) : (
               <tr>
                 <td colSpan={tableHead.length} className="text-center py-8">
-                  <p className="text-gray">No triggers found matching your search{selectedStore && selectedStore !== 'all' ? ' and store filter' : ''}.</p>
+                  <p className="text-gray">No triggers found{searchQuery ? ' matching your search' : ''}{selectedStore && selectedStore !== 'All stores' && selectedStore !== 'all' ? ' for the selected store' : ''}.</p>
                 </td>
               </tr>
             )}
@@ -257,7 +262,7 @@ export default function Trigger({ selectedStore }) {
             ))}
           </div>
           <div className='flex !items-start md:items-center gap-2'>
-            <Checkbox />
+            <Checkbox id="create-ticket-views" />
             <div>
               <p className='text-[#0A0D14] text-sm font-semibold !leading-[1.42] tracking-[-0.084px]'>Create the ticket views "During business hours" and "Outside business hours" to see tickets that trigger this rule.</p>
               <p className='mt-1 text-[#858585] text-xs font-medium !leading-[1.4]'>You can always edit ticket view names after installing.</p>
@@ -298,7 +303,7 @@ export default function Trigger({ selectedStore }) {
 
 // import shopify from '../../assets/img/sop.svg'
 
-// export default function Trigger() {
+// export default function Trigger({ selectedStore }) {
 //   const tableHead = [
 //     `Trigger`,
 //     `Last Updated`,
@@ -380,6 +385,9 @@ export default function Trigger({ selectedStore }) {
 //   ]
 
 //   const [items, setItems] = useState(tableData);
+//   // FIX 1: Added search state
+//   const [searchQuery, setSearchQuery] = useState("");
+
 //   const dragItem = useRef(null);
 //   const handleDragStart = (index) => {
 //     dragItem.current = index;
@@ -437,9 +445,26 @@ export default function Trigger({ selectedStore }) {
 //     },
 //   ]
 
+//   // FIX 1: Added search handler
+//   const handleSearch = (query) => {
+//     setSearchQuery(query);
+//   };
+
+//   // FIX 1 & 3: Filter items based on search query and selected store
+//   const filteredItems = items.filter(item => {
+//     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+//     const matchesStore = !selectedStore || selectedStore === 'all' || item.store.name === selectedStore;
+//     return matchesSearch && matchesStore;
+//   });
+
 //   return (
 //     <div className='p-4 lg:p-5 xl:p-6'>
-//       <TableFilter />
+//       {/* FIX 1 & 2: Added search props and removed duplicate sort button by setting sortHidden */}
+//       <TableFilter
+//         onSearch={handleSearch}
+//         searchValue={searchQuery}
+//         sortHidden={true}
+//       />
 //       <div className='flex md:items-center gap-2 lg:gap-[10px] mb-4 lg:mb-5'>
 //         <a href="#" className=''>
 //           <svg width="12" height="16" viewBox="0 0 12 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -462,38 +487,47 @@ export default function Trigger({ selectedStore }) {
 //             </tr>
 //           </thead>
 //           <tbody>
-//             {items.map((item, index) => (
-//               <tr
-//                 draggable
-//                 onDragStart={() => handleDragStart(index)}
-//                 onDragOver={(e) => handleDragOver(e, index)}
-//                 onDrop={() => handleDrop(index)}
-//                 key={index}>
-//                 <td className='md:!py-5'>
-//                   <div className='flex items-center gap-4 lg:gap-5 xl:gap-7'>
-//                     <button className='flex items-center gap-2 lg:gap-3 !pr-0 cursor-move'>
-//                       <span>
-//                         <svg width="8" height="14" viewBox="0 0 8 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-//                           <path d="M2.75 6.91666V6.99999C2.75 7.57529 2.28363 8.04166 1.70833 8.04166C1.13304 8.04166 0.666667 7.57529 0.666667 6.99999V6.91666C0.666667 6.34136 1.13304 5.87499 1.70833 5.87499C2.28363 5.87499 2.75 6.34136 2.75 6.91666ZM7.33333 6.91666V6.99999C7.33333 7.57529 6.86696 8.04166 6.29167 8.04166C5.71637 8.04166 5.25 7.57529 5.25 6.99999V6.91666C5.25 6.34136 5.71637 5.87499 6.29167 5.87499C6.86696 5.87499 7.33333 6.34136 7.33333 6.91666ZM6.29167 13.25C5.71637 13.25 5.25 12.7836 5.25 12.2083C5.25 11.633 5.71637 11.1667 6.29167 11.1667C6.86696 11.1667 7.33333 11.633 7.33333 12.2083C7.33333 12.7836 6.86696 13.25 6.29167 13.25ZM1.70833 13.25C1.13304 13.25 0.666667 12.7836 0.666667 12.2083C0.666667 11.633 1.13304 11.1667 1.70833 11.1667C2.28363 11.1667 2.75 11.633 2.75 12.2083C2.75 12.7836 2.28363 13.25 1.70833 13.25ZM6.29167 2.83333C5.71637 2.83333 5.25 2.36696 5.25 1.79166C5.25 1.21637 5.71637 0.749995 6.29167 0.749995C6.86696 0.749995 7.33333 1.21637 7.33333 1.79166C7.33333 2.36696 6.86696 2.83333 6.29167 2.83333ZM1.70833 2.83333C1.13304 2.83333 0.666667 2.36696 0.666667 1.79166C0.666667 1.21637 1.13304 0.749995 1.70833 0.749995C2.28363 0.749995 2.75 1.21637 2.75 1.79166C2.75 2.36696 2.28363 2.83333 1.70833 2.83333Z" fill="#858585" stroke="#858585" strokeWidth="0.833333" />
-//                         </svg>
-//                       </span>
-//                       <Switch
-//                         id={index}
-//                         onChange={() => toggleStatus(index)}
-//                         checked={item.status} />
-//                     </button>
-//                     <button onClick={() => setViewDetails(true)} className='!text-[#0A0D14] text-sm font-medium !leading-[1.4] tracking-[-0.084px] hover:!text-primary'>{item.name}</button>
-//                   </div>
-//                 </td>
-//                 <td>{item.date}</td>
-//                 <td className='md:!py-5'>
-//                   <div className="flex items-center justify-center gap-3">
-//                     <button className='text-primary hover:text-primary p-2 -m-2' onClick={() => duplicateData(item, index)}>{copyIcon}</button>
-//                     <button onClick={() => { setActiveData(item); setDeleteAlert(true) }} className='text-gray hover:text-primary p-2 -m-2'>{deleteIcon}</button>
-//                   </div>
+//             {/* FIX 1 & 3: Use filteredItems instead of items */}
+//             {filteredItems.length > 0 ? (
+//               filteredItems.map((item, index) => (
+//                 <tr
+//                   draggable
+//                   onDragStart={() => handleDragStart(index)}
+//                   onDragOver={(e) => handleDragOver(e, index)}
+//                   onDrop={() => handleDrop(index)}
+//                   key={index}>
+//                   <td className='md:!py-5'>
+//                     <div className='flex items-center gap-4 lg:gap-5 xl:gap-7'>
+//                       <button className='flex items-center gap-2 lg:gap-3 !pr-0 cursor-move'>
+//                         <span>
+//                           <svg width="8" height="14" viewBox="0 0 8 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+//                             <path d="M2.75 6.91666V6.99999C2.75 7.57529 2.28363 8.04166 1.70833 8.04166C1.13304 8.04166 0.666667 7.57529 0.666667 6.99999V6.91666C0.666667 6.34136 1.13304 5.87499 1.70833 5.87499C2.28363 5.87499 2.75 6.34136 2.75 6.91666ZM7.33333 6.91666V6.99999C7.33333 7.57529 6.86696 8.04166 6.29167 8.04166C5.71637 8.04166 5.25 7.57529 5.25 6.99999V6.91666C5.25 6.34136 5.71637 5.87499 6.29167 5.87499C6.86696 5.87499 7.33333 6.34136 7.33333 6.91666ZM6.29167 13.25C5.71637 13.25 5.25 12.7836 5.25 12.2083C5.25 11.633 5.71637 11.1667 6.29167 11.1667C6.86696 11.1667 7.33333 11.633 7.33333 12.2083C7.33333 12.7836 6.86696 13.25 6.29167 13.25ZM1.70833 13.25C1.13304 13.25 0.666667 12.7836 0.666667 12.2083C0.666667 11.633 1.13304 11.1667 1.70833 11.1667C2.28363 11.1667 2.75 11.633 2.75 12.2083C2.75 12.7836 2.28363 13.25 1.70833 13.25ZM6.29167 2.83333C5.71637 2.83333 5.25 2.36696 5.25 1.79166C5.25 1.21637 5.71637 0.749995 6.29167 0.749995C6.86696 0.749995 7.33333 1.21637 7.33333 1.79166C7.33333 2.36696 6.86696 2.83333 6.29167 2.83333ZM1.70833 2.83333C1.13304 2.83333 0.666667 2.36696 0.666667 1.79166C0.666667 1.21637 1.13304 0.749995 1.70833 0.749995C2.28363 0.749995 2.75 1.21637 2.75 1.79166C2.75 2.36696 2.28363 2.83333 1.70833 2.83333Z" fill="#858585" stroke="#858585" strokeWidth="0.833333" />
+//                           </svg>
+//                         </span>
+//                         <Switch
+//                           id={index}
+//                           onChange={() => toggleStatus(index)}
+//                           checked={item.status} />
+//                       </button>
+//                       <button onClick={() => setViewDetails(true)} className='!text-[#0A0D14] text-sm font-medium !leading-[1.4] tracking-[-0.084px] hover:!text-primary'>{item.name}</button>
+//                     </div>
+//                   </td>
+//                   <td>{item.date}</td>
+//                   <td className='md:!py-5'>
+//                     <div className="flex items-center justify-center gap-3">
+//                       <button className='text-primary hover:text-primary p-2 -m-2' onClick={() => duplicateData(item, index)}>{copyIcon}</button>
+//                       <button onClick={() => { setActiveData(item); setDeleteAlert(true) }} className='text-gray hover:text-primary p-2 -m-2'>{deleteIcon}</button>
+//                     </div>
+//                   </td>
+//                 </tr>
+//               ))
+//             ) : (
+//               <tr>
+//                 <td colSpan={tableHead.length} className="text-center py-8">
+//                   <p className="text-gray">No triggers found matching your search{selectedStore && selectedStore !== 'all' ? ' and store filter' : ''}.</p>
 //                 </td>
 //               </tr>
-//             ))}
+//             )}
 //           </tbody>
 //         </table>
 //       </div>

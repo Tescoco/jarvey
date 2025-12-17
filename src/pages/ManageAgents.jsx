@@ -8,7 +8,6 @@ import Modal from '../components/Modal'
 import Input from '../components/Input'
 import Dropdown from '../components/Dropdown';
 import Checkbox from '../components/Checkbox';
-
 import img1 from '../assets/img/manager/table-img-01.png'
 import img2 from '../assets/img/manager/table-img-2.png'
 import img3 from '../assets/img/manager/table-img-3.png'
@@ -202,19 +201,31 @@ export default function ManageAgents() {
     };
 
     // FIX 4: Handle status toggle
-    const handleStatusToggle = (index) => {
-        const updated = [...tableData];
-        updated[index].status = !updated[index].status;
+    const handleStatusToggle = (item) => {
+        const updated = tableData.map(agent =>
+            agent === item ? { ...agent, status: !agent.status } : agent
+        );
         setTableData(updated);
-        handleSearch(searchQuery); // Re-filter if search is active
+
+        // Update filtered data too
+        const updatedFiltered = filteredData.map(agent =>
+            agent === item ? { ...agent, status: !agent.status } : agent
+        );
+        setFilteredData(updatedFiltered);
     };
 
     // FIX 5: Handle best agent toggle
-    const handleBestAgentToggle = (index) => {
-        const updated = [...tableData];
-        updated[index].bestAgent = !updated[index].bestAgent;
+    const handleBestAgentToggle = (item) => {
+        const updated = tableData.map(agent =>
+            agent === item ? { ...agent, bestAgent: !agent.bestAgent } : agent
+        );
         setTableData(updated);
-        handleSearch(searchQuery);
+
+        // Update filtered data too
+        const updatedFiltered = filteredData.map(agent =>
+            agent === item ? { ...agent, bestAgent: !agent.bestAgent } : agent
+        );
+        setFilteredData(updatedFiltered);
     };
 
     // FIX 6: Handle permission checkbox toggle
@@ -257,10 +268,13 @@ export default function ManageAgents() {
 
     // FIX 8: Handle delete agent
     const handleDelete = (agent) => {
-        const updated = tableData.filter(a => a !== agent);
-        setTableData(updated);
-        handleSearch(searchQuery);
+        const updatedTable = tableData.filter(a => a !== agent);
+        const updatedFiltered = filteredData.filter(a => a !== agent);
+
+        setTableData(updatedTable);
+        setFilteredData(updatedFiltered);
         setDeleteAlert(false);
+        alert('Agent deleted successfully!');
     };
 
     // FIX 9: Handle create new agent
@@ -344,8 +358,8 @@ export default function ManageAgents() {
                                         </td>
                                         <td className='!font-medium !text-heading'>{item.Email}</td>
                                         <td className='!font-medium !text-heading'>{item.Time}</td>
-                                        <td>
-                                            {/* FIX: Add onChange handler for status */}
+
+                                        {/* <td>
                                             <Switch
                                                 id={`${item.name}_status_${index}`}
                                                 checked={item.status}
@@ -353,13 +367,30 @@ export default function ManageAgents() {
                                             />
                                         </td>
                                         <td>
-                                            {/* FIX: Add onChange handler for best agent */}
                                             <Switch
                                                 id={`${item.name}_best_${index}`}
                                                 checked={item.bestAgent}
                                                 onChange={() => handleBestAgentToggle(tableData.indexOf(item))}
                                             />
+                                        </td> */}
+
+                                        <td>
+                                            {/* FIX: Pass item directly instead of index */}
+                                            <Switch
+                                                id={`${item.name}_status_${index}`}
+                                                checked={item.status}
+                                                onChange={() => handleStatusToggle(item)}
+                                            />
                                         </td>
+                                        <td>
+                                            {/* FIX: Pass item directly instead of index */}
+                                            <Switch
+                                                id={`${item.name}_best_${index}`}
+                                                checked={item.bestAgent}
+                                                onChange={() => handleBestAgentToggle(item)}
+                                            />
+                                        </td>
+
                                         <td>
                                             {/* FIX: Add onClick handlers to action buttons */}
                                             <div className="flex items-center justify-end gap-3">

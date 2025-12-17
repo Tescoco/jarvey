@@ -7,11 +7,18 @@ import TableFilter from '../../components/TableFilter'
 
 export default function NewTicket() {
   const [activeTab2, setActiveTab2] = useState("Customer Details")
-  // FIX 1: Added missing chat state for text editor
   const [chat, setChat] = useState(false)
   const [editorContent, setEditorContent] = useState("")
-  // FIX 2: Added missing search state and handler
   const [searchQuery, setSearchQuery] = useState("")
+  const [subject, setSubject] = useState("")
+  const [tags, setTags] = useState([])
+  const [showTagInput, setShowTagInput] = useState(false)
+  const [newTag, setNewTag] = useState("")
+  const [assignedTo, setAssignedTo] = useState("Unassigned")
+  const [showAssignModal, setShowAssignModal] = useState(false)
+  const [contactReason, setContactReason] = useState("")
+  const [product, setProduct] = useState("")
+  const [resolution, setResolution] = useState("")
 
   const stores = [
     { name: 'stores-1' },
@@ -31,11 +38,13 @@ export default function NewTicket() {
     { name: 'Search customer 2' },
     { name: 'Search customer 3' },
   ]
+
   const JarveySupport = [
     { name: 'Jarvey Support 1' },
     { name: 'Jarvey Support 2' },
     { name: 'Jarvey Support 3' },
   ]
+
   const textEditor = [
     { icon: (<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4.78369 10H11.0418C12.8828 10 14.3752 8.50762 14.3752 6.66667V6.45833C14.3752 4.61738 12.8828 3.125 11.0418 3.125H6.45036C5.52988 3.125 4.78369 3.87119 4.78369 4.79167V10ZM4.78369 10V15.2083C4.78369 16.1288 5.52988 16.875 6.45036 16.875H10.4168M10.8337 16.875H11.8754C13.7163 16.875 15.2087 15.3826 15.2087 13.5417V13.3333C15.2087 11.4924 13.7163 10 11.8754 10H10.8337" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.25" strokeLinecap="square" strokeLinejoin="round" /></svg>), label: 'Bold' },
     { icon: (<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.12516 3.125L12.0835 3.125M16.0418 3.125L12.0835 3.125M12.0835 3.125L7.91683 16.875M7.91683 16.875H3.9585M7.91683 16.875H11.8836" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" /></svg>), label: 'Italic' },
@@ -47,6 +56,92 @@ export default function NewTicket() {
     setSearchQuery(query)
     console.log("Searching for:", query)
   }
+
+  // Text formatting handlers
+  const formatText = (format) => {
+    // This is a basic implementation - for rich text you'd need a proper editor library
+    const textarea = document.querySelector('textarea');
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = editorContent.substring(start, end);
+
+    let formattedText = selectedText;
+    switch (format) {
+      case 'bold':
+        formattedText = `**${selectedText}**`;
+        break;
+      case 'italic':
+        formattedText = `*${selectedText}*`;
+        break;
+      case 'underline':
+        formattedText = `__${selectedText}__`;
+        break;
+    }
+
+    const newContent = editorContent.substring(0, start) + formattedText + editorContent.substring(end);
+    setEditorContent(newContent);
+  };
+
+  // Tag management
+  const handleAddTag = () => {
+    if (newTag.trim()) {
+      setTags([...tags, newTag.trim()]);
+      setNewTag("");
+      setShowTagInput(false);
+    }
+  };
+
+  const removeTag = (indexToRemove) => {
+    setTags(tags.filter((_, index) => index !== indexToRemove));
+  };
+
+  // Assignment handler
+  const handleAssign = (person) => {
+    setAssignedTo(person);
+    setShowAssignModal(false);
+  };
+
+  // Predefined response handler
+  const insertPredefinedResponse = (response) => {
+    setEditorContent(prev => prev + (prev ? '\n\n' : '') + response);
+    setChat(true);
+  };
+
+  // Send handlers
+  const handleSend = () => {
+    if (!subject.trim() || !editorContent.trim()) {
+      alert('Please fill in subject and message');
+      return;
+    }
+
+    const ticketData = {
+      subject,
+      content: editorContent,
+      tags,
+      assignedTo,
+      contactReason,
+      product,
+      resolution,
+      timestamp: new Date().toISOString()
+    };
+
+    console.log('Sending ticket:', ticketData);
+    alert('Ticket sent successfully!');
+
+    // Reset form
+    setSubject("");
+    setEditorContent("");
+    setTags([]);
+    setChat(false);
+  };
+
+  const handleSendAndClose = () => {
+    handleSend();
+    // Navigate back or close window
+    window.history.back();
+  };
 
   // Sample data for tabs
   const customerData = {
@@ -68,15 +163,104 @@ export default function NewTicket() {
           <div className="mb-4 md:mb-5 xl:mb-6">
             <div className="mb-3">
               <h4 className='text-lg md:text-xl xl:text-2xl mb-4 md:mb-5 xl:mb-6'>Create ticket</h4>
-              <Input className='mb-0' label="Subject" required />
+              {/* <Input className='mb-0' label="Subject" required /> */}
+              <Input
+                className='mb-0'
+                label="Subject"
+                required
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+              />
             </div>
-            <div className="flex items-center justify-between flex-wrap md:flex-nowrap gap-2 md:gap-0">
+
+            {/* <div className="flex items-center justify-between flex-wrap md:flex-nowrap gap-2 md:gap-0">
               <button className='text-primary font-medium flex items-center gap-1 underline'>Add tags</button>
               <button className='text-primary font-medium flex items-center gap-1 underline'>Unassigned</button>
               <button className='font-medium text-xs flex items-center gap-1'>Contact Reason <span className='bg-primary size-5 rounded-[5px] flex items-center justify-center'><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1.5625V5M5 5V8.4375M5 5H1.5625M5 5H8.4375" stroke="white" strokeLinecap="round" strokeLinejoin="round" /></svg></span></button>
               <button className='font-medium text-xs flex items-center gap-1'>Product <span className='bg-primary size-5 rounded-[5px] flex items-center justify-center'><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1.5625V5M5 5V8.4375M5 5H1.5625M5 5H8.4375" stroke="white" strokeLinecap="round" strokeLinejoin="round" /></svg></span></button>
               <button className='font-medium text-xs flex items-center gap-1'>Resolution <span className='bg-primary size-5 rounded-[5px] flex items-center justify-center'><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1.5625V5M5 5V8.4375M5 5H1.5625M5 5H8.4375" stroke="white" strokeLinecap="round" strokeLinejoin="round" /></svg></span></button>
+            </div> */}
+
+            <div className="flex items-center justify-between flex-wrap md:flex-nowrap gap-2 md:gap-0">
+              <button
+                onClick={() => setShowTagInput(!showTagInput)}
+                className='text-primary font-medium flex items-center gap-1 underline'
+              >
+                Add tags
+              </button>
+
+              <button
+                onClick={() => setShowAssignModal(true)}
+                className='text-primary font-medium flex items-center gap-1 underline'
+              >
+                {assignedTo}
+              </button>
+
+              <button
+                onClick={() => setContactReason(prompt('Enter contact reason:') || contactReason)}
+                className='font-medium text-xs flex items-center gap-1'
+              >
+                Contact Reason
+                <span className='bg-primary size-5 rounded-[5px] flex items-center justify-center'>
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M5 1.5625V5M5 5V8.4375M5 5H1.5625M5 5H8.4375" stroke="white" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+              </button>
+
+              <button
+                onClick={() => setProduct(prompt('Enter product:') || product)}
+                className='font-medium text-xs flex items-center gap-1'
+              >
+                Product
+                <span className='bg-primary size-5 rounded-[5px] flex items-center justify-center'>
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M5 1.5625V5M5 5V8.4375M5 5H1.5625M5 5H8.4375" stroke="white" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+              </button>
+
+              <button
+                onClick={() => setResolution(prompt('Enter resolution:') || resolution)}
+                className='font-medium text-xs flex items-center gap-1'
+              >
+                Resolution
+                <span className='bg-primary size-5 rounded-[5px] flex items-center justify-center'>
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M5 1.5625V5M5 5V8.4375M5 5H1.5625M5 5H8.4375" stroke="white" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+              </button>
             </div>
+
+            {/* Tag display and input */}
+            {tags.length > 0 && (
+              <div className="flex items-center gap-2 flex-wrap mt-2">
+                {tags.map((tag, index) => (
+                  <span key={index} className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs flex items-center gap-2">
+                    {tag}
+                    <button onClick={() => removeTag(index)} className="hover:text-red-500">×</button>
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {showTagInput && (
+              <div className="flex items-center gap-2 mt-2">
+                <input
+                  type="text"
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleAddTag()}
+                  placeholder="Enter tag name"
+                  className="px-3 py-1 border border-stroke rounded text-sm"
+                  autoFocus
+                />
+                <button onClick={handleAddTag} className="btn !min-w-[unset] !px-3 !py-1 !h-auto text-xs">Add</button>
+                <button onClick={() => setShowTagInput(false)} className="text-gray hover:text-red-500">Cancel</button>
+              </div>
+            )}
+
           </div>
           <div className="flex flex-col justify-between max-h-[calc(100%-100px)] overflow-y-auto">
             <div className="p-4 pt-3 bg-primary/5 border border-stroke rounded-xl">
@@ -108,22 +292,75 @@ export default function NewTicket() {
 
               <div className="flex flex-col gap-2">
                 <p>Suggest Predefined Responses</p>
-                <div className="flex items-center gap-2">
+
+                {/* <div className="flex items-center gap-2">
                   <button className='btn !text-gray !rounded !bg-white !h-9 text-xs md:!text-sm'>Generic: How can i help?</button>
                   <button className='btn !text-gray !rounded !bg-white !h-9 text-xs md:!text-sm'>Generic:Sign off</button>
+                </div> */}
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => insertPredefinedResponse('How can I help you today?')}
+                    className='btn !text-gray !rounded !bg-white !h-9 text-xs md:!text-sm'
+                  >
+                    Generic: How can i help?
+                  </button>
+                  <button
+                    onClick={() => insertPredefinedResponse('Thank you for contacting us. Have a great day!')}
+                    className='btn !text-gray !rounded !bg-white !h-9 text-xs md:!text-sm'
+                  >
+                    Generic:Sign off
+                  </button>
                 </div>
-                <ul className="flex items-center gap-2 py-2 flex-wrap">
+
+                {/* <ul className="flex items-center gap-2 py-2 flex-wrap">
                   {textEditor.map((item, index) => (
                     <li key={index} title={item.label}>
                       <button className='text-[#111111]/50 hover:text-primary'>{item.icon}</button>
                     </li>
                   ))}
+                </ul> */}
+
+                <ul className="flex items-center gap-2 py-2 flex-wrap">
+                  <li title="Bold">
+                    <button onClick={() => formatText('bold')} className='text-[#111111]/50 hover:text-primary'>
+                      {textEditor[0].icon}
+                    </button>
+                  </li>
+                  <li title="Italic">
+                    <button onClick={() => formatText('italic')} className='text-[#111111]/50 hover:text-primary'>
+                      {textEditor[1].icon}
+                    </button>
+                  </li>
+                  <li title="Underline">
+                    <button onClick={() => formatText('underline')} className='text-[#111111]/50 hover:text-primary'>
+                      {textEditor[2].icon}
+                    </button>
+                  </li>
                 </ul>
+
               </div>
-              <div className="flex items-center justify-end gap-2 mt-4 lg:mt-5 xl:mt-6">
+
+              {/* <div className="flex items-center justify-end gap-2 mt-4 lg:mt-5 xl:mt-6">
                 <button className="btn !border-primary !text-primary hover:!text-white !min-w-[unset] !px-4">Send & Close</button>
                 <button className="btn !min-w-[63px] !px-0 !bg-primary !text-white">Send</button>
+              </div> */}
+
+              <div className="flex items-center justify-end gap-2 mt-4 lg:mt-5 xl:mt-6">
+                <button
+                  onClick={handleSendAndClose}
+                  className="btn !border-primary !text-primary hover:!text-white !min-w-[unset] !px-4"
+                >
+                  Send & Close
+                </button>
+                <button
+                  onClick={handleSend}
+                  className="btn !min-w-[63px] !px-0 !bg-primary !text-white"
+                >
+                  Send
+                </button>
               </div>
+
             </div>
           </div>
         </div>
@@ -229,6 +466,36 @@ export default function NewTicket() {
           </div>
         </div>
       </div>
+
+      {/* Assignment Modal */}
+      {showAssignModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold mb-4">Assign Ticket</h3>
+            <div className="space-y-2">
+              {['Unassigned', 'John Doe', 'Jane Smith', 'Support Team'].map((person) => (
+                <button
+                  key={person}
+                  onClick={() => handleAssign(person)}
+                  className={`w-full text-left px-4 py-2 rounded-lg border transition-colors ${assignedTo === person
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-stroke hover:bg-gray-50'
+                    }`}
+                >
+                  {person}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setShowAssignModal(false)}
+              className="w-full mt-4 btn !border-stroke"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }
