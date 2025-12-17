@@ -146,7 +146,18 @@ export default function Setting() {
                 </textarea>
             </div>
 
-            <button className="btn bg-prim min-w-[77px]">Update</button>
+            <button
+                onClick={() => {
+                    console.log('Updating Settings...');
+                    // Add your API call or state update logic here
+                    alert('Settings updated successfully!');
+                }}
+                className="btn bg-prim min-w-[77px] text-white hover:opacity-90"
+            >
+                Update
+            </button>
+
+            {/* <button className="btn bg-prim min-w-[77px]">Update</button> */}
         </div>
     );
 }
