@@ -23,7 +23,12 @@ export default function ChatSettings() {
 
   const [activeTab, setActiveTab] = useState(tabBtns[0]);
   const [chatTab, setChatTab] = useState("During Business hours");
-  const [isInstalled, setIsInstalled] = useState(false);
+  const [installedMethods, setInstalledMethods] = useState({
+    shopify: false,
+    checkout: false,
+    manual: false,
+  });
+  // const [isInstalled, setIsInstalled] = useState(false);
 
   const [chatConfig, setChatConfig] = useState({
     chatTitle: "Chat Title",
@@ -71,8 +76,8 @@ export default function ChatSettings() {
               key={item}
               onClick={() => setActiveTab(item)}
               className={`grow text-sm px-5 pb-3 border-b ${activeTab === item
-                  ? "border-btn text-btn"
-                  : "border-transparent text-heading"
+                ? "border-btn text-btn"
+                : "border-transparent text-heading"
                 }`}
             >
               {item}
@@ -83,14 +88,14 @@ export default function ChatSettings() {
         <div className="flex flex-wrap gap-6">
           <div
             className={`w-full xl:w-[calc(100%-24px-var(--layout-right,350px))] ${activeTab === "Appearances" || activeTab === "Preferences"
-                ? ""
-                : "!w-full"
+              ? ""
+              : "!w-full"
               }`}
           >
             <div
               className={`${!["Languages", "Campaigns", "Installation"].includes(activeTab)
-                  ? c_border
-                  : ""
+                ? c_border
+                : ""
                 }`}
             >
               <div className="md:h-[calc(100vh-175px)] overflow-y-auto pr-4 lg:pr-5">
@@ -106,14 +111,23 @@ export default function ChatSettings() {
                 {activeTab === "Campaigns" && <Campaigns />}
 
                 {activeTab === "Installation" && (
+                  // <Installation
+                  //   isInstalled={isInstalled}
+                  //   onInstall={() => setIsInstalled(true)}
+                  // />
+
                   <Installation
-                    isInstalled={isInstalled}
-                    onInstall={() => setIsInstalled(true)}
+                    installedMethods={installedMethods}
+                    onInstall={(method) =>
+                      setInstalledMethods(prev => ({ ...prev, [method]: true }))
+                    }
                   />
+
                 )}
 
                 {activeTab === "Automate" && (
-                  <Automate isInstalled={isInstalled} />
+                  <Automate isInstalled={Object.values(installedMethods).some(v => v)} />
+                  // <Automate isInstalled={isInstalled} />
                 )}
               </div>
             </div>
@@ -139,8 +153,8 @@ export default function ChatSettings() {
                         key={item}
                         onClick={() => setChatTab(item)}
                         className={`btn px-0 grow ${chatTab === item
-                            ? "!border-primary !text-primary"
-                            : ""
+                          ? "!border-primary !text-primary"
+                          : ""
                           } ${index === 0 ? "rounded-r-none" : "rounded-l-none"}`}
                       >
                         {item}

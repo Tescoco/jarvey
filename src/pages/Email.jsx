@@ -605,14 +605,22 @@ export default function Email() {
                   </ul>
 
                   {/* Editable Signature Area */}
-                  <div
+                  {/* <div
                     contentEditable
                     className="min-h-[80px] p-2 outline-none focus:ring-2 focus:ring-primary/20 rounded text-sm"
                     onInput={(e) => setSignature(e.currentTarget.textContent)}
                     suppressContentEditableWarning
                   >
                     {signature || 'Type your signature here...'}
-                  </div>
+                  </div> */}
+                  <textarea
+                    className="min-h-[80px] w-full p-2 outline-none focus:ring-2 focus:ring-primary/20 rounded text-sm border-0 resize-none"
+                    placeholder="Type your signature here..."
+                    value={signature}
+                    onChange={(e) => setSignature(e.target.value)}
+                    rows={4}
+                  />
+                  
                 </div>
               </div>
             </div>

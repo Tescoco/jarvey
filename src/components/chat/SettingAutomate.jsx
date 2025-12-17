@@ -131,7 +131,6 @@ export default function SettingAutomate({ isInstalled }) {
   );
 }
 
-/* ==================== COMPONENTS ==================== */
 
 function SectionHeader({ title, description, onClick }) {
   return (
@@ -246,7 +245,6 @@ function Modal({ onClose }) {
   );
 }
 
-/* ==================== DATA ==================== */
 
 const subItems = [
   { img: img2, name: "Track", path: "#" },
