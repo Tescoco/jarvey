@@ -25,40 +25,72 @@ export default function Outgoing() {
     keywords: ''
   });
 
-  const tableData = [
-    {
-      name: 'SMTP',
-      status: 'active',
-      default: true,
-    },
-    {
-      name: 'Gmail',
-      status: 'active',
-      default: true,
-    },
-    {
-      name: 'SMTP',
-      status: 'active',
-      default: true,
-    },
-    {
-      name: 'Gmail',
-      status: 'active',
-      default: true,
-    },
-    {
-      name: 'SMTP',
-      status: 'active',
-      default: true,
-    },
-    {
-      name: 'Gmail',
-      status: 'active',
-      default: true,
-    },
-  ]
+  // const tableData = [
+  //   {
+  //     name: 'SMTP',
+  //     status: 'active',
+  //     default: true,
+  //   },
+  //   {
+  //     name: 'Gmail',
+  //     status: 'active',
+  //     default: true,
+  //   },
+  //   {
+  //     name: 'SMTP',
+  //     status: 'active',
+  //     default: true,
+  //   },
+  //   {
+  //     name: 'Gmail',
+  //     status: 'active',
+  //     default: true,
+  //   },
+  //   {
+  //     name: 'SMTP',
+  //     status: 'active',
+  //     default: true,
+  //   },
+  //   {
+  //     name: 'Gmail',
+  //     status: 'active',
+  //     default: true,
+  //   },
+  // ]
 
   // Filter table data based on search query
+
+
+  const [tableData, setTableData] = useState([
+    {
+      name: 'SMTP',
+      status: 'active',
+      default: true,
+      product: 'SMTP',
+      host: 'smtp.example.com',
+      port: '587',
+      encryption: 'TLS',
+      username: 'user@example.com',
+      password: '••••••••',
+      protocol: 'SMTP',
+      keywords: 'support'
+    },
+    {
+      name: 'Gmail',
+      status: 'active',
+      default: true,
+      product: 'Gmail',
+      host: 'smtp.gmail.com',
+      port: '465',
+      encryption: 'SSL',
+      username: 'gmail@example.com',
+      password: '••••••••',
+      protocol: 'SMTP',
+      keywords: 'help'
+    },
+    // Add complete data for all items
+  ]);
+
   const filteredData = tableData.filter(item =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -89,8 +121,19 @@ export default function Outgoing() {
   };
 
   const handleEditSubmit = () => {
-    console.log('Saving gateway changes:', editGateway);
-    // Add your API call here
+    // Validate required fields
+    if (!editGateway.name || !editGateway.host || !editGateway.port) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    // Update the specific item in tableData
+    setTableData(prev => prev.map((item, idx) =>
+      idx === editingItem.index
+        ? { ...item, ...editGateway }
+        : item
+    ));
+
     setShowEditModal(false);
     alert('Gateway updated successfully!');
   };

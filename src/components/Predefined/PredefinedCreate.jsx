@@ -51,6 +51,14 @@ export default function PredefinedCreate() {
   // FIX: Add search state
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredCards, setFilteredCards] = useState(CardItems);
+  const [sortBy, setSortBy] = useState('Sort by');
+  const [showCustomModal, setShowCustomModal] = useState(false);
+  const [customTemplate, setCustomTemplate] = useState({
+    name: '',
+    content: '',
+    tags: []
+  });
+  const [newTag, setNewTag] = useState('');
 
   // FIX: Handle search
   const handleSearch = (query) => {
@@ -66,6 +74,82 @@ export default function PredefinedCreate() {
     );
     setFilteredCards(filtered);
   };
+
+
+  // Add sort handler
+  const handleSort = (sortOption) => {
+    setSortBy(sortOption);
+
+    let sorted = [...filteredCards];
+
+    switch (sortOption) {
+      case 'Sort by Name':
+        sorted.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case 'Sort by Store':
+        // Since your cards don't have store property, sort by tags
+        sorted.sort((a, b) => a.tags[0].localeCompare(b.tags[0]));
+        break;
+      case 'Sort by Language':
+        // You can customize this based on your needs
+        sorted.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      default:
+        sorted = CardItems;
+    }
+
+    setFilteredCards(sorted);
+  };
+
+
+  const handleCreateTemplate = () => {
+    if (!customTemplate.name.trim()) {
+      alert('Please enter a template name');
+      return;
+    }
+
+    if (!customTemplate.content.trim()) {
+      alert('Please enter template content');
+      return;
+    }
+
+    // Create new template object
+    const newTemplate = {
+      title: customTemplate.name,
+      tags: customTemplate.tags.length > 0 ? customTemplate.tags : ['CUSTOM'],
+      value: customTemplate.tags.length > 2 ? `${customTemplate.tags.length - 2}` : null,
+    };
+
+    // Add to CardItems and filteredCards
+    const updatedItems = [...CardItems, newTemplate];
+    CardItems.push(newTemplate); // Update original array
+    setFilteredCards(updatedItems);
+
+    // Reset form and close modal
+    setCustomTemplate({ name: '', content: '', tags: [] });
+    setNewTag('');
+    setShowCustomModal(false);
+
+    alert('Custom template created successfully!');
+  };
+
+  const handleAddTag = () => {
+    if (newTag.trim() && !customTemplate.tags.includes(newTag.trim().toUpperCase())) {
+      setCustomTemplate(prev => ({
+        ...prev,
+        tags: [...prev.tags, newTag.trim().toUpperCase()]
+      }));
+      setNewTag('');
+    }
+  };
+
+  const handleRemoveTag = (tagToRemove) => {
+    setCustomTemplate(prev => ({
+      ...prev,
+      tags: prev.tags.filter(tag => tag !== tagToRemove)
+    }));
+  };
+
 
   return (
     <div>
@@ -93,13 +177,20 @@ export default function PredefinedCreate() {
               searchClass="min-w-[220px]"
               onSearch={handleSearch}
               searchValue={searchQuery}
+              onSort={handleSort}
             />
-            <Link
+            {/* <Link
               to="/app/predefined-update"
               className="btn gap-2 flex items-center px-4 shadow-[0px_1px_2px_0px_rgba(90,54, 91,0.48), 0px_0px_0px_1px_#6E3FF3] border-primary text-primary"
             >
               {plus} Custom template
-            </Link>
+            </Link> */}
+            <button
+              onClick={() => setShowCustomModal(true)}
+              className="btn gap-2 flex items-center px-4 shadow-[0px_1px_2px_0px_rgba(90,54,91,0.48),_0px_0px_0px_1px_#6E3FF3] border-primary text-primary"
+            >
+              {plus} Custom template
+            </button>
           </div>
         </div>
         <div>
@@ -150,10 +241,102 @@ export default function PredefinedCreate() {
           )}
         </div>
       </div>
+
+      {showCustomModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-semibold mb-4">Create Custom Template</h3>
+
+            {/* Template Name */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">Template Name *</label>
+              <input
+                type="text"
+                placeholder="e.g., Order Confirmation"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                value={customTemplate.name}
+                onChange={(e) => setCustomTemplate(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+
+            {/* Template Content */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">Template Content *</label>
+              <textarea
+                placeholder="Enter your template content here..."
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary min-h-[150px] resize-none"
+                value={customTemplate.content}
+                onChange={(e) => setCustomTemplate(prev => ({ ...prev, content: e.target.value }))}
+              />
+            </div>
+
+            {/* Action Tags */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">Action Tags</label>
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  placeholder="e.g., SEND EMAIL"
+                  className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleAddTag()}
+                />
+                <button
+                  onClick={handleAddTag}
+                  className="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200"
+                >
+                  Add
+                </button>
+              </div>
+
+              {/* Display Tags */}
+              {customTemplate.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {customTemplate.tags.map((tag, idx) => (
+                    <span
+                      key={idx}
+                      className="bg-[#F6F8FA] text-[#0A0D14] text-xs font-semibold rounded-lg py-1 px-3 flex items-center gap-2"
+                    >
+                      {tag}
+                      <button
+                        onClick={() => handleRemoveTag(tag)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Buttons */}
+            <div className="flex gap-3 justify-end pt-4 border-t">
+              <button
+                onClick={() => {
+                  setShowCustomModal(false);
+                  setCustomTemplate({ name: '', content: '', tags: [] });
+                  setNewTag('');
+                }}
+                className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateTemplate}
+                className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+              >
+                Create Template
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
     </div>
   );
 }
-
 
 // import React from "react";
 // import Top from "../../layouts/Top";

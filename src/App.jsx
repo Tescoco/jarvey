@@ -138,6 +138,7 @@ import Upgrade from "./pages/home/Upgrade";
 import FavoriteApps from "./pages/home/FavoriteApps";
 import Strategies from "./pages/home/Strategies";
 import ImportData from "./pages/admin/ImportData";
+import { TicketFieldsProvider } from "./contexts/TicketFieldsContext";
 
 // Super Admin
 
@@ -738,7 +739,9 @@ export default function App() {
   return (
     <AvailabilityProvider>
       <GlobalDismissProvider>
-        <RouterProvider router={router} />
+        <TicketFieldsProvider>
+          <RouterProvider router={router} />
+        </TicketFieldsProvider>
       </GlobalDismissProvider>
     </AvailabilityProvider>
   );

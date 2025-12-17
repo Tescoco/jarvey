@@ -42,30 +42,62 @@ export default function Incoming() {
     keywords: ''
   });
 
-  const tableData = [
-    {
-      name: 'SMTP',
-      status: 'active',
-      default: true,
-    },
-    {
-      name: 'SMTP',
-      status: 'active',
-      default: false,
-    },
-    {
-      name: 'SMTP',
-      status: 'active',
-      default: true,
-    },
-    {
-      name: 'SMTP',
-      status: 'active',
-      default: false,
-    },
-  ]
+  // const tableData = [
+  //   {
+  //     name: 'SMTP',
+  //     status: 'active',
+  //     default: true,
+  //   },
+  //   {
+  //     name: 'SMTP',
+  //     status: 'active',
+  //     default: false,
+  //   },
+  //   {
+  //     name: 'SMTP',
+  //     status: 'active',
+  //     default: true,
+  //   },
+  //   {
+  //     name: 'SMTP',
+  //     status: 'active',
+  //     default: false,
+  //   },
+  // ]
 
   // Filter table data based on search query
+
+
+  const [tableData, setTableData] = useState([
+    {
+      name: 'SMTP',
+      status: 'active',
+      default: true,
+      product: 'SMTP',
+      host: 'smtp.example.com',
+      port: '587',
+      encryption: 'TLS',
+      username: 'user@example.com',
+      password: '••••••••',
+      protocol: 'SMTP',
+      keywords: 'support, help'
+    },
+    {
+      name: 'SMTP',
+      status: 'active',
+      default: false,
+      product: 'Gmail',
+      host: 'smtp.gmail.com',
+      port: '465',
+      encryption: 'SSL',
+      username: 'gmail@example.com',
+      password: '••••••••',
+      protocol: 'SMTP',
+      keywords: 'inquiry'
+    },
+    // Add more complete data for other items
+  ]);
+
   const filteredData = tableData.filter(item =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -95,8 +127,19 @@ export default function Incoming() {
   };
 
   const handleEditSubmit = () => {
-    console.log('Saving gateway changes:', editGateway);
-    // Add your API call here
+    // Validate required fields
+    if (!editGateway.name || !editGateway.host || !editGateway.port) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    // Update the specific item in tableData
+    setTableData(prev => prev.map((item, idx) =>
+      idx === editingItem.index
+        ? { ...item, ...editGateway }
+        : item
+    ));
+
     setShowEditModal(false);
     alert('Gateway updated successfully!');
   };
@@ -120,8 +163,20 @@ export default function Incoming() {
 
   // Handle form submission
   const handleAddSubmit = () => {
-    console.log('Adding new gateway:', newGateway);
-    // Add your API call or state update logic here
+    // Validate required fields
+    if (!newGateway.name || !newGateway.product || !newGateway.host || !newGateway.port) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    // Add new gateway to tableData
+    const newItem = {
+      ...newGateway,
+      status: 'active',
+      default: false
+    };
+
+    setTableData(prev => [...prev, newItem]);
 
     // Reset form and close modal
     setNewGateway({
@@ -136,8 +191,6 @@ export default function Incoming() {
       keywords: ''
     });
     setShowAddModal(false);
-
-    // Show success message (you can use a toast notification here)
     alert('Gateway added successfully!');
   };
 

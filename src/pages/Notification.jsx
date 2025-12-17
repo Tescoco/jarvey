@@ -115,7 +115,7 @@ export default function Notification() {
                   </span>
                 )}
               </h4>
-              <Dropdown
+              {/* <Dropdown
                 info=""
                 className="!mb-0 z-[2]"
                 btnClass="text-primary max-h-[28px] min-w-[50px] text-xs"
@@ -123,6 +123,16 @@ export default function Notification() {
                 isArrow={true}
                 items={[{ name: "All" }, { name: "Read" }, { name: "UnRead" }]}
                 onChange={(item) => setFilter(item.name)}
+              /> */}
+              <Dropdown
+                info=""
+                className="!mb-0 z-[2]"
+                btnClass="text-primary max-h-[28px] min-w-[50px] text-xs"
+                placeholder={filter}
+                value={filter}
+                isArrow={true}
+                items={[{ name: "All" }, { name: "Read" }, { name: "UnRead" }]}
+                onChange={(value) => setFilter(value)}
               />
             </div>
             {/* FIX 1: Added onClick handler to "Mark All as Read" */}
@@ -205,7 +215,19 @@ export default function Notification() {
           </div>
 
           {/* FIX 2: Added "View All Notifications" button */}
-          {filteredNotifications.length > 0 && (
+          {/* {filteredNotifications.length > 0 && (
+            <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-stroke -mx-3 md:-mx-4 px-3 md:px-4">
+              <button
+                onClick={handleViewAllNotifications}
+                className="w-full text-center text-sm text-primary hover:text-primary/80 font-medium transition-colors duration-200"
+              >
+                View All Notifications →
+              </button>
+            </div>
+          )} */}
+
+          {/* FIX 2: Added "View All Notifications" button */}
+          {notifications.length > 0 && ( 
             <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-stroke -mx-3 md:-mx-4 px-3 md:px-4">
               <button
                 onClick={handleViewAllNotifications}

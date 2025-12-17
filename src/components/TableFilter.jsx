@@ -16,7 +16,8 @@ export default function TableFilter({
   csv = false,
   hideSortDrop,
   onSearch,
-  searchValue
+  searchValue,
+  onSort
 }) {
   const [showMenu, setShowMenu] = useState(false);
   const [activeTab, setActiveTab] = useState("Table");
@@ -122,8 +123,8 @@ export default function TableFilter({
         <button
           onClick={() => setActiveTab("Table")}
           className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === "Table"
-              ? "bg-gray-200 text-gray-900"
-              : "text-gray-600 hover:text-gray-900"
+            ? "bg-gray-200 text-gray-900"
+            : "text-gray-600 hover:text-gray-900"
             }`}
         >
           Table
@@ -131,8 +132,8 @@ export default function TableFilter({
         <button
           onClick={() => setActiveTab("Heatmap")}
           className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === "Heatmap"
-              ? "bg-gray-200 text-gray-900"
-              : "text-gray-600 hover:text-gray-900"
+            ? "bg-gray-200 text-gray-900"
+            : "text-gray-600 hover:text-gray-900"
             }`}
         >
           Heatmap
@@ -302,71 +303,87 @@ export default function TableFilter({
       </div>
 
       {/* SINGLE Sort Button - Removed duplicate */}
-      <div className="relative z-[2]" ref={sortContainerRef}>
-        <button
-          ref={sortTriggerRef}
-          className={`${btnClass} ${BtnClass}`}
-          onClick={() => setSortDrop(!sortDrop)}
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
+      {/* <div className="relative z-[2]" ref={sortContainerRef}> */}
+      {!hideSortDrop && (
+        <div className="relative z-[20]" ref={sortContainerRef}>
+          <button
+            ref={sortTriggerRef}
+            className={`${btnClass} ${BtnClass}`}
+            onClick={() => setSortDrop(!sortDrop)}
           >
-            <path
-              d="M5.00133 3.95801V16.0413M5.00133 16.0413L2.5 13.5413M5.00133 16.0413L7.5 13.5413M9.79167 5.62467H16.875M13.125 14.3747H16.875M11.4583 9.99967H16.875"
-              stroke="#111111"
-              strokeOpacity="0.5"
-              strokeWidth="1.25"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          {!textHidden && (
-            <>
-              <span className="mx-1 block">{defaultSort}</span>
-              <svg
-                className={`${sortDrop ? "-scale-y-100" : "scale-x-100"}`}
-                width="10"
-                height="6"
-                viewBox="0 0 10 6"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M5.00005 3.87852L8.71255 0.166016L9.77305 1.22652L5.00005 5.99952L0.227051 1.22652L1.28755 0.166016L5.00005 3.87852Z"
-                  fill="#111111"
-                  fillOpacity="0.5"
-                />
-              </svg>
-            </>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M5.00133 3.95801V16.0413M5.00133 16.0413L2.5 13.5413M5.00133 16.0413L7.5 13.5413M9.79167 5.62467H16.875M13.125 14.3747H16.875M11.4583 9.99967H16.875"
+                stroke="#111111"
+                strokeOpacity="0.5"
+                strokeWidth="1.25"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            {!textHidden && (
+              <>
+                <span className="mx-1 block">{defaultSort}</span>
+                <svg
+                  className={`${sortDrop ? "-scale-y-100" : "scale-x-100"}`}
+                  width="10"
+                  height="6"
+                  viewBox="0 0 10 6"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M5.00005 3.87852L8.71255 0.166016L9.77305 1.22652L5.00005 5.99952L0.227051 1.22652L1.28755 0.166016L5.00005 3.87852Z"
+                    fill="#111111"
+                    fillOpacity="0.5"
+                  />
+                </svg>
+              </>
+            )}
+          </button>
+          {sortDrop && (
+            <div className="mt-1 py-1 absolute right-0 w-max max-w-[300px] bg-white border border-solid border-stroke rounded-lg max-h-[250px] overflow-y-auto flex flex-col items-start">
+              {sorts.map((item, index) => (
+                <span
+                  key={index}
+                  onClick={() => {
+                    setDefaultSort(item);
+                    setSortDrop(false);
+                    if (onSort) {
+                      onSort(item);
+                    }
+                  }}
+                  className="text-sm font-normal py-1 px-3 cursor-pointer hover:text-primary"
+                >
+                  {item}
+                </span>
+                // <span
+                //   key={index}
+                //   onClick={() => {
+                //     setDefaultSort(item);
+                //     setSortDrop(false);
+                //   }}
+                //   className="text-sm font-normal py-1 px-3 cursor-pointer hover:text-primary"
+                // >
+                //   {item}
+                // </span>
+              ))}
+            </div>
           )}
-        </button>
-        {sortDrop && (
-          <div className="mt-1 py-1 absolute right-0 w-max max-w-[300px] bg-white border border-solid border-stroke rounded-lg max-h-[250px] overflow-y-auto flex flex-col items-start">
-            {sorts.map((item, index) => (
-              <span
-                key={index}
-                onClick={() => {
-                  setDefaultSort(item);
-                  setSortDrop(false);
-                }}
-                className="text-sm font-normal py-1 px-3 cursor-pointer hover:text-primary"
-              >
-                {item}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* language */}
       {lang && (
         <Dropdown
           btnClass="!h-[38px]"
-          className="mb-0 min-w-[110px]"
+          className="mb-0 min-w-[110px] z-[20]"
           placeholder="Language"
           items={langList}
           dropDownClass="w-max !left-auto !right-0"
