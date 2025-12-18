@@ -1247,6 +1247,363 @@ export default function FlowChart({ onSave, analysisMode = false }) {
   };
 
   // Branch Container Component for horizontal layout with relocated nodes
+  // const BranchContainerDisplay = () => {
+  //   const node = useContext(NodeContext);
+  //   const branches = node.data.branches || [];
+  //   const relocatedNodes = node.data.relocatedNodes || [];
+  //   const firstBranchId = node.data.firstBranchId;
+  //   const branchChains = node.data.branchChains || {};
+
+  //   return (
+  //     <div className="flex flex-col items-center w-full">
+  //       {/* Connecting lines from multiple choice to branches */}
+  //       <div className="flex justify-center items-start w-full mb-2">
+  //         <div className="w-0.5 h-4 bg-primary"></div>
+  //       </div>
+
+  //       {/* Horizontal branch nodes */}
+  //       <div className="flex justify-center items-start gap-6 w-full mb-2">
+  //         {branches.map((branch, index) => (
+  //           <div key={branch.id} className="flex flex-col items-center">
+  //             {/* Individual branch node */}
+  //             <div
+  //               className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[200px] relative z-1 text-start cursor-pointer hover:bg-gray-50 transition-colors"
+  //               onClick={() => {
+  //                 setSidePanel({
+  //                   open: true,
+  //                   type: "message",
+  //                   nodeId: branch.id,
+  //                   data: {
+  //                     currentText: branch.data.content,
+  //                     nodeType: "branch-response",
+  //                     config: {},
+  //                     isEditing: true,
+  //                   },
+  //                 });
+  //               }}
+  //             >
+  //               <div className="flex items-center justify-between">
+  //                 <div className="flex items-center gap-1 py-1 px-2 rounded-lg bg-primary/10 mb-1">
+  //                   <span className="text-primary font-semibold text-[10px]">
+  //                     {branch.data.title}
+  //                   </span>
+  //                 </div>
+  //               </div>
+  //               <div>
+  //                 <span className="text-heading font-medium text-sm">
+  //                   {branch.data.content}
+  //                 </span>
+  //                 <div className="mt-1 text-[10px] text-gray-500">
+  //                   Choice: {branch.data.parentChoice}
+  //                 </div>
+  //               </div>
+
+  //               {/* Analysis metrics for branch nodes */}
+  //               {analysisMode && (
+  //                 <div className="flex justify-center gap-4 mt-2">
+  //                   <div className="text-center flex flex-col gap-1">
+  //                     <span className="text-[#858585] text-[10px] font-medium">
+  //                       Views
+  //                     </span>
+  //                     <strong className="text-heading font-bold text-sm !leading-normal">
+  //                       -
+  //                     </strong>
+  //                   </div>
+  //                   <div className="text-center flex flex-col gap-1">
+  //                     <span className="text-red-500 text-[10px] font-medium">
+  //                       Drop off
+  //                     </span>
+  //                     <strong className="text-heading font-bold text-sm !leading-normal">
+  //                       -
+  //                     </strong>
+  //                   </div>
+  //                 </div>
+  //               )}
+  //             </div>
+
+  //             {/* Plus button after each branch */}
+  //             {!analysisMode && (
+  //               <div className="flex flex-col items-center my-2">
+  //                 <div className="w-0.5 h-4 bg-primary"></div>
+  //                 <button
+  //                   onClick={(event) => {
+  //                     event.stopPropagation();
+  //                     setSelectedNodeForAdd(branch.id);
+  //                     setShowModal(true);
+  //                   }}
+  //                   className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-dark transition-colors z-10 shadow-lg"
+  //                 >
+  //                   <svg
+  //                     width="12"
+  //                     height="12"
+  //                     viewBox="0 0 16 16"
+  //                     fill="none"
+  //                     xmlns="http://www.w3.org/2000/svg"
+  //                   >
+  //                     <path
+  //                       d="M8 3.33333V12.6667M3.33333 8H12.6667"
+  //                       stroke="currentColor"
+  //                       strokeWidth="2"
+  //                       strokeLinecap="round"
+  //                       strokeLinejoin="round"
+  //                     />
+  //                   </svg>
+  //                 </button>
+  //                 <div className="w-0.5 h-4 bg-primary"></div>
+  //               </div>
+  //             )}
+
+  //             {/* Connecting line for analysis mode */}
+  //             {analysisMode && (
+  //               <div className="flex flex-col items-center my-2">
+  //                 <div className="w-0.5 h-4 bg-primary"></div>
+  //               </div>
+  //             )}
+
+  //             {/* Show additional nodes added to this branch */}
+  //             {branchChains[branch.id] &&
+  //               branchChains[branch.id].map((chainNode, chainIndex) => (
+  //                 <div
+  //                   key={chainNode.id}
+  //                   className="flex flex-col items-center"
+  //                 >
+  //                   <div
+  //                     className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[200px] relative z-1 text-start cursor-pointer hover:bg-gray-50 transition-colors"
+  //                     onClick={() => {
+  //                       setSidePanel({
+  //                         open: true,
+  //                         type: "message",
+  //                         nodeId: chainNode.id,
+  //                         data: {
+  //                           currentText: chainNode.data.content,
+  //                           nodeType: chainNode.data.nodeType || "message",
+  //                           config: chainNode.data.config || {},
+  //                           isEditing: true,
+  //                         },
+  //                       });
+  //                     }}
+  //                   >
+  //                     <div className="flex items-center justify-between">
+  //                       <div className="flex items-center gap-1 py-1 px-2 rounded-lg bg-primary/10 mb-1">
+  //                         <span className="text-primary font-semibold text-[10px]">
+  //                           {chainNode.data.title}
+  //                         </span>
+  //                       </div>
+  //                     </div>
+  //                     <span className="text-heading font-medium text-sm">
+  //                       {chainNode.data.content}
+  //                     </span>
+
+  //                     {/* Analysis metrics for chain nodes */}
+  //                     {analysisMode && (
+  //                       <div className="flex justify-center gap-4 mt-2">
+  //                         <div className="text-center flex flex-col gap-1">
+  //                           <span className="text-[#858585] text-[10px] font-medium">
+  //                             Views
+  //                           </span>
+  //                           <strong className="text-heading font-bold text-sm !leading-normal">
+  //                             -
+  //                           </strong>
+  //                         </div>
+  //                         <div className="text-center flex flex-col gap-1">
+  //                           <span className="text-red-500 text-[10px] font-medium">
+  //                             Drop off
+  //                           </span>
+  //                           <strong className="text-heading font-bold text-sm !leading-normal">
+  //                             -
+  //                           </strong>
+  //                         </div>
+  //                       </div>
+  //                     )}
+  //                   </div>
+
+  //                   {/* Plus button after each chain node */}
+  //                   {!analysisMode && (
+  //                     <div className="flex flex-col items-center my-2">
+  //                       <div className="w-0.5 h-4 bg-primary"></div>
+  //                       <button
+  //                         onClick={(event) => {
+  //                           event.stopPropagation();
+  //                           setSelectedNodeForAdd(chainNode.id);
+  //                           setShowModal(true);
+  //                         }}
+  //                         className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-dark transition-colors z-10 shadow-lg"
+  //                       >
+  //                         <svg
+  //                           width="12"
+  //                           height="12"
+  //                           viewBox="0 0 16 16"
+  //                           fill="none"
+  //                           xmlns="http://www.w3.org/2000/svg"
+  //                         >
+  //                           <path
+  //                             d="M8 3.33333V12.6667M3.33333 8H12.6667"
+  //                             stroke="currentColor"
+  //                             strokeWidth="2"
+  //                             strokeLinecap="round"
+  //                             strokeLinejoin="round"
+  //                           />
+  //                         </svg>
+  //                       </button>
+  //                       <div className="w-0.5 h-4 bg-primary"></div>
+  //                     </div>
+  //                   )}
+
+  //                   {/* Connecting line for analysis mode */}
+  //                   {analysisMode && (
+  //                     <div className="flex flex-col items-center my-2">
+  //                       <div className="w-0.5 h-4 bg-primary"></div>
+  //                     </div>
+  //                   )}
+  //                 </div>
+  //               ))}
+
+  //             {/* Show relocated nodes only on the first branch */}
+  //             {index === 0 && relocatedNodes.length > 0 && (
+  //               <div className="flex flex-col items-center">
+  //                 {relocatedNodes.map((relocatedNode, nodeIndex) => (
+  //                   <div
+  //                     key={relocatedNode.id}
+  //                     className="flex flex-col items-center"
+  //                   >
+  //                     {/* Render the relocated node based on its type */}
+  //                     {relocatedNode.type === "end" ? (
+  //                       <div className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[200px] relative z-1 text-start">
+  //                         <div className="flex items-center justify-between">
+  //                           <div className="flex items-center gap-1 py-1 px-2 rounded-lg bg-[#F7F7F7] mb-1">
+  //                             <span className="text-heading text-[10px] font-bold">
+  //                               {relocatedNode.data.title}
+  //                             </span>
+  //                           </div>
+  //                         </div>
+
+  //                         {/* Analysis metrics for relocated END node */}
+  //                         {analysisMode && (
+  //                           <div className="grid grid-cols-3 gap-2 mt-2">
+  //                             <div className="text-center flex flex-col gap-1">
+  //                               <span className="text-green-600 text-[10px] font-medium">
+  //                                 Automated
+  //                               </span>
+  //                               <strong className="text-heading font-bold text-sm !leading-normal">
+  //                                 2
+  //                               </strong>
+  //                             </div>
+  //                             <div className="text-center flex flex-col gap-1">
+  //                               <span className="text-red-500 text-[10px] font-medium">
+  //                                 Drop off
+  //                               </span>
+  //                               <strong className="text-heading font-bold text-sm !leading-normal">
+  //                                 3
+  //                               </strong>
+  //                             </div>
+  //                             <div className="text-center flex flex-col gap-1">
+  //                               <span className="text-[#858585] text-[10px] font-medium">
+  //                                 Tickets
+  //                               </span>
+  //                               <strong className="text-heading font-bold text-sm !leading-normal">
+  //                                 0
+  //                               </strong>
+  //                             </div>
+  //                           </div>
+  //                         )}
+  //                       </div>
+  //                     ) : (
+  //                       <div className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[200px] relative z-1 text-start">
+  //                         <div className="flex items-center justify-between">
+  //                           <div className="flex items-center gap-1 py-1 px-2 rounded-lg bg-primary/10 mb-1">
+  //                             <span className="text-primary font-semibold text-[10px]">
+  //                               {relocatedNode.data.title}
+  //                             </span>
+  //                           </div>
+  //                         </div>
+  //                         <span className="text-heading font-medium text-sm">
+  //                           {relocatedNode.data.content}
+  //                         </span>
+
+  //                         {/* Analysis metrics for relocated nodes */}
+  //                         {analysisMode && (
+  //                           <div className="flex justify-center gap-4 mt-2">
+  //                             <div className="text-center flex flex-col gap-1">
+  //                               <span className="text-[#858585] text-[10px] font-medium">
+  //                                 Views
+  //                               </span>
+  //                               <strong className="text-heading font-bold text-sm !leading-normal">
+  //                                 -
+  //                               </strong>
+  //                             </div>
+  //                             <div className="text-center flex flex-col gap-1">
+  //                               <span className="text-red-500 text-[10px] font-medium">
+  //                                 Drop off
+  //                               </span>
+  //                               <strong className="text-heading font-bold text-sm !leading-normal">
+  //                                 -
+  //                               </strong>
+  //                             </div>
+  //                           </div>
+  //                         )}
+  //                       </div>
+  //                     )}
+
+  //                     {/* Add connecting line if not the last relocated node */}
+  //                     {nodeIndex < relocatedNodes.length - 1 && (
+  //                       <div className="w-0.5 h-4 bg-primary my-1"></div>
+  //                     )}
+  //                   </div>
+  //                 ))}
+  //               </div>
+  //             )}
+
+  //             {/* Show individual END nodes only for branches without relocated nodes and no additional chain nodes */}
+  //             {!(index === 0 && relocatedNodes.length > 0) &&
+  //               (!branchChains[branch.id] ||
+  //                 branchChains[branch.id].length === 0) && (
+  //                 <div className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[200px] relative z-1 text-start">
+  //                   <div className="flex items-center justify-between">
+  //                     <div className="flex items-center gap-1 py-1 px-2 rounded-lg bg-[#F7F7F7] mb-1">
+  //                       <span className="text-heading text-[10px] font-bold">
+  //                         END
+  //                       </span>
+  //                     </div>
+  //                   </div>
+
+  //                   {/* Analysis metrics for individual END nodes */}
+  //                   {analysisMode && (
+  //                     <div className="grid grid-cols-3 gap-2 mt-2">
+  //                       <div className="text-center flex flex-col gap-1">
+  //                         <span className="text-green-600 text-[10px] font-medium">
+  //                           Automated
+  //                         </span>
+  //                         <strong className="text-heading font-bold text-sm !leading-normal">
+  //                           2
+  //                         </strong>
+  //                       </div>
+  //                       <div className="text-center flex flex-col gap-1">
+  //                         <span className="text-red-500 text-[10px] font-medium">
+  //                           Drop off
+  //                         </span>
+  //                         <strong className="text-heading font-bold text-sm !leading-normal">
+  //                           3
+  //                         </strong>
+  //                       </div>
+  //                       <div className="text-center flex flex-col gap-1">
+  //                         <span className="text-[#858585] text-[10px] font-medium">
+  //                           Tickets
+  //                         </span>
+  //                         <strong className="text-heading font-bold text-sm !leading-normal">
+  //                           0
+  //                         </strong>
+  //                       </div>
+  //                     </div>
+  //                   )}
+  //                 </div>
+  //               )}
+  //           </div>
+  //         ))}
+  //       </div>
+  //     </div>
+  //   );
+  // };
+
   const BranchContainerDisplay = () => {
     const node = useContext(NodeContext);
     const branches = node.data.branches || [];
@@ -1321,44 +1678,39 @@ export default function FlowChart({ onSave, analysisMode = false }) {
                 )}
               </div>
 
-              {/* Plus button after each branch */}
-              {!analysisMode && (
-                <div className="flex flex-col items-center my-2">
-                  <div className="w-0.5 h-4 bg-primary"></div>
-                  <button
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      setSelectedNodeForAdd(branch.id);
-                      setShowModal(true);
-                    }}
-                    className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-dark transition-colors z-10 shadow-lg"
-                  >
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 16 16"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
+              {/* FIXED: Always show connecting line after branch node */}
+              <div className="flex flex-col items-center my-2">
+                <div className="w-0.5 h-4 bg-primary"></div>
+                {!analysisMode && (
+                  <>
+                    <button
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setSelectedNodeForAdd(branch.id);
+                        setShowModal(true);
+                      }}
+                      className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-dark transition-colors z-10 shadow-lg"
                     >
-                      <path
-                        d="M8 3.33333V12.6667M3.33333 8H12.6667"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
-                  <div className="w-0.5 h-4 bg-primary"></div>
-                </div>
-              )}
-
-              {/* Connecting line for analysis mode */}
-              {analysisMode && (
-                <div className="flex flex-col items-center my-2">
-                  <div className="w-0.5 h-4 bg-primary"></div>
-                </div>
-              )}
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M8 3.33333V12.6667M3.33333 8H12.6667"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
+                    <div className="w-0.5 h-4 bg-primary"></div>
+                  </>
+                )}
+              </div>
 
               {/* Show additional nodes added to this branch */}
               {branchChains[branch.id] &&
@@ -1417,44 +1769,39 @@ export default function FlowChart({ onSave, analysisMode = false }) {
                       )}
                     </div>
 
-                    {/* Plus button after each chain node */}
-                    {!analysisMode && (
-                      <div className="flex flex-col items-center my-2">
-                        <div className="w-0.5 h-4 bg-primary"></div>
-                        <button
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setSelectedNodeForAdd(chainNode.id);
-                            setShowModal(true);
-                          }}
-                          className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-dark transition-colors z-10 shadow-lg"
-                        >
-                          <svg
-                            width="12"
-                            height="12"
-                            viewBox="0 0 16 16"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
+                    {/* FIXED: Always show connecting line after chain node */}
+                    <div className="flex flex-col items-center my-2">
+                      <div className="w-0.5 h-4 bg-primary"></div>
+                      {!analysisMode && (
+                        <>
+                          <button
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setSelectedNodeForAdd(chainNode.id);
+                              setShowModal(true);
+                            }}
+                            className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-dark transition-colors z-10 shadow-lg"
                           >
-                            <path
-                              d="M8 3.33333V12.6667M3.33333 8H12.6667"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </button>
-                        <div className="w-0.5 h-4 bg-primary"></div>
-                      </div>
-                    )}
-
-                    {/* Connecting line for analysis mode */}
-                    {analysisMode && (
-                      <div className="flex flex-col items-center my-2">
-                        <div className="w-0.5 h-4 bg-primary"></div>
-                      </div>
-                    )}
+                            <svg
+                              width="12"
+                              height="12"
+                              viewBox="0 0 16 16"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M8 3.33333V12.6667M3.33333 8H12.6667"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          </button>
+                          <div className="w-0.5 h-4 bg-primary"></div>
+                        </>
+                      )}
+                    </div>
                   </div>
                 ))}
 
@@ -1468,7 +1815,23 @@ export default function FlowChart({ onSave, analysisMode = false }) {
                     >
                       {/* Render the relocated node based on its type */}
                       {relocatedNode.type === "end" ? (
-                        <div className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[200px] relative z-1 text-start">
+                        <div
+                          className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[200px] relative z-1 text-start cursor-pointer hover:bg-gray-50 transition-colors"
+                          onClick={() => {
+                            if (!analysisMode) {
+                              setSidePanel({
+                                open: true,
+                                type: "end",
+                                nodeId: relocatedNode.id,
+                                data: {
+                                  currentText: relocatedNode.data.content,
+                                  currentSubtitle: relocatedNode.data.subtitle,
+                                  isEditing: true,
+                                },
+                              });
+                            }
+                          }}
+                        >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-1 py-1 px-2 rounded-lg bg-[#F7F7F7] mb-1">
                               <span className="text-heading text-[10px] font-bold">
@@ -1508,7 +1871,24 @@ export default function FlowChart({ onSave, analysisMode = false }) {
                           )}
                         </div>
                       ) : (
-                        <div className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[200px] relative z-1 text-start">
+                        <div
+                          className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[200px] relative z-1 text-start cursor-pointer hover:bg-gray-50 transition-colors"
+                          onClick={() => {
+                            if (!analysisMode) {
+                              setSidePanel({
+                                open: true,
+                                type: "message",
+                                nodeId: relocatedNode.id,
+                                data: {
+                                  currentText: relocatedNode.data.content,
+                                  nodeType: relocatedNode.data.nodeType || "message",
+                                  config: relocatedNode.data.config || {},
+                                  isEditing: true,
+                                },
+                              });
+                            }
+                          }}
+                        >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-1 py-1 px-2 rounded-lg bg-primary/10 mb-1">
                               <span className="text-primary font-semibold text-[10px]">
@@ -1544,9 +1924,9 @@ export default function FlowChart({ onSave, analysisMode = false }) {
                         </div>
                       )}
 
-                      {/* Add connecting line if not the last relocated node */}
+                      {/* FIXED: Always show connecting line between relocated nodes */}
                       {nodeIndex < relocatedNodes.length - 1 && (
-                        <div className="w-0.5 h-4 bg-primary my-1"></div>
+                        <div className="w-0.5 h-4 bg-primary my-2"></div>
                       )}
                     </div>
                   ))}
@@ -1557,7 +1937,23 @@ export default function FlowChart({ onSave, analysisMode = false }) {
               {!(index === 0 && relocatedNodes.length > 0) &&
                 (!branchChains[branch.id] ||
                   branchChains[branch.id].length === 0) && (
-                  <div className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[200px] relative z-1 text-start">
+                  <div
+                    className="p-3 rounded-xl border border-primary bg-white flex flex-col gap-2 w-[200px] relative z-1 text-start cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={() => {
+                      if (!analysisMode) {
+                        setSidePanel({
+                          open: true,
+                          type: "end",
+                          nodeId: `end-${branch.id}`,
+                          data: {
+                            currentText: "Ask for feedback",
+                            currentSubtitle: "Ask for feedback",
+                            isEditing: true,
+                          },
+                        });
+                      }
+                    }}
+                  >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1 py-1 px-2 rounded-lg bg-[#F7F7F7] mb-1">
                         <span className="text-heading text-[10px] font-bold">
@@ -1983,9 +2379,8 @@ const StartPanel = ({ onSubmit, currentText }) => {
             setTriggerText(e.target.value);
             if (error) setError(""); // Clear error when user starts typing
           }}
-          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
-            error ? "border-red-500" : "border-gray-300"
-          }`}
+          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${error ? "border-red-500" : "border-gray-300"
+            }`}
           placeholder="Enter trigger button text..."
         />
         {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
@@ -2031,9 +2426,8 @@ const MessagePanel = ({ onSubmit, currentText, nodeId }) => {
             setMessageText(e.target.value);
             if (error) setError(""); // Clear error when user starts typing
           }}
-          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none ${
-            error ? "border-red-500" : "border-gray-300"
-          }`}
+          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none ${error ? "border-red-500" : "border-gray-300"
+            }`}
           rows="4"
           placeholder="Enter message content..."
         />
@@ -2268,9 +2662,8 @@ const MultipleChoicePanel = ({ onSubmit, data }) => {
             setQuestion(e.target.value);
             if (error) setError(""); // Clear error when user starts typing
           }}
-          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none ${
-            error ? "border-red-500" : "border-gray-300"
-          }`}
+          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none ${error ? "border-red-500" : "border-gray-300"
+            }`}
           rows="3"
           placeholder="Enter your question..."
           maxLength={5000}
@@ -2347,9 +2740,8 @@ const TextReplyPanel = ({ onSubmit, data }) => {
             setQuestion(e.target.value);
             if (error) setError(""); // Clear error when user starts typing
           }}
-          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
-            error ? "border-red-500" : "border-gray-300"
-          }`}
+          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${error ? "border-red-500" : "border-gray-300"
+            }`}
           placeholder="What would you like to ask?"
         />
         {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
@@ -2436,9 +2828,8 @@ const FileUploadPanel = ({ onSubmit, data }) => {
             setQuestion(e.target.value);
             if (error) setError(""); // Clear error when user starts typing
           }}
-          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
-            error ? "border-red-500" : "border-gray-300"
-          }`}
+          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${error ? "border-red-500" : "border-gray-300"
+            }`}
           placeholder="Please upload your file"
         />
         {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
@@ -2516,9 +2907,8 @@ const AutomatedAnswerPanel = ({ onSubmit, data }) => {
             setMessage(e.target.value);
             if (error) setError(""); // Clear error when user starts typing
           }}
-          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none ${
-            error ? "border-red-500" : "border-gray-300"
-          }`}
+          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none ${error ? "border-red-500" : "border-gray-300"
+            }`}
           rows="4"
           placeholder="Enter your automated response..."
         />
@@ -2759,9 +3149,8 @@ const HttpRequestPanel = ({ onSubmit, data }) => {
             setUrl(e.target.value);
             if (error) setError(""); // Clear error when user starts typing
           }}
-          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
-            error ? "border-red-500" : "border-gray-300"
-          }`}
+          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${error ? "border-red-500" : "border-gray-300"
+            }`}
           placeholder="https://api.example.com/endpoint"
         />
         {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
@@ -2825,9 +3214,8 @@ const ConditionsPanel = ({ onSubmit, data }) => {
             setVariable(e.target.value);
             if (error) setError(""); // Clear error when user makes selection
           }}
-          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
-            error ? "border-red-500" : "border-gray-300"
-          }`}
+          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${error ? "border-red-500" : "border-gray-300"
+            }`}
         >
           <option value="">Select variable...</option>
           <option value="user_type">User Type</option>
@@ -2865,9 +3253,8 @@ const ConditionsPanel = ({ onSubmit, data }) => {
             setValue(e.target.value);
             if (error) setError(""); // Clear error when user starts typing
           }}
-          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
-            error ? "border-red-500" : "border-gray-300"
-          }`}
+          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${error ? "border-red-500" : "border-gray-300"
+            }`}
           placeholder="Enter value to compare"
         />
         {error && <p className="text-xs text-red-500 mt-1">{error}</p>}

@@ -5,7 +5,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { c_24 } from "../../utilities/Classes";
 import Input from "../../components/Input";
 import { search } from "../../utilities/Classes";
-
 import flag from "../../assets/img/flag.png";
 import StoreDropdown from "../../components/StoreDropdown";
 

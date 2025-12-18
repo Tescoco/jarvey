@@ -188,6 +188,22 @@ export default function Articles() {
     e.preventDefault();
   };
 
+  // Around line 206 - UPDATE handleSearch to be more comprehensive
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+
+    if (query.trim() === "") {
+      setFilteredItems(items);
+    } else {
+      const filtered = items.filter((item) =>
+        item.store.name.toLowerCase().includes(query.toLowerCase()) ||
+        item.language.des.toLowerCase().includes(query.toLowerCase()) ||
+        item.date.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredItems(filtered);
+    }
+  };
+
   const handleDrop = (dropIndex) => {
     if (dragItem.current !== null && dragItem.current !== dropIndex) {
       const copyItems = [...items];
@@ -201,11 +217,44 @@ export default function Articles() {
   };
 
   // File upload handler
+  // const handleFileUpload = (e) => {
+  //   const file = e.target.files?.[0];
+  //   if (file) {
+  //     console.log("File uploaded:", file.name);
+  //     alert(`File "${file.name}" uploaded successfully!`);
+  //   }
+  // };
+
+  // Around line 290 - REPLACE handleFileUpload function
   const handleFileUpload = (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      console.log("File uploaded:", file.name);
+      // Validate file type
+      const allowedTypes = ['.pdf', '.doc', '.docx', '.txt'];
+      const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+
+      if (!allowedTypes.includes(fileExtension)) {
+        alert('Invalid file type. Please upload PDF, DOC, DOCX, or TXT files only.');
+        return;
+      }
+
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('File size must be less than 10MB.');
+        return;
+      }
+
+      console.log("Processing file:", file.name);
+
+      // Here you would upload to your server
+      // Example: await uploadFileToServer(file);
+
       alert(`File "${file.name}" uploaded successfully!`);
+
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -283,21 +332,38 @@ export default function Articles() {
   };
 
   // Create category handler
+  // REPLACE handleCreateCategory function:
   const handleCreateCategory = () => {
+    // Validation
     if (!categoryTitle.trim()) {
       alert("Please enter a category title");
       return;
     }
 
-    console.log("Creating category:", {
+    if (!categorySlug.trim()) {
+      alert("Category slug is required");
+      return;
+    }
+
+    const newCategory = {
+      id: Date.now(),
       title: categoryTitle,
       slug: categorySlug,
       language: categoryLanguage,
-    });
+      createdAt: new Date().toISOString()
+    };
+
+    console.log("Creating category:", newCategory);
+
+    // Here you would make an API call to save the category
+    // Example: await createCategoryAPI(newCategory);
 
     alert("Category created successfully!");
+
+    // Reset form
     setCategoryTitle("");
     setCategorySlug("");
+    setCategoryLanguage("en-US");
     setShowCreateCategory(false);
   };
 
@@ -305,6 +371,7 @@ export default function Articles() {
   const handlePublishArticle = (isUpdate = false) => {
     const errors = [];
 
+    // Required field validations
     if (!articleTitle.trim()) {
       errors.push("Title is required");
     }
@@ -313,16 +380,26 @@ export default function Articles() {
       errors.push("Category is required");
     }
 
+    if (!articleSlug.trim()) {
+      errors.push("Slug is required");
+    }
+
     if (!articleContent.trim()) {
       errors.push("Article content is required");
     }
 
+    if (!selectedLanguage) {
+      errors.push("Language selection is required");
+    }
+
+    // Show all errors at once
     if (errors.length > 0) {
-      alert("Please fix the following errors:\n" + errors.join("\n"));
+      alert("Please fix the following errors:\n\n• " + errors.join("\n• "));
       return;
     }
 
-    console.log(isUpdate ? "Updating article:" : "Publishing article:", {
+    // All validations passed
+    const articleData = {
       title: articleTitle,
       category: articleCategory,
       slug: articleSlug,
@@ -330,7 +407,13 @@ export default function Articles() {
       language: selectedLanguage,
       excerpt: excerptText,
       metaTitle: useSameTitleAsMeta ? articleTitle : metaTitle,
-    });
+      createdAt: new Date().toISOString()
+    };
+
+    console.log(isUpdate ? "Updating article:" : "Publishing article:", articleData);
+
+    // Here you would make an API call
+    // Example: await saveArticleAPI(articleData);
 
     alert(
       isUpdate
@@ -345,6 +428,7 @@ export default function Articles() {
     setArticleContent("");
     setExcerptText("");
     setMetaTitle("");
+    setSelectedLanguage("en-US");
     setShowCreateArticle(false);
     setShowEditArticle(false);
   };
@@ -743,7 +827,15 @@ export default function Articles() {
                   btnClass="!h-9 !px-2.5"
                   dropDownClass="w-max !left-auto right-0"
                   items={langList}
+                  value={selectedLanguage}
+                  onChange={(value) => setSelectedLanguage(value)}
                 />
+                {/* <Dropdown
+                  className="mb-0"
+                  btnClass="!h-9 !px-2.5"
+                  dropDownClass="w-max !left-auto right-0"
+                  items={langList}
+                /> */}
               </div>
               <div className="flex items-center gap-2 lg:gap-3">
                 {Icons.map((item, idx) => (
@@ -781,16 +873,31 @@ export default function Articles() {
               </div>
             </div>
           </div>
+          {/* <Input
+            label="Title"
+            className="mb-3 lg:mb-4"
+            required
+            placeholder="Do you offer refunds or exchanges"
+          /> */}
           <Input
             label="Title"
             className="mb-3 lg:mb-4"
             required
             placeholder="Do you offer refunds or exchanges"
+            value={articleTitle}
+            onChange={(e) => setArticleTitle(e.target.value)}
           />
-          <Input
+          {/* <Input
             label="Category"
             className="mb-3 lg:mb-4"
             placeholder="Do you offer refunds or exchanges"
+          /> */}
+          <Input
+            label="Category"
+            className="mb-3 lg:mb-4"
+            placeholder="Category name"
+            value={articleCategory}
+            onChange={(e) => setArticleCategory(e.target.value)}
           />
           <div className="mb-3 lg:mb-4">
             <div className="flex items-center justify-between mb-1">
@@ -859,14 +966,27 @@ export default function Articles() {
               ex. when order status is delivered{" "}
             </p>
           </div>
+          {/* <Input
+            label="Meta Title"
+            required
+            className="mb-3 lg:mb-4"
+            placeholder="Do you offer refunds or exchanges"
+          /> */}
           <Input
             label="Meta Title"
             required
             className="mb-3 lg:mb-4"
             placeholder="Do you offer refunds or exchanges"
+            value={metaTitle}
+            onChange={(e) => setMetaTitle(e.target.value)}
           />
           <div className="flex items-center gap-2 lg:gap-[10px] mb-3 lg:mb-4">
-            <Checkbox id="check" />
+            <Checkbox
+              id="check"
+              checked={useSameTitleAsMeta}
+              onChange={() => setUseSameTitleAsMeta(!useSameTitleAsMeta)}
+            />
+            {/* <Checkbox id="check" /> */}
             <label
               htmlFor="check"
               className="text-[#0A0D14] cursor-pointer text-sm font-semibold !leading-[1.42]"
@@ -915,12 +1035,28 @@ export default function Articles() {
               >
                 Discard Changes
               </button>
-              <button
+              {/* <button
                 onClick={() => setEditArticle(false)}
                 className="btn !bg-[#7856FF] !text-white !py-[10px] !px-[14px] !min-w-[94px]"
               >
                 Published
+              </button> */}
+              <button
+                onClick={() => {
+                  // Save the article settings
+                  console.log('Saving article settings:', {
+                    excerptText,
+                    searchPreviewText,
+                    metaTitle: useSameTitleAsMeta ? articleTitle : metaTitle
+                  });
+                  alert('Article settings saved successfully!');
+                  setEditArticle(false);
+                }}
+                className="btn !bg-[#7856FF] !text-white !py-[10px] !px-[14px] !min-w-[94px]"
+              >
+                Save Changes
               </button>
+
             </div>
           </div>
         </Modal>
@@ -944,7 +1080,15 @@ export default function Articles() {
                 btnClass="!h-9"
                 dropDownClass="w-max !left-auto right-0"
                 items={langList}
+                value={selectedLanguage}
+                onChange={(value) => setSelectedLanguage(value)}
               />
+              {/* <Dropdown
+                className="mb-0"
+                btnClass="!h-9"
+                dropDownClass="w-max !left-auto right-0"
+                items={langList}
+              /> */}
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 relative z-0">
@@ -954,17 +1098,39 @@ export default function Articles() {
               placeholder="Category"
               items={contact}
               dropDownClass="z-20"
+              value={articleCategory}
+              onChange={(value) => setArticleCategory(value)}
             />
-            <Input label="Title" required placeholder="Article title" />
+            <Input
+              label="Title"
+              required
+              placeholder="Article title"
+              value={articleTitle}
+              onChange={(e) => setArticleTitle(e.target.value)}
+            />
+            {/* <Dropdown
+              className="mb-0"
+              label=""
+              placeholder="Category"
+              items={contact}
+              dropDownClass="z-20"
+            />
+            <Input label="Title" required placeholder="Article title" /> */}
           </div>
           <div className="mb-5">
             <div className="flex items-center justify-between mb-1">
               <h6 className="text-[#0A0D14] text-sm font-semibold !leading-[1.42]">
                 Slug
               </h6>
-              <button className="text-[#7856FF] flex items-center gap-2 text-sm font-semibold !leading-[1.42]">
+              <button
+                onClick={() => handleCopySlug(`https://jarvey.jarveyai.help/en-US/articles/${articleSlug || 'category-slug'}`)}
+                className="text-[#7856FF] flex items-center gap-2 text-sm font-semibold !leading-[1.42] cursor-pointer hover:opacity-80"
+              >
                 {copyIcon2} Copy
               </button>
+              {/* <button className="text-[#7856FF] flex items-center gap-2 text-sm font-semibold !leading-[1.42]">
+                {copyIcon2} Copy
+              </button> */}
             </div>
             <div className="rounded-[10px] border border-[#E2E4E9] py-[10px] px-3 text-xs text-[#888]">
               https://jarvey.jarveyai.help/en-US/articles/
@@ -979,9 +1145,15 @@ export default function Articles() {
             <button className="btn" onClick={() => setShowCreateArticle(false)}>
               Discard changes
             </button>
-            <button
+            {/* <button
               className="btn bg-primary !text-white"
               onClick={() => setShowCreateArticle(false)}
+            >
+              Publish Article
+            </button> */}
+            <button
+              className="btn bg-primary !text-white"
+              onClick={() => handlePublishArticle(false)}
             >
               Publish Article
             </button>
@@ -1007,33 +1179,64 @@ export default function Articles() {
                 btnClass="!h-9"
                 dropDownClass="w-max !left-auto right-0"
                 items={langList}
+                value={selectedLanguage}
+                onChange={(value) => setSelectedLanguage(value)}
               />
+              {/* <Dropdown
+                className="mb-0"
+                btnClass="!h-9"
+                dropDownClass="w-max !left-auto right-0"
+                items={langList}
+              /> */}
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 relative z-0">
-            <Dropdown
+            {/* <Dropdown
               className="mb-0"
               label=""
               placeholder="Category"
               items={contact}
               dropDownClass="z-20"
             />
-            <Input label="Title" required placeholder="Article title" />
+            <Input label="Title" required placeholder="Article title" /> */}
+            <Dropdown
+              className="mb-0"
+              label=""
+              placeholder="Category"
+              items={contact}
+              dropDownClass="z-20"
+              value={articleCategory}
+              onChange={(value) => setArticleCategory(value)}
+            />
+            <Input
+              label="Title"
+              required
+              placeholder="Article title"
+              value={articleTitle}
+              onChange={(e) => setArticleTitle(e.target.value)}
+            />
           </div>
           <div className="mb-5">
             <div className="flex items-center justify-between mb-1">
               <h6 className="text-[#0A0D14] text-sm font-semibold !leading-[1.42]">
                 Slug
               </h6>
-              <button className="text-[#7856FF] flex items-center gap-2 text-sm font-semibold !leading-[1.42]">
+              <button
+                onClick={() => handleCopySlug(`https://jarvey.jarveyai.help/en-US/articles/${articleSlug || 'category-slug'}`)}
+                className="text-[#7856FF] flex items-center gap-2 text-sm font-semibold !leading-[1.42] cursor-pointer hover:opacity-80"
+              >
                 {copyIcon2} Copy
               </button>
+              {/* <button className="text-[#7856FF] flex items-center gap-2 text-sm font-semibold !leading-[1.42]">
+                {copyIcon2} Copy
+              </button> */}
             </div>
             <div className="rounded-[10px] border border-[#E2E4E9] py-[10px] px-3 text-xs text-[#888]">
               https://jarvey.jarveyai.help/en-US/articles/
               <span className="text-[#888]">category-slug</span>
             </div>
           </div>
+
           <div className="mb-5">
             <TextEditor2 />
           </div>
@@ -1042,9 +1245,15 @@ export default function Articles() {
             <button className="btn" onClick={() => setShowEditArticle(false)}>
               Discard changes
             </button>
-            <button
+            {/* <button
               className="btn bg-primary !text-white"
               onClick={() => setShowEditArticle(false)}
+            >
+              Update Article
+            </button> */}
+            <button
+              className="btn bg-primary !text-white"
+              onClick={() => handlePublishArticle(true)}
             >
               Update Article
             </button>
@@ -1058,7 +1267,7 @@ export default function Articles() {
             <h5 className="text-[#0A0D14] text-xl lg:text-2xl font-semibold mb-4">
               Share Article
             </h5>
-            <div className="space-y-3">
+            {/* <div className="space-y-3">
               <button className="w-full flex items-center gap-3 p-3 border border-[#E2E4E9] rounded-[10px] hover:bg-gray-50 transition-colors">
                 <svg
                   width="20"
@@ -1108,7 +1317,49 @@ export default function Articles() {
                 </svg>
                 <span className="text-sm font-medium">Share on Twitter</span>
               </button>
+            </div> */}
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  handleShare('copy');
+                  setShowShareOptions(false);
+                }}
+                className="w-full flex items-center gap-3 p-3 border border-[#E2E4E9] rounded-[10px] hover:bg-gray-50 transition-colors"
+              >
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15.8333 8.33333H10.8333C10.3731 8.33333 10 7.96024 10 7.5V4.16667C10 3.70643 10.3731 3.33333 10.8333 3.33333H13.3333L16.6667 0V6.66667H15.8333C15.3731 6.66667 15 7.03976 15 7.5V8.33333Z" fill="#858585" />
+                  <path d="M13.3333 11.6667H9.16667C8.70643 11.6667 8.33333 12.0398 8.33333 12.5V15.8333C8.33333 16.2936 7.96024 16.6667 7.5 16.6667H4.16667L0.833333 20V13.3333H1.66667C2.1269 13.3333 2.5 12.9602 2.5 12.5V11.6667H5C5.46024 11.6667 5.83333 11.2936 5.83333 10.8333V9.16667C5.83333 8.70643 6.20643 8.33333 6.66667 8.33333H8.33333L13.3333 11.6667Z" fill="#858585" />
+                </svg>
+                <span className="text-sm font-medium">Copy Link</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  handleShare('facebook');
+                  setShowShareOptions(false);
+                }}
+                className="w-full flex items-center gap-3 p-3 border border-[#E2E4E9] rounded-[10px] hover:bg-gray-50 transition-colors"
+              >
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M10 0C4.477 0 0 4.477 0 10C0 15.523 4.477 20 10 20C15.523 20 20 15.523 20 10C20 4.477 15.523 0 10 0ZM13.5 10.5H11V13.5C11 13.776 10.776 14 10.5 14C10.224 14 10 13.776 10 13.5V10.5H7.5C7.224 10.5 7 10.276 7 10C7 9.724 7.224 9.5 7.5 9.5H10V6.5C10 6.224 10.224 6 10.5 6C10.776 6 11 6.224 11 6.5V9.5H13.5C13.776 9.5 14 9.724 14 10C14 10.276 13.776 10.5 13.5 10.5Z" fill="#858585" />
+                </svg>
+                <span className="text-sm font-medium">Share on Facebook</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  handleShare('twitter');
+                  setShowShareOptions(false);
+                }}
+                className="w-full flex items-center gap-3 p-3 border border-[#E2E4E9] rounded-[10px] hover:bg-gray-50 transition-colors"
+              >
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20 3.924C19.264 4.25 18.473 4.47 17.643 4.573C18.491 4.061 19.141 3.258 19.467 2.295C18.684 2.76 17.821 3.088 16.902 3.261C16.157 2.461 15.127 1.963 13.991 1.963C11.93 1.963 10.253 3.64 10.253 5.701C10.253 5.989 10.285 6.269 10.349 6.539C6.704 6.355 3.407 4.612 1.336 1.793C1.022 2.331 0.846 2.948 0.846 3.601C0.846 5.819 1.974 7.674 3.681 8.779C2.991 8.757 2.335 8.567 1.732 8.235V8.287C1.732 10.109 3.029 11.619 4.735 11.957C4.431 12.04 4.109 12.085 3.778 12.085C3.535 12.085 3.299 12.061 3.071 12.016C3.545 13.503 4.906 14.537 6.516 14.566C5.221 15.583 3.584 16.188 1.825 16.188C1.515 16.188 1.209 16.17 0.909 16.135C2.537 17.181 4.474 17.806 6.517 17.806C13.984 17.806 18.087 12.129 18.087 6.129L18.081 5.688C18.862 5.126 19.543 4.407 20 3.924Z" fill="#858585" />
+                </svg>
+                <span className="text-sm font-medium">Share on Twitter</span>
+              </button>
             </div>
+
           </div>
           <div className="flex items-center justify-end gap-3">
             <button className="btn" onClick={() => setShowShareOptions(false)}>
@@ -1177,18 +1428,39 @@ export default function Articles() {
                 btnClass="!h-9"
                 dropDownClass="w-max !left-auto right-0"
                 items={langList}
+                value={categoryLanguage}
+                onChange={(value) => setCategoryLanguage(value)}
               />
+              {/* <Dropdown
+                className="mb-0"
+                btnClass="!h-9"
+                dropDownClass="w-max !left-auto right-0"
+                items={langList}
+              /> */}
             </div>
           </div>
-          <Input label="Title" required placeholder="Category title" />
+          <Input
+            label="Title"
+            required
+            placeholder="Category title"
+            value={categoryTitle}
+            onChange={(e) => setCategoryTitle(e.target.value)}
+          />
+          {/* <Input label="Title" required placeholder="Category title" /> */}
           <div className="mb-3">
             <div className="flex items-center justify-between mb-1">
               <h6 className="text-[#0A0D14] text-sm font-semibold !leading-[1.42]">
                 Slug <span className="text-[#FE4333]">*</span>
               </h6>
-              <button className="text-[#7856FF] flex items-center gap-2 text-sm font-semibold !leading-[1.42]">
+              <button
+                onClick={() => handleCopySlug(`https://jarvey.jarveyai.help/en-US/articles/${categorySlug || 'category-slug'}`)}
+                className="text-[#7856FF] flex items-center gap-2 text-sm font-semibold !leading-[1.42] cursor-pointer hover:opacity-80"
+              >
                 {copyIcon2} Copy URL
               </button>
+              {/* <button className="text-[#7856FF] flex items-center gap-2 text-sm font-semibold !leading-[1.42]">
+                {copyIcon2} Copy URL
+              </button> */}
             </div>
             <div className="rounded-[10px] border border-[#E2E4E9] py-[14px] px-3">
               <p className="text-xs font-medium !leading-[1.66] text-[#7856FF] mb-1 md:flex items-center gap-3">
@@ -1206,9 +1478,15 @@ export default function Articles() {
             >
               Cancel
             </button>
-            <button
+            {/* <button
               className="btn bg-primary !text-white"
               onClick={() => setShowCreateCategory(false)}
+            >
+              Create Category
+            </button> */}
+            <button
+              className="btn bg-primary !text-white"
+              onClick={handleCreateCategory}
             >
               Create Category
             </button>
