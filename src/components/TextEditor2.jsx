@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Dropdown from "./Dropdown";
 
 export default function Toolbar({
@@ -477,11 +477,23 @@ export default function Toolbar({
   const editorRef = useRef(null);
   const [content, setContent] = useState(value);
 
+  useEffect(() => {
+    if (editorRef.current && value && editorRef.current.innerHTML !== value) {
+      editorRef.current.innerHTML = value;
+    }
+  }, [value]);
+
   const handleInput = () => {
     const newValue = editorRef.current ? editorRef.current.innerHTML : "";
     setContent(newValue);
     if (onChange) onChange(newValue);
   };
+
+  // const handleInput = () => {
+  //   const newValue = editorRef.current ? editorRef.current.innerHTML : "";
+  //   setContent(newValue);
+  //   if (onChange) onChange(newValue);
+  // };
 
   return (
     <div className="flex flex-col gap-3 p-3 rounded-xl bg-[#F7F7F7] border border-stroke">
@@ -539,7 +551,7 @@ export default function Toolbar({
           </div>
         ))}
       </div>
-      <div
+      {/* <div
         ref={editorRef}
         contentEditable
         suppressContentEditableWarning
@@ -547,7 +559,36 @@ export default function Toolbar({
         className="min-h-[160px] bg-white border border-stroke rounded-xl p-3 text-sm focus:outline-none"
         dangerouslySetInnerHTML={{ __html: content || "" }}
         placeholder={placeholder}
+      /> */}
+
+      {/* <div
+        ref={editorRef}
+        contentEditable
+        suppressContentEditableWarning
+        onInput={handleInput}
+        className="min-h-[160px] bg-white border border-stroke rounded-xl p-3 text-sm focus:outline-none"
+        style={{
+          direction: 'ltr !important',
+          textAlign: 'left !important',
+          unicodeBidi: 'normal'
+        }}
+        dir="ltr"
+      >
+      </div> */}
+      <div
+        ref={editorRef}
+        contentEditable
+        suppressContentEditableWarning
+        onInput={handleInput}
+        className="min-h-[160px] bg-white border border-stroke rounded-xl p-3 text-sm focus:outline-none empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400"
+        style={{
+          direction: 'ltr',
+          textAlign: 'left',
+        }}
+        dir="ltr"
+        data-placeholder={placeholder}
       />
+
     </div>
   );
 }

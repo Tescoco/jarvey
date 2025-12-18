@@ -6,6 +6,46 @@ import Dropdown from '../../components/Dropdown';
 import TableFilter from '../../components/TableFilter'
 
 export default function NewTicket() {
+
+  const customersDatabase = [
+    {
+      id: 1,
+      name: "John Doe",
+      email: "john.doe@example.com",
+      phone: "+1 (555) 123-4567",
+      orders: 15,
+      totalSpent: "$2,450.00",
+      joinDate: "Jan 15, 2024"
+    },
+    {
+      id: 2,
+      name: "Jane Smith",
+      email: "jane.smith@example.com",
+      phone: "+1 (555) 234-5678",
+      orders: 8,
+      totalSpent: "$1,200.00",
+      joinDate: "Mar 22, 2024"
+    },
+    {
+      id: 3,
+      name: "Mike Johnson",
+      email: "mike.j@example.com",
+      phone: "+1 (555) 345-6789",
+      orders: 23,
+      totalSpent: "$3,890.00",
+      joinDate: "Dec 10, 2023"
+    },
+    {
+      id: 4,
+      name: "Sarah Williams",
+      email: "sarah.w@example.com",
+      phone: "+1 (555) 456-7890",
+      orders: 12,
+      totalSpent: "$1,850.00",
+      joinDate: "Feb 5, 2024"
+    }
+  ];
+
   const [activeTab2, setActiveTab2] = useState("Customer Details")
   const [chat, setChat] = useState(false)
   const [editorContent, setEditorContent] = useState("")
@@ -19,6 +59,7 @@ export default function NewTicket() {
   const [contactReason, setContactReason] = useState("")
   const [product, setProduct] = useState("")
   const [resolution, setResolution] = useState("")
+  const [selectedCustomer, setSelectedCustomer] = useState(customersDatabase[0]);
 
   const stores = [
     { name: 'stores-1' },
@@ -27,6 +68,46 @@ export default function NewTicket() {
     { name: 'stores-4' },
     { name: 'stores-5' },
   ]
+
+  // ADD THIS: Customer database
+  // const customersDatabase = [
+  //   {
+  //     id: 1,
+  //     name: "John Doe",
+  //     email: "john.doe@example.com",
+  //     phone: "+1 (555) 123-4567",
+  //     orders: 15,
+  //     totalSpent: "$2,450.00",
+  //     joinDate: "Jan 15, 2024"
+  //   },
+  //   {
+  //     id: 2,
+  //     name: "Jane Smith",
+  //     email: "jane.smith@example.com",
+  //     phone: "+1 (555) 234-5678",
+  //     orders: 8,
+  //     totalSpent: "$1,200.00",
+  //     joinDate: "Mar 22, 2024"
+  //   },
+  //   {
+  //     id: 3,
+  //     name: "Mike Johnson",
+  //     email: "mike.j@example.com",
+  //     phone: "+1 (555) 345-6789",
+  //     orders: 23,
+  //     totalSpent: "$3,890.00",
+  //     joinDate: "Dec 10, 2023"
+  //   },
+  //   {
+  //     id: 4,
+  //     name: "Sarah Williams",
+  //     email: "sarah.w@example.com",
+  //     phone: "+1 (555) 456-7890",
+  //     orders: 12,
+  //     totalSpent: "$1,850.00",
+  //     joinDate: "Feb 5, 2024"
+  //   }
+  // ];
 
   const mailIcon = (<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M14.0011 6.16675C12.3296 7.42257 10.2518 8.16675 8.00016 8.16675C5.74851 8.16675 3.67067 7.42257 1.99919 6.16675M3.16683 3.16675H12.8335C13.5699 3.16675 14.1668 3.7637 14.1668 4.50008V11.5001C14.1668 12.2365 13.5699 12.8334 12.8335 12.8334H3.16683C2.43045 12.8334 1.8335 12.2365 1.8335 11.5001V4.50008C1.8335 3.7637 2.43045 3.16675 3.16683 3.16675Z" stroke="#111111" strokeOpacity="0.5" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
@@ -52,10 +133,23 @@ export default function NewTicket() {
   ]
 
   // FIX 2: Search handler function
+  // Updated search handler function
   const handleSearch = (query) => {
-    setSearchQuery(query)
-    console.log("Searching for:", query)
-  }
+    setSearchQuery(query);
+
+    // If search query exists, try to find matching customer
+    if (query.trim()) {
+      const found = customersDatabase.find(customer =>
+        customer.name.toLowerCase().includes(query.toLowerCase()) ||
+        customer.email.toLowerCase().includes(query.toLowerCase()) ||
+        customer.phone.includes(query)
+      );
+
+      if (found) {
+        setSelectedCustomer(found);
+      }
+    }
+  };
 
   // Text formatting handlers
   const formatText = (format) => {
@@ -144,20 +238,20 @@ export default function NewTicket() {
   };
 
   // Sample data for tabs
-  const customerData = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+1 (555) 123-4567",
-    orders: 15,
-    totalSpent: "$2,450.00",
-    joinDate: "Jan 15, 2024"
-  }
+  // const customerData = {
+  //   name: "John Doe",
+  //   email: "john.doe@example.com",
+  //   phone: "+1 (555) 123-4567",
+  //   orders: 15,
+  //   totalSpent: "$2,450.00",
+  //   joinDate: "Jan 15, 2024"
+  // }
 
-  const filteredCustomerData = searchQuery.trim()
-    ? Object.entries(customerData).filter(([key, value]) =>
-      value.toString().toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    : null;
+  // const filteredCustomerData = searchQuery.trim()
+  //   ? Object.entries(customerData).filter(([key, value]) =>
+  //     value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+  //   )
+  //   : null;
 
   return (
     <div>
@@ -389,178 +483,137 @@ export default function NewTicket() {
               searchValue={searchQuery}
             />
 
-            {/* FIX 3: Tab Content */}
-            {/* <div className="mt-4">
-              {activeTab2 === "Customer Details" && (
-                <div className="space-y-4">
-                  <div className="bg-white p-4 rounded-lg border border-stroke">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-lg">
-                        {customerData.name.charAt(0)}
-                      </div>
-                      <div>
-                        <h5 className="font-semibold text-sm">{customerData.name}</h5>
-                        <p className="text-xs text-gray">Customer</p>
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      <div>
-                        <p className="text-xs text-gray mb-1">Email</p>
-                        <p className="text-sm font-medium">{customerData.email}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray mb-1">Phone</p>
-                        <p className="text-sm font-medium">{customerData.phone}</p>
-                      </div>
-                      <div className="flex gap-4">
-                        <div>
-                          <p className="text-xs text-gray mb-1">Orders</p>
-                          <p className="text-sm font-semibold">{customerData.orders}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray mb-1">Total Spent</p>
-                          <p className="text-sm font-semibold">{customerData.totalSpent}</p>
-                        </div>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray mb-1">Member Since</p>
-                        <p className="text-sm font-medium">{customerData.joinDate}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {searchQuery && (
-                    <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                      <p className="text-xs text-blue-800">
-                        Search results for: <strong>{searchQuery}</strong>
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {activeTab2 === "AI Feedback" && (
-                <div className="space-y-4">
-                  <div className="bg-white p-4 rounded-lg border border-stroke">
-                    <h5 className="font-semibold text-sm mb-3">AI Suggestions</h5>
-                    <div className="space-y-3">
-                      <div className="p-3 bg-primary/5 rounded-lg">
-                        <p className="text-xs text-gray mb-1">Suggested Response</p>
-                        <p className="text-sm">Based on this inquiry, consider using the "Product Information" template.</p>
-                      </div>
-                      <div className="p-3 bg-green-50 rounded-lg">
-                        <p className="text-xs text-gray mb-1">Sentiment Analysis</p>
-                        <p className="text-sm">Customer sentiment: <span className="font-semibold text-green-600">Positive</span></p>
-                      </div>
-                      <div className="p-3 bg-amber-50 rounded-lg">
-                        <p className="text-xs text-gray mb-1">Priority</p>
-                        <p className="text-sm">Suggested priority: <span className="font-semibold text-amber-600">Medium</span></p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {searchQuery && (
-                    <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                      <p className="text-xs text-blue-800">
-                        Search results for: <strong>{searchQuery}</strong>
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div> */}
-
             {activeTab2 === "Customer Details" && (
-              <div className="space-y-4">
+              <div className="space-y-4 mt-4">
+                {/* Selected Customer Display */}
                 <div className="bg-white p-4 rounded-lg border border-stroke">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-lg">
-                      {customerData.name.charAt(0)}
+                      {selectedCustomer.name.charAt(0)}
                     </div>
                     <div>
-                      <h5 className="font-semibold text-sm">{customerData.name}</h5>
+                      <h5 className="font-semibold text-sm">{selectedCustomer.name}</h5>
                       <p className="text-xs text-gray">Customer</p>
                     </div>
                   </div>
                   <div className="space-y-3">
                     <div>
                       <p className="text-xs text-gray mb-1">Email</p>
-                      <p className="text-sm font-medium">{customerData.email}</p>
+                      <p className="text-sm font-medium">{selectedCustomer.email}</p>
                     </div>
                     <div>
                       <p className="text-xs text-gray mb-1">Phone</p>
-                      <p className="text-sm font-medium">{customerData.phone}</p>
+                      <p className="text-sm font-medium">{selectedCustomer.phone}</p>
                     </div>
                     <div className="flex gap-4">
                       <div>
                         <p className="text-xs text-gray mb-1">Orders</p>
-                        <p className="text-sm font-semibold">{customerData.orders}</p>
+                        <p className="text-sm font-semibold">{selectedCustomer.orders}</p>
                       </div>
                       <div>
                         <p className="text-xs text-gray mb-1">Total Spent</p>
-                        <p className="text-sm font-semibold">{customerData.totalSpent}</p>
+                        <p className="text-sm font-semibold">{selectedCustomer.totalSpent}</p>
                       </div>
                     </div>
                     <div>
                       <p className="text-xs text-gray mb-1">Member Since</p>
-                      <p className="text-sm font-medium">{customerData.joinDate}</p>
+                      <p className="text-sm font-medium">{selectedCustomer.joinDate}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* UPDATED: Show filtered results when searching */}
+                {/* Search Results - Show all matching customers */}
                 {searchQuery && (
                   <div className="bg-white p-4 rounded-lg border border-stroke">
                     <h6 className="font-semibold text-sm mb-3">
                       Search Results for: <span className="text-primary">"{searchQuery}"</span>
                     </h6>
-                    {filteredCustomerData && filteredCustomerData.length > 0 ? (
-                      <div className="space-y-2">
-                        {filteredCustomerData.map(([key, value]) => (
-                          <div key={key} className="p-2 bg-primary/5 rounded">
-                            <p className="text-xs text-gray capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</p>
-                            <p className="text-sm font-medium">{value}</p>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-sm text-gray">No matching results found</p>
-                    )}
+                    {(() => {
+                      const results = customersDatabase.filter(customer =>
+                        customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        customer.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        customer.phone.includes(searchQuery)
+                      );
+
+                      return results.length > 0 ? (
+                        <div className="space-y-2">
+                          {results.map(customer => (
+                            <button
+                              key={customer.id}
+                              onClick={() => {
+                                setSelectedCustomer(customer);
+                                setSearchQuery(""); // Clear search after selection
+                              }}
+                              className={`w-full text-left p-3 rounded-lg border transition-colors ${selectedCustomer.id === customer.id
+                                ? 'border-primary bg-primary/5'
+                                : 'border-stroke hover:bg-gray-50'
+                                }`}
+                            >
+                              <p className="font-semibold text-sm">{customer.name}</p>
+                              <p className="text-xs text-gray">{customer.email}</p>
+                              <p className="text-xs text-gray mt-1">{customer.phone}</p>
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray">No matching customers found</p>
+                      );
+                    })()}
                   </div>
                 )}
 
-                {activeTab2 === "AI Feedback" && (
-                  <div className="space-y-4">
-                    <div className="bg-white p-4 rounded-lg border border-stroke">
-                      <h5 className="font-semibold text-sm mb-3">AI Suggestions</h5>
-                      <div className="space-y-3">
-                        <div className="p-3 bg-primary/5 rounded-lg">
-                          <p className="text-xs text-gray mb-1">Suggested Response</p>
-                          <p className="text-sm">Based on this inquiry, consider using the "Product Information" template.</p>
-                        </div>
-                        <div className="p-3 bg-green-50 rounded-lg">
-                          <p className="text-xs text-gray mb-1">Sentiment Analysis</p>
-                          <p className="text-sm">Customer sentiment: <span className="font-semibold text-green-600">Positive</span></p>
-                        </div>
-                        <div className="p-3 bg-amber-50 rounded-lg">
-                          <p className="text-xs text-gray mb-1">Priority</p>
-                          <p className="text-sm">Suggested priority: <span className="font-semibold text-amber-600">Medium</span></p>
-                        </div>
-                      </div>
+                {/* Quick Customer List - shows when NOT searching */}
+                {!searchQuery && (
+                  <div className="bg-white p-4 rounded-lg border border-stroke">
+                    <h6 className="font-semibold text-sm mb-3">Recent Customers</h6>
+                    <div className="space-y-2">
+                      {customersDatabase.slice(0, 3).map(customer => (
+                        <button
+                          key={customer.id}
+                          onClick={() => setSelectedCustomer(customer)}
+                          className={`w-full text-left p-2 rounded-lg transition-colors ${selectedCustomer.id === customer.id
+                            ? 'bg-primary/10 text-primary'
+                            : 'hover:bg-gray-50'
+                            }`}
+                        >
+                          <p className="font-medium text-xs">{customer.name}</p>
+                          <p className="text-[10px] text-gray">{customer.email}</p>
+                        </button>
+                      ))}
                     </div>
-
-                    {/* UPDATED: Show search in AI Feedback too */}
-                    {searchQuery && (
-                      <div className="bg-white p-4 rounded-lg border border-stroke">
-                        <h6 className="font-semibold text-sm mb-2">
-                          Searching AI insights for: <span className="text-primary">"{searchQuery}"</span>
-                        </h6>
-                        <p className="text-sm text-gray">AI analysis updated based on your search</p>
-                      </div>
-                    )}
                   </div>
                 )}
-                
+              </div>
+            )}
+
+            {activeTab2 === "AI Feedback" && (
+              <div className="space-y-4 mt-4">
+                <div className="bg-white p-4 rounded-lg border border-stroke">
+                  <h5 className="font-semibold text-sm mb-3">AI Suggestions</h5>
+                  <div className="space-y-3">
+                    <div className="p-3 bg-primary/5 rounded-lg">
+                      <p className="text-xs text-gray mb-1">Suggested Response</p>
+                      <p className="text-sm">Based on this inquiry, consider using the "Product Information" template.</p>
+                    </div>
+                    <div className="p-3 bg-green-50 rounded-lg">
+                      <p className="text-xs text-gray mb-1">Sentiment Analysis</p>
+                      <p className="text-sm">Customer sentiment: <span className="font-semibold text-green-600">Positive</span></p>
+                    </div>
+                    <div className="p-3 bg-amber-50 rounded-lg">
+                      <p className="text-xs text-gray mb-1">Priority</p>
+                      <p className="text-sm">Suggested priority: <span className="font-semibold text-amber-600">Medium</span></p>
+                    </div>
+                  </div>
+                </div>
+
+                {searchQuery && (
+                  <div className="bg-white p-4 rounded-lg border border-stroke">
+                    <h6 className="font-semibold text-sm mb-2">
+                      Searching AI insights for: <span className="text-primary">"{searchQuery}"</span>
+                    </h6>
+                    <p className="text-sm text-gray">AI analysis updated based on your search</p>
+                  </div>
+                )}
               </div>
             )}
 
