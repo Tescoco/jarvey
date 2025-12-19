@@ -150,7 +150,7 @@ export default function FieldSettings() {
                         <div className="flex gap-3 mt-6">
                             <button
                                 onClick={handleSave}
-                                className="flex-1 bg-prim text-white rounded-lg py-2 font-medium hover:opacity-90"
+                                className="flex-1 bg-btn border text-white border-stroke rounded-lg py-2 font-medium hover:bg-gray-50 hover:opacity-90"
                             >
                                 Save
                             </button>

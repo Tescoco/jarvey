@@ -279,7 +279,7 @@ export default function ReplyWithPredefined({ install }) {
             <button className="btn bg-off" onClick={handleEdit}>
               Edit
             </button>
-            <button className="btn bg-primary" onClick={handleInstall}>
+            <button className="btn bg-off" onClick={handleInstall}>
               Install
             </button>
           </div>
