@@ -11,6 +11,7 @@ import StoreDropdown from "../../components/StoreDropdown";
 
 export const CardList = [
   {
+    id: 1,
     status: "Product Question",
     name: "Preview",
     title: "Shelf life Information",
@@ -21,6 +22,7 @@ export const CardList = [
     color2: "#176448",
   },
   {
+    id: 2,
     status: "Product Question",
     name: "Preview",
     title: "Shelf life Information",
@@ -31,6 +33,7 @@ export const CardList = [
     color2: "#176448",
   },
   {
+    id: 3,
     status: "Product Question",
     name: "Preview",
     title: "Shelf life Information",
@@ -41,6 +44,7 @@ export const CardList = [
     color2: "#176448",
   },
   {
+    id: 4,
     status: "Product Question",
     name: "Preview",
     title: "Shelf life Information",
@@ -51,6 +55,7 @@ export const CardList = [
     color2: "#176448",
   },
   {
+    id: 5,
     status: "Policy",
     name: "Preview",
     title: "Shelf life Information",
@@ -61,6 +66,7 @@ export const CardList = [
     color2: "#176448",
   },
   {
+    id: 6,
     status: "Product Question",
     name: "Preview",
     title: "Shelf life Information",
@@ -71,6 +77,7 @@ export const CardList = [
     color2: "#176448",
   },
   {
+    id: 7,
     status: "Product Question",
     name: "Preview",
     title: "Shelf life Information",
@@ -81,6 +88,7 @@ export const CardList = [
     color2: "#176448",
   },
   {
+    id: 8,
     status: "Policy",
     name: "Preview",
     title: "Shelf life Information",
@@ -91,6 +99,7 @@ export const CardList = [
     color2: "#176448",
   },
   {
+    id: 9,
     status: "Product Question",
     name: "Preview",
     title: "Shelf life Information",
@@ -101,6 +110,7 @@ export const CardList = [
     color2: "#176448",
   },
   {
+    id: 10,
     status: "Policy",
     name: "Preview",
     title: "Shelf life Information",
@@ -111,6 +121,7 @@ export const CardList = [
     color2: "#176448",
   },
   {
+    id: 11,
     status: "Product Question",
     name: "Preview",
     title: "Shelf life Information",
@@ -121,6 +132,7 @@ export const CardList = [
     color2: "#176448",
   },
   {
+    id: 12,
     status: "Product Question",
     name: "Preview",
     title: "Shelf life Information",
@@ -131,6 +143,7 @@ export const CardList = [
     color2: "#176448",
   },
 ];
+
 export default function Create() {
   const [modal, setModal] = useState(false);
 

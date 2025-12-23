@@ -5,11 +5,12 @@ import Input from "../../components/Input";
 import Dropdown from "../../components/Dropdown";
 import bg from "../../assets/img/flows-bg.png";
 import { arrow_left } from "../../utilities/Classes";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import FlowChart from "../../components/FlowChart";
 import { useSearchParams } from "react-router-dom";
 
 export default function Details() {
+  const { id } = useParams();
   const [searchParams] = useSearchParams();
   const install = searchParams.get("install");
 
@@ -218,8 +219,8 @@ export default function Details() {
                 <button
                   onClick={() => setActiveActionBtn(item)}
                   className={`min-w-[68px] capitalize min-h-10 px-2.5 text-sm font-inter font-medium rounded-[10px] hover:text-heading transition-colors ${item === activeActionBtn
-                      ? "bg-heading !text-white"
-                      : "text-gray"
+                    ? "bg-heading !text-white"
+                    : "text-gray"
                     }`}
                   key={index}
                 >
@@ -272,6 +273,7 @@ export default function Details() {
           <div className="flex-1 w-full p-4 md:p-6">
             <div className="w-full h-full min-h-[500px]">
               <FlowChart
+                templateId={id}
                 onSave={handleSave}
                 analysisMode={activeActionBtn === "analysis"}
               />

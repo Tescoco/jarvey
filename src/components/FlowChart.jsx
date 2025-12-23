@@ -15,8 +15,9 @@ import Input from "./Input";
 import Dropdown from "./Dropdown";
 import "./FlowChart.css";
 
-export default function FlowChart({ onSave, analysisMode = false }) {
+export default function FlowChart({ templateId, onSave, analysisMode = false }) {
   const [nodes, setNodes] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [sidePanel, setSidePanel] = useState({
     open: false,
@@ -43,6 +44,39 @@ export default function FlowChart({ onSave, analysisMode = false }) {
       'button, a, input, textarea, select, [role="button"], [contenteditable="true"], .cursor-pointer, [onclick]'
     );
   };
+
+  // MOVE THIS BEFORE useEffect 
+  const getDefaultNodes = () => [
+    {
+      id: "start",
+      type: "start",
+      name: "START",
+      data: {
+        title: "START",
+        subtitle: "Trigger button",
+        content: "Buy Now",
+      },
+    },
+    {
+      id: "message",
+      type: "message",
+      name: "Message",
+      data: {
+        title: "Message",
+        content: "Message",
+      },
+    },
+    {
+      id: "end",
+      type: "end",
+      name: "END",
+      data: {
+        title: "END",
+        subtitle: "Ask for feedback",
+        content: "Ask for feedback",
+      },
+    },
+  ];
 
   // Handle page leave/refresh confirmation
   useEffect(() => {
@@ -76,42 +110,29 @@ export default function FlowChart({ onSave, analysisMode = false }) {
     };
   }, [hasUnsavedChanges]);
 
-  // Initialize with default nodes
+  // Load template data
   useEffect(() => {
-    const initialNodes = [
-      {
-        id: "start",
-        type: "start",
-        name: "START",
-        data: {
-          title: "START",
-          subtitle: "Trigger button",
-          content: "Buy Now",
-        },
-      },
-      {
-        id: "message",
-        type: "message",
-        name: "Message",
-        data: {
-          title: "Message",
-          content: "Message",
-        },
-      },
-      {
-        id: "end",
-        type: "end",
-        name: "END",
-        data: {
-          title: "END",
-          subtitle: "Ask for feedback",
-          content: "Ask for feedback",
-        },
-      },
-    ];
-    setNodes(initialNodes);
-  }, []);
+    const loadTemplateData = async () => {
+      setIsLoading(true);
 
+      if (templateId) {
+        const template = CardList.find(t => t.id === parseInt(templateId));
+
+        if (template && template.nodes) {
+          setNodes(template.nodes);
+        } else {
+          setNodes(getDefaultNodes()); // Now this works! ✅
+        }
+      } else {
+        setNodes(getDefaultNodes()); // Now this works! ✅
+      }
+
+      setIsLoading(false);
+    };
+
+    loadTemplateData();
+  }, [templateId]);
+  
   // Function to mark changes as unsaved
   const markAsUnsaved = () => {
     setHasUnsavedChanges(true);
@@ -2217,6 +2238,29 @@ export default function FlowChart({ onSave, analysisMode = false }) {
   const handleTouchEnd = () => setIsPanning(false);
 
   // Center the canvas on first render
+  // useLayoutEffect(() => {
+  //   if (hasCenteredRef.current) return;
+  //   const viewportEl = viewportRef.current;
+  //   const contentEl = contentRef.current;
+  //   if (!viewportEl || !contentEl) return;
+
+  //   // Defer to ensure sizes are computed
+  //   const raf = requestAnimationFrame(() => {
+  //     const vw = viewportEl.clientWidth;
+  //     const vh = viewportEl.clientHeight;
+  //     const cw = contentEl.offsetWidth;
+  //     const ch = contentEl.offsetHeight;
+  //     if (vw && vh && cw && ch) {
+  //       const offsetX = (vw - cw * viewportScale) / 2;
+  //       const offsetY = (vh - ch * viewportScale) / 2;
+  //       setViewportOffset({ x: offsetX, y: offsetY });
+  //       hasCenteredRef.current = true;
+  //     }
+  //   });
+  //   return () => cancelAnimationFrame(raf);
+  // }, [viewportScale]);
+
+  // Center the canvas on first render
   useLayoutEffect(() => {
     if (hasCenteredRef.current) return;
     const viewportEl = viewportRef.current;
@@ -2237,7 +2281,15 @@ export default function FlowChart({ onSave, analysisMode = false }) {
       }
     });
     return () => cancelAnimationFrame(raf);
-  }, [viewportScale]);
+  }, [viewportScale, nodes]); // ← ADD 'nodes' HERE
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-[600px]">
+        <p>Loading template...</p>
+      </div>
+    );
+  }
 
   return (
     <div
