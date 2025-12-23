@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import Logo from "../components/Logo";
 import { useDispatch, useSelector } from "react-redux";
 import { handleChange } from "../store/MenuSlice";
@@ -17,6 +17,7 @@ export default function Left({ className }) {
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const notificationsRef = useRef(null);
   const location = useLocation();
+  const navigate = useNavigate();
   const pathname = location.pathname;
 
   // Register notifications dropdown for global dismiss
@@ -27,7 +28,7 @@ export default function Left({ className }) {
   );
 
   // Sample notification data
-  const notifications = [
+  const [notifications, setNotifications] = useState([
     {
       id: 1,
       title: "New ticket assigned",
@@ -60,7 +61,7 @@ export default function Left({ className }) {
       type: "system",
       unread: false,
     },
-  ];
+  ]);
 
   // Ticket navigation data
   const ticketsCategories = [
@@ -88,6 +89,33 @@ export default function Left({ className }) {
     { name: "Offline Capture", count: 1 },
     { name: "Help Center survey", count: 1 },
   ];
+
+  const handleMarkAllAsRead = () => {
+    setNotifications(prevNotifications =>
+      prevNotifications.map(notif => ({ ...notif, unread: false }))
+    );
+  };
+
+  const handleNotificationClick = (notificationId) => {
+    // Mark this notification as read
+    setNotifications(prevNotifications =>
+      prevNotifications.map(notif =>
+        notif.id === notificationId ? { ...notif, unread: false } : notif
+      )
+    );
+
+    // Add your navigation logic here, e.g.:
+    // navigate(`/notification/${notificationId}`);
+    // Or close the dropdown:
+    setNotificationsOpen(false);
+  };
+
+  const handleViewAllNotifications = () => {
+    // Add navigation to notifications page
+    navigate('admin/notification-setting');
+    setNotificationsOpen(false);
+  };
+
   useEffect(() => {
     const baseMenu = [
       {
@@ -239,6 +267,7 @@ export default function Left({ className }) {
         ],
       },
     ];
+
     const allPages = [
       {
         label: {
@@ -476,6 +505,7 @@ export default function Left({ className }) {
         ],
       },
     ];
+
     const agentPage = [
       {
         label: "Stores",
@@ -643,6 +673,7 @@ export default function Left({ className }) {
         ],
       },
     ];
+
     const helpPage = [
       {
         label: "Recent Added",
@@ -692,6 +723,7 @@ export default function Left({ className }) {
         ],
       },
     ];
+
     const dashboardPage = [
       {
         label: {
@@ -1558,9 +1590,8 @@ export default function Left({ className }) {
         ></div>
       )}
       <div
-        className={`flex flex-col h-screen border-r border-solid border-stroke min-h-screen fixed top-0 left-0 bg-white z-30 transition-all duration-300 ${
-          mobileMenu ? "translate-x-0" : "-translate-x-[150%]"
-        } lg:relative lg:translate-x-0 ${className}`}
+        className={`flex flex-col h-screen border-r border-solid border-stroke min-h-screen fixed top-0 left-0 bg-white z-30 transition-all duration-300 ${mobileMenu ? "translate-x-0" : "-translate-x-[150%]"
+          } lg:relative lg:translate-x-0 ${className}`}
       >
         <div className="border-b border-solid border-stroke min-h-16 md:min-h-20 lg:min-h-[88px] flex items-center justify-between px-4 md:px-5 lg:px-6">
           <Logo />
@@ -1572,16 +1603,14 @@ export default function Left({ className }) {
               {/* Regular menu items for tickets page */}
               {menus.map((item, index) => (
                 <div
-                  className={`${
-                    index === menus.length - 1 ? "border-b-0" : "border-b"
-                  } border-solid border-stroke p-4 md:p-5`}
+                  className={`${index === menus.length - 1 ? "border-b-0" : "border-b"
+                    } border-solid border-stroke p-4 md:p-5`}
                   key={index}
                 >
                   {item.label && (
                     <div
-                      className={`flex items-center gap-1 ${
-                        item.label.icon ? "mb-1.5" : "mb-2.5"
-                      }`}
+                      className={`flex items-center gap-1 ${item.label.icon ? "mb-1.5" : "mb-2.5"
+                        }`}
                     >
                       {item.label.icon}
                       <strong className="block uppercase font-inter font-normal text-[#868C98] text-sm tracking-[0.48px]">
@@ -1594,9 +1623,8 @@ export default function Left({ className }) {
                       <button
                         key={k}
                         onClick={() => setSearchModalOpen(true)}
-                        className={`${item.label?.icon ? "ml-5" : ""} ${
-                          k === item.items.length - 1 ? "mb-0" : "mb-1"
-                        } w-full flex items-center justify-between gap-2 px-3 py-2 bg-transparent rounded-lg hover:bg-[#F1EEFF] text-[#111]/70 font-inter font-medium text-sm capitalize`}
+                        className={`${item.label?.icon ? "ml-5" : ""} ${k === item.items.length - 1 ? "mb-0" : "mb-1"
+                          } w-full flex items-center justify-between gap-2 px-3 py-2 bg-transparent rounded-lg hover:bg-[#F1EEFF] text-[#111]/70 font-inter font-medium text-sm capitalize`}
                       >
                         <span className="flex items-center justify-between gap-2">
                           {link?.icon && link?.icon}
@@ -1612,9 +1640,8 @@ export default function Left({ className }) {
                           onClick={() =>
                             setNotificationsOpen(!notificationsOpen)
                           }
-                          className={`${item.label?.icon ? "ml-5" : ""} ${
-                            k === item.items.length - 1 ? "mb-0" : "mb-1"
-                          } w-full flex items-center justify-between gap-2 px-3 py-2 bg-transparent rounded-lg hover:bg-[#F1EEFF] text-[#111]/70 font-inter font-medium text-sm capitalize`}
+                          className={`${item.label?.icon ? "ml-5" : ""} ${k === item.items.length - 1 ? "mb-0" : "mb-1"
+                            } w-full flex items-center justify-between gap-2 px-3 py-2 bg-transparent rounded-lg hover:bg-[#F1EEFF] text-[#111]/70 font-inter font-medium text-sm capitalize`}
                         >
                           <span className="flex items-center justify-between gap-2">
                             {link?.icon && link?.icon}
@@ -1640,29 +1667,41 @@ export default function Left({ className }) {
                                 <h3 className="font-medium text-heading">
                                   Notifications
                                 </h3>
-                                <button className="text-xs text-primary hover:underline">
+                                <button
+                                  onClick={handleMarkAllAsRead}
+                                  className="text-xs text-primary hover:underline"
+                                >
                                   Mark all as read
                                 </button>
+                                {/* <button className="text-xs text-primary hover:underline">
+                                  Mark all as read
+                                </button> */}
                               </div>
                             </div>
                             <div className="py-2">
                               {notifications.length > 0 ? (
                                 notifications.map((notification) => (
+                                  // <div
+                                  //   key={notification.id}
+                                  //   className={`px-4 py-3 hover:bg-gray-50 cursor-pointer border-l-4 ${notification.unread
+                                  //     ? "border-l-primary bg-blue-50/30"
+                                  //     : "border-l-transparent"
+                                  //     }`}
+                                  // >
                                   <div
                                     key={notification.id}
-                                    className={`px-4 py-3 hover:bg-gray-50 cursor-pointer border-l-4 ${
-                                      notification.unread
-                                        ? "border-l-primary bg-blue-50/30"
-                                        : "border-l-transparent"
-                                    }`}
+                                    onClick={() => handleNotificationClick(notification.id)}
+                                    className={`px-4 py-3 hover:bg-gray-50 cursor-pointer border-l-4 ${notification.unread
+                                      ? "border-l-primary bg-blue-50/30"
+                                      : "border-l-transparent"
+                                      }`}
                                   >
                                     <div className="flex items-start gap-3">
                                       <div
-                                        className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
-                                          notification.unread
-                                            ? "bg-primary"
-                                            : "bg-gray-300"
-                                        }`}
+                                        className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${notification.unread
+                                          ? "bg-primary"
+                                          : "bg-gray-300"
+                                          }`}
                                       ></div>
                                       <div className="flex-1 min-w-0">
                                         <div className="flex items-center justify-between">
@@ -1700,9 +1739,15 @@ export default function Left({ className }) {
                               )}
                             </div>
                             <div className="p-3 border-t border-stroke">
-                              <button className="w-full text-center text-sm text-primary hover:underline">
+                              <button
+                                onClick={handleViewAllNotifications}
+                                className="w-full text-center text-sm text-primary hover:underline"
+                              >
                                 View all notifications
                               </button>
+                              {/* <button className="w-full text-center text-sm text-primary hover:underline">
+                                View all notifications
+                              </button> */}
                             </div>
                           </div>
                         )}
@@ -1714,9 +1759,8 @@ export default function Left({ className }) {
                         }
                         to={link.path || "#"}
                         key={k}
-                        className={`${item.label?.icon ? "ml-5" : ""} ${
-                          k === item.items.length - 1 ? "mb-0" : "mb-1"
-                        } flex items-center justify-between gap-2 px-3 py-2 bg-transparent rounded-lg hover:bg-[#F1EEFF] text-[#111]/70 font-inter font-medium text-sm capitalize`}
+                        className={`${item.label?.icon ? "ml-5" : ""} ${k === item.items.length - 1 ? "mb-0" : "mb-1"
+                          } flex items-center justify-between gap-2 px-3 py-2 bg-transparent rounded-lg hover:bg-[#F1EEFF] text-[#111]/70 font-inter font-medium text-sm capitalize`}
                       >
                         <span className="flex items-center justify-between gap-2">
                           {link?.icon && link?.icon}
@@ -1731,11 +1775,10 @@ export default function Left({ className }) {
                             </span>
                           )}
                           <span
-                            className={`text ${
-                              pathname.includes("help-center")
-                                ? "text-[#525866]"
-                                : ""
-                            }`}
+                            className={`text ${pathname.includes("help-center")
+                              ? "text-[#525866]"
+                              : ""
+                              }`}
                           >
                             <span className="line-clamp-1">{link?.name}</span>
                             {link?.des && (
@@ -1761,11 +1804,10 @@ export default function Left({ className }) {
                 {ticketsCategories.map((category, index) => (
                   <div
                     key={index}
-                    className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors mb-1 ${
-                      category.isSelected
-                        ? "bg-[#F4F2FF] text-primary"
-                        : "hover:bg-[#F1EEFF] text-[#0A0D14]"
-                    }`}
+                    className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors mb-1 ${category.isSelected
+                      ? "bg-[#F4F2FF] text-primary"
+                      : "hover:bg-[#F1EEFF] text-[#0A0D14]"
+                      }`}
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-5 h-5 flex items-center justify-center">
@@ -1922,9 +1964,8 @@ export default function Left({ className }) {
                         viewBox="0 0 12 12"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
-                        className={`transition-transform duration-200 ${
-                          sharedViewsExpanded ? "rotate-180" : ""
-                        }`}
+                        className={`transition-transform duration-200 ${sharedViewsExpanded ? "rotate-180" : ""
+                          }`}
                       >
                         <path
                           d="M3 4.5L6 7.5L9 4.5"
@@ -1961,16 +2002,14 @@ export default function Left({ className }) {
             /* Regular menu rendering for non-tickets pages */
             menus.map((item, index) => (
               <div
-                className={`${
-                  index === menus.length - 1 ? "border-b-0" : "border-b"
-                } border-solid border-stroke p-4 md:p-5`}
+                className={`${index === menus.length - 1 ? "border-b-0" : "border-b"
+                  } border-solid border-stroke p-4 md:p-5`}
                 key={index}
               >
                 {item.label && (
                   <div
-                    className={`flex items-center gap-1 ${
-                      item.label.icon ? "mb-1.5" : "mb-2.5"
-                    }`}
+                    className={`flex items-center gap-1 ${item.label.icon ? "mb-1.5" : "mb-2.5"
+                      }`}
                   >
                     {item.label.icon}
                     <strong className="block uppercase font-inter font-normal text-[#868C98] text-sm tracking-[0.48px]">
@@ -1983,9 +2022,8 @@ export default function Left({ className }) {
                     <button
                       key={k}
                       onClick={() => setSearchModalOpen(true)}
-                      className={`${item.label?.icon ? "ml-5" : ""} ${
-                        k === item.items.length - 1 ? "mb-0" : "mb-1"
-                      } w-full flex items-center justify-between gap-2 px-3 py-2 bg-transparent rounded-lg hover:bg-[#F1EEFF] text-[#111]/70 font-inter font-medium text-sm capitalize`}
+                      className={`${item.label?.icon ? "ml-5" : ""} ${k === item.items.length - 1 ? "mb-0" : "mb-1"
+                        } w-full flex items-center justify-between gap-2 px-3 py-2 bg-transparent rounded-lg hover:bg-[#F1EEFF] text-[#111]/70 font-inter font-medium text-sm capitalize`}
                     >
                       <span className="flex items-center justify-between gap-2">
                         {link?.icon && link?.icon}
@@ -1999,9 +2037,8 @@ export default function Left({ className }) {
                       <button
                         ref={notificationsRef}
                         onClick={() => setNotificationsOpen(!notificationsOpen)}
-                        className={`${item.label?.icon ? "ml-5" : ""} ${
-                          k === item.items.length - 1 ? "mb-0" : "mb-1"
-                        } w-full flex items-center justify-between gap-2 px-3 py-2 bg-transparent rounded-lg hover:bg-[#F1EEFF] text-[#111]/70 font-inter font-medium text-sm capitalize`}
+                        className={`${item.label?.icon ? "ml-5" : ""} ${k === item.items.length - 1 ? "mb-0" : "mb-1"
+                          } w-full flex items-center justify-between gap-2 px-3 py-2 bg-transparent rounded-lg hover:bg-[#F1EEFF] text-[#111]/70 font-inter font-medium text-sm capitalize`}
                       >
                         <span className="flex items-center justify-between gap-2">
                           {link?.icon && link?.icon}
@@ -2027,29 +2064,48 @@ export default function Left({ className }) {
                               <h3 className="font-medium text-heading">
                                 Notifications
                               </h3>
-                              <button className="text-xs text-primary hover:underline">
+
+                              <button
+                                onClick={handleMarkAllAsRead}
+                                className="text-xs text-primary hover:underline"
+                              >
                                 Mark all as read
                               </button>
+
+                              {/* <button className="text-xs text-primary hover:underline">
+                                Mark all as read
+                              </button> */}
+
+
                             </div>
                           </div>
                           <div className="py-2">
                             {notifications.length > 0 ? (
                               notifications.map((notification) => (
+                                // <div
+                                //   key={notification.id}
+                                //   className={`px-4 py-3 hover:bg-gray-50 cursor-pointer border-l-4 ${notification.unread
+                                //     ? "border-l-primary bg-blue-50/30"
+                                //     : "border-l-transparent"
+                                //     }`}
+                                // >
+
                                 <div
                                   key={notification.id}
-                                  className={`px-4 py-3 hover:bg-gray-50 cursor-pointer border-l-4 ${
-                                    notification.unread
-                                      ? "border-l-primary bg-blue-50/30"
-                                      : "border-l-transparent"
-                                  }`}
+                                  onClick={() => handleNotificationClick(notification.id)}
+                                  className={`px-4 py-3 hover:bg-gray-50 cursor-pointer border-l-4 ${notification.unread
+                                    ? "border-l-primary bg-blue-50/30"
+                                    : "border-l-transparent"
+                                    }`}
                                 >
+
+
                                   <div className="flex items-start gap-3">
                                     <div
-                                      className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
-                                        notification.unread
-                                          ? "bg-primary"
-                                          : "bg-gray-300"
-                                      }`}
+                                      className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${notification.unread
+                                        ? "bg-primary"
+                                        : "bg-gray-300"
+                                        }`}
                                     ></div>
                                     <div className="flex-1 min-w-0">
                                       <div className="flex items-center justify-between">
@@ -2087,9 +2143,20 @@ export default function Left({ className }) {
                             )}
                           </div>
                           <div className="p-3 border-t border-stroke">
-                            <button className="w-full text-center text-sm text-primary hover:underline">
+
+                            <button
+                              onClick={handleViewAllNotifications}
+                              className="w-full text-center text-sm text-primary hover:underline"
+                            >
                               View all notifications
                             </button>
+
+
+                            {/* <button className="w-full text-center text-sm text-primary hover:underline">
+                              View all notifications
+                            </button> */}
+
+
                           </div>
                         </div>
                       )}
@@ -2101,9 +2168,8 @@ export default function Left({ className }) {
                       }
                       to={link.path || "#"}
                       key={k}
-                      className={`${item.label?.icon ? "ml-5" : ""} ${
-                        k === item.items.length - 1 ? "mb-0" : "mb-1"
-                      } flex items-center justify-between gap-2 px-3 py-2 bg-transparent rounded-lg hover:bg-[#F1EEFF] text-[#111]/70 font-inter font-medium text-sm capitalize`}
+                      className={`${item.label?.icon ? "ml-5" : ""} ${k === item.items.length - 1 ? "mb-0" : "mb-1"
+                        } flex items-center justify-between gap-2 px-3 py-2 bg-transparent rounded-lg hover:bg-[#F1EEFF] text-[#111]/70 font-inter font-medium text-sm capitalize`}
                     >
                       <span className="flex items-center justify-between gap-2">
                         {link?.icon && link?.icon}
@@ -2118,11 +2184,10 @@ export default function Left({ className }) {
                           </span>
                         )}
                         <span
-                          className={`text ${
-                            pathname.includes("help-center")
-                              ? "text-[#525866]"
-                              : ""
-                          }`}
+                          className={`text ${pathname.includes("help-center")
+                            ? "text-[#525866]"
+                            : ""
+                            }`}
                         >
                           <span className="line-clamp-1">{link?.name}</span>
                           {link?.des && (
