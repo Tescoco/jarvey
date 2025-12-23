@@ -34,12 +34,22 @@ export default function InstallFlows({ install }) {
     );
   };
 
-  const handleEdit = () => {
-    // if the page is on onboarding page, redirect to /onboarding/predefined-install
+  // const handleEdit = () => {
+  //   // if the page is on onboarding page, redirect to /onboarding/predefined-install
+  //   if (window.location.pathname.includes("/onboarding")) {
+  //     window.location.href = "/onboarding/flows-details/1?install=true";
+  //   } else {
+  //     window.location.href = "/app/flows-details/1";
+  //   }
+  // };
+
+  const handleEdit = (template) => {
+    const templateId = template?.id || 1;
+
     if (window.location.pathname.includes("/onboarding")) {
-      window.location.href = "/onboarding/flows-details/1?install=true";
+      window.location.href = `/onboarding/flows-details/${templateId}?install=true`;
     } else {
-      window.location.href = "/app/flows-details/1";
+      window.location.href = `/app/flows-details/${templateId}`;
     }
   };
 
@@ -87,6 +97,110 @@ export default function InstallFlows({ install }) {
       ...prev,
     ]);
   };
+
+  // const [modal, setModal] = useState(false);
+  // const [selectedFlow, setSelectedFlow] = useState(null);
+  // const [installed, setInstalled] = useState([]);
+  // const initialInstalled = [];
+  // const [installedFlows, setInstalledFlows] = useState(
+  //   install
+  //     ? [{
+  //       id: 1, // ADD THIS
+  //       name: "Flow 1",
+  //       date: new Date().toLocaleDateString(),
+  //       img: flag
+  //     }]
+  //     : initialInstalled
+  // );
+  // const [query, setQuery] = useState("");
+  // const [templateModalOpen, setTemplateModalOpen] = useState(false);
+  // const [selectedTemplate, setSelectedTemplate] = useState(null);
+
+  // const openTemplate = (template) => {
+  //   setSelectedTemplate(template);
+  //   setTemplateModalOpen(true);
+  // };
+
+  // const isInstalled = (template) => {
+  //   return installedFlows.some(
+  //     (f) =>
+  //       f.name.toLowerCase() ===
+  //       (template?.title || template?.name)?.toLowerCase()
+  //   );
+  // };
+
+  // // FIX THIS - Accept the flow item as parameter
+  // const handleEdit = (flowItem) => {
+  //   // Use the flow's ID or name to identify it
+  //   const flowId = flowItem.id || encodeURIComponent(flowItem.name);
+
+  //   if (window.location.pathname.includes("/onboarding")) {
+  //     window.location.href = `/onboarding/flows-details/${flowId}?install=true`;
+  //   } else {
+  //     window.location.href = `/app/flows-details/${flowId}`;
+  //   }
+  // };
+
+  // // FIX THIS - Add ID when installing
+  // const handleInstallTemplate = () => {
+  //   if (!selectedTemplate) return;
+  //   if (isInstalled(selectedTemplate)) {
+  //     setTemplateModalOpen(false);
+  //     return;
+  //   }
+  //   const today = new Date();
+  //   const dd = String(today.getDate()).padStart(2, "0");
+  //   const mm = String(today.getMonth() + 1).padStart(2, "0");
+  //   const yyyy = today.getFullYear();
+  //   const date = `${dd}/${mm}/${yyyy}`;
+
+  //   // Generate unique ID
+  //   const newId = installedFlows.length > 0
+  //     ? Math.max(...installedFlows.map(f => f.id || 0)) + 1
+  //     : 1;
+
+  //   setInstalledFlows((prev) => [
+  //     {
+  //       id: newId, // ADD THIS
+  //       name: selectedTemplate.title || selectedTemplate.name,
+  //       stock: "-",
+  //       date,
+  //       img: flag,
+  //     },
+  //     ...prev,
+  //   ]);
+  //   setTemplateModalOpen(false);
+  // };
+
+  // const handleDeleteFlow = (flowToDelete) => {
+  //   setInstalledFlows((prev) => prev.filter((flow) => flow !== flowToDelete));
+  // };
+
+  // // FIX THIS - Add ID when duplicating
+  // const handleDuplicateFlow = (flowToDuplicate) => {
+  //   const today = new Date();
+  //   const dd = String(today.getDate()).padStart(2, "0");
+  //   const mm = String(today.getMonth() + 1).padStart(2, "0");
+  //   const yyyy = today.getFullYear();
+  //   const date = `${dd}/${mm}/${yyyy}`;
+
+  //   // Generate unique ID
+  //   const newId = installedFlows.length > 0
+  //     ? Math.max(...installedFlows.map(f => f.id || 0)) + 1
+  //     : 1;
+
+  //   setInstalledFlows((prev) => [
+  //     {
+  //       id: newId, // ADD THIS
+  //       name: `${flowToDuplicate.name} (Copy)`,
+  //       stock: "-",
+  //       date,
+  //       img: flag,
+  //     },
+  //     ...prev,
+  //   ]);
+  // };
+
   return (
     <>
       <div className={`${c_24}`}>
@@ -236,6 +350,7 @@ export default function InstallFlows({ install }) {
           </div>
         ))}
       </div>
+
       {templateModalOpen && selectedTemplate && (
         <Modal closeIconHide={false} innerClass="max-w-[724px]">
           <h4 className="text-lg md:text-xl xl:text-2xl font-semibold !leading-[1.3] mb-4 md:mb-5 xl:mb-6">
@@ -812,6 +927,7 @@ export default function InstallFlows({ install }) {
           </div>
         </Modal>
       )}
+
     </>
   );
 }
