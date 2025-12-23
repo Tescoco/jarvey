@@ -118,6 +118,7 @@ export default function Billing() {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'paid', 'not paid'
   const [dateFilter, setDateFilter] = useState({ from: '', to: '' });
+  const [planSelections, setPlanSelections] = useState({});
 
   const rowsPerPage = 10;
 
@@ -372,6 +373,13 @@ export default function Billing() {
     printWindow.document.close();
   };
 
+  const handlePlanSelection = (planId, value) => {
+    setPlanSelections(prev => ({
+      ...prev,
+      [planId]: value
+    }));
+  };
+
   return (
     <>
       <Top />
@@ -443,9 +451,18 @@ export default function Billing() {
                                 className="!mb-0"
                                 btnClass="max-h-[34px] max-w-[123px] text-heading font-medium"
                                 placeholder="300"
+                                value={planSelections[item.id] || "300"}  // Add this
+                                onChange={(value) => handlePlanSelection(item.id, value)}  // Add this
                                 isArrow={true}
                                 items={[{ name: "300" }, { name: "400" }]}
                               />
+                              {/* <Dropdown
+                                className="!mb-0"
+                                btnClass="max-h-[34px] max-w-[123px] text-heading font-medium"
+                                placeholder="300"
+                                isArrow={true}
+                                items={[{ name: "300" }, { name: "400" }]}
+                              /> */}
                               <div className="flex items-center gap-2">
                                 <p>Tickets/Month</p>
                                 <svg
