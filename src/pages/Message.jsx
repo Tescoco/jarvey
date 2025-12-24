@@ -302,14 +302,14 @@ export default function Message() {
   }, [messagesList, searchQuery]);
 
   const handleSearch = (e) => {
-    const query = e.target.value.toLowerCase();
+    const query = e.target.value;
     setSearchQuery(query);
 
     if (query.trim() === "") {
       setFilteredMessages(messagesList);
     } else {
       const filtered = messagesList.filter(msg =>
-        msg.name.toLowerCase().includes(query)
+        msg.name.toLowerCase().includes(query.toLowerCase()) // Convert only for comparison
       );
       setFilteredMessages(filtered);
     }
@@ -675,8 +675,8 @@ export default function Message() {
                     </div>
                     <div
                       className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${selectedMembers.includes(member.name)
-                          ? 'bg-primary border-primary'
-                          : 'border-gray-300'
+                        ? 'bg-primary border-primary'
+                        : 'border-gray-300'
                         }`}
                     >
                       {selectedMembers.includes(member.name) && (
