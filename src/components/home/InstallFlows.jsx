@@ -320,7 +320,37 @@ export default function InstallFlows({ install }) {
       <h4 className="text-base md:text-lg font-semibold !leading-normal my-4 md:m-y5">
         Add New From Template
       </h4>
-      <div className="cursor-pointer grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-4 gap-4">
+      <div className="cursor-pointer grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-4 lg:gap-6">
+        {CardList.map((item, idx) => (
+          <div
+            onClick={() => openTemplate(item)}
+            key={idx}
+            className={`cursor-pointer ${c_16}`}
+          >
+            <div className="flex items-center justify-between gap-3 mb-6">
+              <p
+                className="text-xs font-semibold leading-[1.5] py-1 px-2 rounded-md"
+                style={{ color: item.color, backgroundColor: item.bg }}
+              >
+                {item.status}
+              </p>
+              <p
+                className="text-xs font-semibold leading-[1.5] py-1 px-2 rounded-md"
+                style={{ color: item.color2, backgroundColor: item.bg2 }}
+              >
+                {item.name}
+              </p>
+            </div>
+            <p className="text-[#0A0D14] text-sm lg:text-base font-semibold leading-[1.4] mb-2">
+              {item.title}
+            </p>
+            <p className="text-sm text-[#858585] font-normal font-inter leading-normal">
+              {item.des}
+            </p>
+          </div>
+        ))}
+      </div>
+      {/* <div className="cursor-pointer grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-4 gap-4">
         {CardList.map((item, idx) => (
           <div
             onClick={() => openTemplate(item)}
@@ -329,13 +359,13 @@ export default function InstallFlows({ install }) {
           >
             <div className="flex items-center justify-between mb-6">
               <p
-                className={` text-xs font-semibold !leading-[1.5] max-w-max py-1 px-2 rounded-md mb-2 lg:mb-3 `}
+                className={`text-xs font-semibold !leading-[1.5] max-w-max py-1 px-2 rounded-md mb-2 lg:mb-3 `}
                 style={{ color: item.color, backgroundColor: item.bg }}
               >
                 {item.status}
               </p>
               <p
-                className={` text-xs font-semibold !leading-[1.5] max-w-max py-1 px-2 rounded-md mb-2 lg:mb-3 `}
+                className={`text-xs font-semibold !leading-[1.5] max-w-max py-1 px-2 rounded-md mb-2 lg:mb-3 `}
                 style={{ color: item.color2, backgroundColor: item.bg2 }}
               >
                 {item.name}
@@ -349,7 +379,7 @@ export default function InstallFlows({ install }) {
             </p>
           </div>
         ))}
-      </div>
+      </div> */}
 
       {templateModalOpen && selectedTemplate && (
         <Modal closeIconHide={false} innerClass="max-w-[724px]">
