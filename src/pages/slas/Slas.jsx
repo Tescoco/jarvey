@@ -183,14 +183,19 @@ export default function Slas() {
                       </div>
                     </td>
                     <td className="text-center">{item.update}</td>
-                    <td className="!py-4">
+                    {/* <td className="!py-4">
+                      <button
+                        onClick={() => openChannelSLA(item)}
+                        className="flex items-center justify-center text-gray hover:text-primary"
+                      > */}
+                    <td className="!py-4 text-center">
                       {/* <Link
                         to=""
                         className="flex items-center justify-center text-gray hover:text-primary"
                       > */}
                       <button
                         onClick={() => openChannelSLA(item)}
-                        className="flex items-center justify-center text-gray hover:text-primary"
+                        className="inline-flex items-center justify-center text-gray hover:text-primary"
                       >
                         <svg
                           width="21"
@@ -223,7 +228,7 @@ export default function Slas() {
           </table>
         </div>
 
-        
+
         {isChannelModalOpen && (
           <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
             <div className="bg-white w-full max-w-lg p-6 rounded-lg shadow-xl">
