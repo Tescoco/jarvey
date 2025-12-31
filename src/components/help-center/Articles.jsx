@@ -625,7 +625,7 @@ export default function Articles() {
         <div className="flex items-center gap-3 mb-3">
           <label
             htmlFor="input"
-            className="btn !bg-black !p-2 !min-w-max cursor-pointer transition-all duration-300 hover:bg-gray-800"
+            className="btn !bg-transparent !border-primary !p-2 !min-w-max cursor-pointer transition-all duration-300 hover:!bg-primary/10"
           >
             <input
               type="file"
@@ -634,6 +634,7 @@ export default function Articles() {
               onChange={handleFileUpload}
               accept=".pdf,.doc,.docx,.txt"
             />
+
             <svg
               className="flex-none"
               width="20"
@@ -644,13 +645,47 @@ export default function Articles() {
             >
               <path
                 d="M10.0003 15.8337V10.0003M10.0003 10.0003L12.0837 12.0837M10.0003 10.0003L7.91699 12.0837M6.66699 15.8337H5.83366C3.53247 15.8337 1.66699 13.9682 1.66699 11.667C1.66699 9.55637 3.23629 7.81229 5.27173 7.5379C5.9474 5.57631 7.80928 4.16699 10.0003 4.16699C12.7617 4.16699 15.0003 6.40557 15.0003 9.16699C16.8413 9.16699 18.3337 10.6594 18.3337 12.5003C18.3337 14.3413 16.8413 15.8337 15.0003 15.8337H13.3337"
-                stroke="white"
+                stroke="#3B82F6"
                 strokeWidth="1.25"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
             </svg>
           </label>
+
+          {/* <label
+            htmlFor="input"
+            className="btn !bg-black !p-2 !min-w-max cursor-pointer transition-all duration-300 hover:bg-gray-800"
+          >
+            <input
+              type="file"
+              id="input"
+              className="hidden"
+              onChange={handleFileUpload}
+              accept=".pdf,.doc,.docx,.txt"
+            />
+            
+            <svg
+              className="flex-none"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M10.0003 15.8337V10.0003M10.0003 10.0003L12.0837 12.0837M10.0003 10.0003L7.91699 12.0837M6.66699 15.8337H5.83366C3.53247 15.8337 1.66699 13.9682 1.66699 11.667C1.66699 9.55637 3.23629 7.81229 5.27173 7.5379C5.9474 5.57631 7.80928 4.16699 10.0003 4.16699C12.7617 4.16699 15.0003 6.40557 15.0003 9.16699C16.8413 9.16699 18.3337 10.6594 18.3337 12.5003C18.3337 14.3413 16.8413 15.8337 15.0003 15.8337H13.3337"
+                // stroke="currentColor"
+                stroke="#3B82F6"
+                // stroke="white"
+                strokeWidth="1.25"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+
+          </label> */}
+          
           <button
             onClick={() => setShowCreateCategory(true)}
             className="btn !text-primary !border-primary main-w-max hover:!text-white"
@@ -679,6 +714,7 @@ export default function Articles() {
             </span>
           </button>
         </div>
+
       </div>
 
       <div className="flex items-center gap-2.5 mb-5">
