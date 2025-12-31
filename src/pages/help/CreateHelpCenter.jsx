@@ -18,27 +18,25 @@ export default function CreateHelpCenter() {
   ];
 
   const [stepProgress, setStepProgress] = useState(0);
-  const [formValidation, setFormValidation] = useState({
-    isValid: false,
-    data: null
-  });
+  const [validationError, setValidationError] = useState("");
 
   const basicsRef = useRef(null);
   const brandingRef = useRef(null);
-
-  // Handle validation from child components
-  const handleValidationChange = (isValid, data) => {
-    setFormValidation({ isValid, data });
-  };
+  const addArticlesRef = useRef(null);
+  const automatedRef = useRef(null);
 
   // Handle step progression with validation
   const handleNextStep = () => {
+    setValidationError("");
+
     if (stepProgress === 0) {
       // Validate Basics form
       if (window.validateBasicsForm) {
         const isValid = window.validateBasicsForm();
         if (!isValid) {
-          alert('Please fill in all required fields before proceeding.');
+          setValidationError('Please fill in all required fields before proceeding.');
+          // Scroll to top to show error
+          window.scrollTo({ top: 0, behavior: 'smooth' });
           return;
         }
       }
@@ -48,13 +46,33 @@ export default function CreateHelpCenter() {
       if (window.validateBrandingForm) {
         const isValid = window.validateBrandingForm();
         if (!isValid) {
-          alert('Please complete all branding fields before proceeding.');
+          setValidationError('Please complete all branding fields before proceeding.');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
           return;
         }
       }
       setStepProgress(2);
-    } else {
-      setStepProgress(stepProgress + 1);
+    } else if (stepProgress === 2) {
+      // Validate AddArticles form
+      if (window.validateAddArticlesForm) {
+        const isValid = window.validateAddArticlesForm();
+        if (!isValid) {
+          setValidationError('Please complete at least one article with description and content.');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+      }
+      setStepProgress(3);
+    } else if (stepProgress === 3) {
+      if (window.validateAutomatedForm) {
+        const isValid = window.validateAutomatedForm();
+        if (!isValid) {
+          setValidationError('Please connect a store before finishing.');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+      }
+      handleFinished();
     }
   };
 
@@ -70,6 +88,27 @@ export default function CreateHelpCenter() {
     <div className="flex flex-col h-full">
       <Top />
       <MainInner className="mb-6">
+        {/* Validation Error Banner */}
+        {validationError && (
+          <div className="mb-5 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="flex-shrink-0 mt-0.5">
+              <path d="M10 0a10 10 0 100 20 10 10 0 000-20zm0 16a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm1.5-6a1 1 0 01-2 0V5a1 1 0 012 0v5z" fill="#FE4234" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-red-800 mb-1">Validation Error</p>
+              <p className="text-sm text-red-700">{validationError}</p>
+            </div>
+            <button
+              onClick={() => setValidationError("")}
+              className="text-red-500 hover:text-red-700"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </button>
+          </div>
+        )}
+
         <Progress
           className="justify-start md:justify-center mb-5 md:mb-7"
           itemClass="min-w-[120px]"
@@ -79,21 +118,15 @@ export default function CreateHelpCenter() {
         {stepProgress != 2 ? (
           <div className={`${c_border}`}>
             {stepProgress === 0 && (
-              <Basics
-                ref={basicsRef}
-                onValidationChange={handleValidationChange}
-              />
+              <Basics ref={basicsRef} />
             )}
             {stepProgress === 1 && (
-              <Branding
-                ref={brandingRef}
-                onValidationChange={handleValidationChange}
-              />
+              <Branding ref={brandingRef} />
             )}
-            {stepProgress === 3 && <Automated />}
+            {stepProgress === 3 && <Automated ref={automatedRef} />}
           </div>
         ) : (
-          <AddArticles />
+          <AddArticles ref={addArticlesRef} />
         )}
       </MainInner>
 
@@ -114,17 +147,20 @@ export default function CreateHelpCenter() {
             <div className="flex items-center gap-3 lg:gap-4 flex-wrap">
               <button
                 className="btn !min-w-max"
-                onClick={() => setStepProgress(stepProgress - 1)}
+                onClick={() => {
+                  setValidationError("");
+                  setStepProgress(stepProgress - 1);
+                }}
               >
                 Back
               </button>
               {stepProgress === 3 ? (
-                <Link
-                  onClick={() => handleFinished()}
+                <button
+                  onClick={handleNextStep}
                   className="btn shadow !text-white !min-w-max"
                 >
                   Finished
-                </Link>
+                </button>
               ) : (
                 <button
                   className="btn shadow !text-white !min-w-max"
@@ -141,7 +177,7 @@ export default function CreateHelpCenter() {
   );
 }
 
-// import React, { useState } from "react";
+// import React, { useState, useRef } from "react";
 // import Top from "../../layouts/Top";
 // import MainInner from "../../components/MainInner";
 // import Progress from "../../components/Progress";
@@ -159,11 +195,49 @@ export default function CreateHelpCenter() {
 //     `Add articles`,
 //     `Automated`,
 //   ];
+
 //   const [stepProgress, setStepProgress] = useState(0);
+//   const [formValidation, setFormValidation] = useState({
+//     isValid: false,
+//     data: null
+//   });
+
+//   const basicsRef = useRef(null);
+//   const brandingRef = useRef(null);
+
+//   // Handle validation from child components
+//   const handleValidationChange = (isValid, data) => {
+//     setFormValidation({ isValid, data });
+//   };
+
+//   // Handle step progression with validation
+//   const handleNextStep = () => {
+//     if (stepProgress === 0) {
+//       // Validate Basics form
+//       if (window.validateBasicsForm) {
+//         const isValid = window.validateBasicsForm();
+//         if (!isValid) {
+//           alert('Please fill in all required fields before proceeding.');
+//           return;
+//         }
+//       }
+//       setStepProgress(1);
+//     } else if (stepProgress === 1) {
+//       // Validate Branding form
+//       if (window.validateBrandingForm) {
+//         const isValid = window.validateBrandingForm();
+//         if (!isValid) {
+//           alert('Please complete all branding fields before proceeding.');
+//           return;
+//         }
+//       }
+//       setStepProgress(2);
+//     } else {
+//       setStepProgress(stepProgress + 1);
+//     }
+//   };
 
 //   const handleFinished = () => {
-//     // if link is onboarding, redirect to onboarding
-//     // if link is not onboarding, redirect to help-center-settings
 //     if (window.location.pathname.includes("onboarding")) {
 //       window.location.href = "/onboarding/ai-power";
 //     } else {
@@ -183,19 +257,30 @@ export default function CreateHelpCenter() {
 //         />
 //         {stepProgress != 2 ? (
 //           <div className={`${c_border}`}>
-//             {stepProgress === 0 && <Basics />}
-//             {stepProgress === 1 && <Branding />}
+//             {stepProgress === 0 && (
+//               <Basics
+//                 ref={basicsRef}
+//                 onValidationChange={handleValidationChange}
+//               />
+//             )}
+//             {stepProgress === 1 && (
+//               <Branding
+//                 ref={brandingRef}
+//                 onValidationChange={handleValidationChange}
+//               />
+//             )}
 //             {stepProgress === 3 && <Automated />}
 //           </div>
 //         ) : (
 //           <AddArticles />
 //         )}
 //       </MainInner>
+
 //       <div className={`${bottom_border} items-center`}>
 //         {stepProgress === 0 && (
 //           <button
 //             className="ml-auto btn shadow !text-white"
-//             onClick={() => setStepProgress(1)}
+//             onClick={handleNextStep}
 //           >
 //             Create & Customize
 //           </button>
@@ -205,15 +290,6 @@ export default function CreateHelpCenter() {
 //             <Link to="/app" className={`${save_btn}`}>
 //               Save & Customize Later
 //             </Link>
-//             {/* {stepProgress === 3 &&
-//                             <div className="footer flex items-center gap-4">
-//                                 <div className="flex items-center gap-3">
-//                                     <button className='btn text-primary border-primary'>Save changes</button>
-//                                     <button className='btn text-primary border-primary'>Cancel</button>
-//                                 </div>
-//                                 <button className='btn border-[#FE4333] text-[#FE4333]'>Delete help centre</button>
-//                             </div>
-//                         } */}
 //             <div className="flex items-center gap-3 lg:gap-4 flex-wrap">
 //               <button
 //                 className="btn !min-w-max"
@@ -231,7 +307,7 @@ export default function CreateHelpCenter() {
 //               ) : (
 //                 <button
 //                   className="btn shadow !text-white !min-w-max"
-//                   onClick={() => setStepProgress(stepProgress + 1)}
+//                   onClick={handleNextStep}
 //                 >
 //                   Save
 //                 </button>
