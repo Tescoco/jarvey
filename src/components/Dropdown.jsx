@@ -115,7 +115,8 @@ export default function Dropdown({
         >
           {label}
           {required && <span className="text-[#FE4234]">*</span>}
-          {info && (
+
+          {/* {info && (
             <span className="relative cursor-pointer group">
               <svg
                 width="16"
@@ -148,7 +149,86 @@ export default function Dropdown({
                 {info}
               </span>
             </span>
+          )} */}
+
+          {info && (
+            <span className="info-icon-wrapper">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="cursor-pointer"
+              >
+                <g clipPath="url(#clip0_10364_38617)">
+                  <path
+                    d="M8.00004 14.6666C11.6819 14.6666 14.6667 11.6818 14.6667 7.99992C14.6667 4.31802 11.6819 1.33325 8.00004 1.33325C4.31814 1.33325 1.33337 4.31802 1.33337 7.99992C1.33337 11.6818 4.31814 14.6666 8.00004 14.6666Z"
+                    stroke="#FE4333"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M8 10.6666V7.99992M8 5.33325H8.00667"
+                    stroke="#FE4333"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </g>
+                <defs>
+                  <clipPath id="clip0_10364_38617">
+                    <rect width="16" height="16" fill="white" />
+                  </clipPath>
+                </defs>
+              </svg>
+              <span className="info-tooltip">
+                {info}
+              </span>
+
+              <style jsx>{`
+      .info-icon-wrapper {
+        position: relative;
+        display: inline-block;
+        margin-left: 4px;
+      }
+      
+      .info-tooltip {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        margin-bottom: 8px;
+        padding: 6px 12px;
+        font-size: 10px;
+        color: white;
+        background-color: #6b7280;
+        border-radius: 4px;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s;
+        pointer-events: none;
+        z-index: 9999;
+      }
+      
+      .info-tooltip::before {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 4px solid transparent;
+        border-top-color: #6b7280;
+      }
+      
+      .info-icon-wrapper:hover .info-tooltip {
+        opacity: 1;
+        visibility: visible;
+      }
+    `}</style>
+            </span>
           )}
+
         </label>
       )}
       <div className="relative">
@@ -189,9 +269,8 @@ export default function Dropdown({
         {showDropdown && showDrop && (
           <div
             data-dropdown-content
-            className={`p-2 absolute z-[1] ${
-              position === "top" ? "top-full mt-1" : "bottom-full mb-1"
-            } left-0 w-full md:max-w-[300px] bg-white border border-solid border-stroke rounded-lg max-h-[250px] overflow-y-auto flex flex-col items-start ${dropDownClass}`}
+            className={`p-2 absolute z-[1] ${position === "top" ? "top-full mt-1" : "bottom-full mb-1"
+              } left-0 w-full md:max-w-[300px] bg-white border border-solid border-stroke rounded-lg max-h-[250px] overflow-y-auto flex flex-col items-start ${dropDownClass}`}
           >
             {search && (
               <span className="block sticky -top-2 -mt-2 left-0 w-full bg-white pt-2">
@@ -205,11 +284,10 @@ export default function Dropdown({
             )}
             {filteredData.map((item, index) => (
               <button
-                className={`${
-                  item.name === defaultItem.name
-                    ? "bg-gray-100 text-heading"
-                    : "bg-white text-[#111]/80"
-                } hover:text-primary flex items-start gap-2 text-sm font-inter px-2 py-2 rounded-md hover:bg-gray-100 w-full text-start`}
+                className={`${item.name === defaultItem.name
+                  ? "bg-gray-100 text-heading"
+                  : "bg-white text-[#111]/80"
+                  } hover:text-primary flex items-start gap-2 text-sm font-inter px-2 py-2 rounded-md hover:bg-gray-100 w-full text-start`}
                 onClick={() => handleChange(item)}
                 key={index}
               >
